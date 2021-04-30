@@ -1,0 +1,548 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  3 MAR 2021 15:34
+entering extended mode
+ restricted \write18 enabled.
+ file:line:error style messages enabled.
+ %&-line parsing enabled.
+**modeled_pressure_projection.tex
+(./modeled_pressure_projection.tex
+LaTeX2e <2018-04-01> patch level 2
+Babel <3.18> and hyphenation patterns for 84 language(s) loaded.
+(./jfm.cls
+Document Class: jfm 2006/11/13 v1.27 Journal of Fluid Mechanics document class
+\halflineskip=\skip41
+\affilskip=\skip42
+\c@part=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\@indentskip=\skip43
+\smallindent=\skip44
+\@footindent=\skip45
+\@leftskip=\skip46
+\proofbox=\box26
+\rpbdim=\skip47
+\@stequation=\toks14
+\c@subequation=\count85
+\c@table=\count86
+\c@figure=\count87
+LaTeX Info: Redefining \cite on input line 1066.
+) (/usr/local/texlive/2018/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2017/06/01 v1.1a Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
+\KV@toks@=\toks15
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2017/06/25 v1.2c Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 99.
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/graphics-def/pdftex.def
+File: pdftex.def 2018/01/08 v1.0l Graphics/color driver for pdftex
+))
+\Gin@req@height=\dimen102
+\Gin@req@width=\dimen103
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/oberdiek/epstopdf.sty
+Package: epstopdf 2016/05/15 v2.6 Conversion with epstopdf on the fly (HO)
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
+Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
+
+(/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/infwarerr.sty
+Package: infwarerr 2016/05/16 v1.4 Providing info/warning/error messages (HO)
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/oberdiek/grfext.sty
+Package: grfext 2016/05/16 v1.2 Manage graphics extensions (HO)
+
+(/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/kvdefinekeys.sty
+Package: kvdefinekeys 2016/05/16 v1.4 Define keys (HO)
+
+(/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
+Package: ltxcmds 2016/05/16 v1.23 LaTeX kernel commands for general use (HO)
+)))
+(/usr/local/texlive/2018/texmf-dist/tex/latex/oberdiek/kvoptions.sty
+Package: kvoptions 2016/05/16 v3.12 Key value format for package options (HO)
+
+(/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/kvsetkeys.sty
+Package: kvsetkeys 2016/05/16 v1.17 Key value parser (HO)
+
+(/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/etexcmds.sty
+Package: etexcmds 2016/05/16 v1.6 Avoid name clashes with e-TeX commands (HO)
+
+(/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/ifluatex.sty
+Package: ifluatex 2016/05/16 v1.4 Provides the ifluatex switch (HO)
+Package ifluatex Info: LuaTeX not detected.
+)
+Package etexcmds Info: Could not find \expanded.
+(etexcmds)             That can mean that you are not using pdfTeX 1.50 or
+(etexcmds)             that some package has redefined \expanded.
+(etexcmds)             In the latter case, load this package earlier.
+)))
+(/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
+Package: pdftexcmds 2018/01/30 v0.27 Utility functions of pdfTeX for LuaTeX (HO
+)
+
+(/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/ifpdf.sty
+Package: ifpdf 2017/03/15 v3.2 Provides the ifpdf switch
+)
+Package pdftexcmds Info: LuaTeX not detected.
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+)
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+38.
+Package grfext Info: Graphics extension search list:
+(grfext)             [.pdf,.png,.jpg,.mps,.jpeg,.jbig2,.jb2,.PDF,.PNG,.JPG,.JPE
+G,.JBIG2,.JB2,.eps]
+(grfext)             \AppendGraphicsExtensions on input line 456.
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
+e
+)))
+(/usr/local/texlive/2018/texmf-dist/tex/latex/graphics/epsfig.sty
+Package: epsfig 2017/06/25 v1.7b (e)psfig emulation (SPQR)
+\epsfxsize=\dimen104
+\epsfysize=\dimen105
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/jknapltx/mathrsfs.sty
+Package: mathrsfs 1996/01/01 Math RSFS package v1.0 (jk)
+\symrsfs=\mathgroup4
+)
+(/Users/kraig/Library/texmf/tex/latex/jfm/amssymb.sty
+Package: amssymb 1995/02/01 v2.2a
+
+(/Users/kraig/Library/texmf/tex/latex/jfm/amsfonts.sty
+Package: amsfonts 1995/02/01 v2.2b
+\@emptytoks=\toks16
+\symAMSa=\mathgroup5
+\symAMSb=\mathgroup6
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 128.
+))
+(/usr/local/texlive/2018/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2017/09/02 v2.17a AMS math features
+\@mathmargin=\skip48
+
+For additional information on amsmath, use the `?' option.
+(/usr/local/texlive/2018/texmf-dist/tex/latex/amsmath/amstext.sty
+Package: amstext 2000/06/29 v2.01 AMS text
+
+(/Users/kraig/Library/texmf/tex/latex/jfm/amsgen.sty
+File: amsgen.sty 1995/02/01 v1.2a
+\@emptytoks=\toks17
+\ex@=\dimen106
+))
+(/Users/kraig/Library/texmf/tex/latex/jfm/amsbsy.sty
+Package: amsbsy 1995/01/20 v1.2
+\pmbraise@=\dimen107
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/amsmath/amsopn.sty
+Package: amsopn 2016/03/08 v2.02 operator names
+)
+\inf@bad=\count88
+LaTeX Info: Redefining \frac on input line 213.
+\uproot@=\count89
+\leftroot@=\count90
+LaTeX Info: Redefining \overline on input line 375.
+\classnum@=\count91
+\DOTSCASE@=\count92
+LaTeX Info: Redefining \ldots on input line 472.
+LaTeX Info: Redefining \dots on input line 475.
+LaTeX Info: Redefining \cdots on input line 596.
+\Mathstrutbox@=\box27
+\strutbox@=\box28
+\big@size=\dimen108
+LaTeX Font Info:    Redeclaring font encoding OML on input line 712.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 713.
+\macc@depth=\count93
+\c@MaxMatrixCols=\count94
+\dotsspace@=\muskip10
+\c@parentequation=\count95
+\dspbrk@lvl=\count96
+\tag@help=\toks18
+\row@=\count97
+\column@=\count98
+\maxfields@=\count99
+\andhelp@=\toks19
+\eqnshift@=\dimen109
+\alignsep@=\dimen110
+\tagshift@=\dimen111
+\tagwidth@=\dimen112
+\totwidth@=\dimen113
+\lineht@=\dimen114
+\@envbody=\toks20
+\multlinegap=\skip49
+\multlinetaggap=\skip50
+\mathdisplay@stack=\toks21
+LaTeX Info: Redefining \[ on input line 2817.
+LaTeX Info: Redefining \] on input line 2818.
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/tools/bm.sty
+Package: bm 2017/01/16 v1.2c Bold Symbol Support (DPC/FMi)
+\symboldoperators=\mathgroup7
+\symboldletters=\mathgroup8
+\symboldsymbols=\mathgroup9
+LaTeX Font Info:    Redeclaring math alphabet \mathbf on input line 141.
+LaTeX Info: Redefining \bm on input line 207.
+)
+(./modeled_pressure_projection.aux)
+\openout1 = `modeled_pressure_projection.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 35.
+LaTeX Font Info:    ... okay on input line 35.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 35.
+LaTeX Font Info:    ... okay on input line 35.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 35.
+LaTeX Font Info:    ... okay on input line 35.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 35.
+LaTeX Font Info:    ... okay on input line 35.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 35.
+LaTeX Font Info:    ... okay on input line 35.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 35.
+LaTeX Font Info:    ... okay on input line 35.
+
+(/usr/local/texlive/2018/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count100
+\scratchdimen=\dimen115
+\scratchbox=\box29
+\nofMPsegments=\count101
+\nofMParguments=\count102
+\everyMPshowfont=\toks22
+\MPscratchCnt=\count103
+\MPscratchDim=\dimen116
+\MPnumerator=\count104
+\makeMPintoPDFobject=\count105
+\everyMPtoPDFconversion=\toks23
+)
+LaTeX Font Info:    Try loading font information for U+rsfs on input line 50.
+ (/usr/local/texlive/2018/texmf-dist/tex/latex/jknapltx/ursfs.fd
+File: ursfs.fd 1998/03/24 rsfs font definition file (jk)
+)
+LaTeX Font Info:    Try loading font information for U+msa on input line 50.
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Try loading font information for U+msb on input line 50.
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+Underfull \hbox (badness 10000) has occurred while \output is active
+
+ []
+
+[1{/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+Package epstopdf Info: Source file: <FIGS/explicit_1step/ustar_vecs.eps>
+(epstopdf)                    date: 2021-03-03 11:35:03
+(epstopdf)                    size: 474916 bytes
+(epstopdf)             Output file: <FIGS/explicit_1step/ustar_vecs-eps-convert
+ed-to.pdf>
+(epstopdf)                    date: 2021-03-03 11:35:29
+(epstopdf)                    size: 151144 bytes
+(epstopdf)             Command: <repstopdf --outfile=FIGS/explicit_1step/ustar_
+vecs-eps-converted-to.pdf FIGS/explicit_1step/ustar_vecs.eps>
+(epstopdf)             \includegraphics on input line 103.
+Package epstopdf Info: Output file is already uptodate.
+
+
+pdfTeX warning: /Library/TeX/texbin/pdflatex (file ./FIGS/explicit_1step/ustar_
+vecs-eps-converted-to.pdf): PDF inclusion: found PDF version <1.7>, but at most
+ version <1.5> allowed
+<FIGS/explicit_1step/ustar_vecs-eps-converted-to.pdf, id=16, 544.0325pt x 289.0
+8pt>
+File: FIGS/explicit_1step/ustar_vecs-eps-converted-to.pdf Graphic file (type pd
+f)
+<use FIGS/explicit_1step/ustar_vecs-eps-converted-to.pdf>
+Package pdftex.def Info: FIGS/explicit_1step/ustar_vecs-eps-converted-to.pdf  u
+sed on input line 103.
+(pdftex.def)             Requested size: 384.0pt x 204.05284pt.
+Package epstopdf Info: Source file: <FIGS/explicit_1step/rhs_vecs.eps>
+(epstopdf)                    date: 2021-03-03 11:29:37
+(epstopdf)                    size: 819624 bytes
+(epstopdf)             Output file: <FIGS/explicit_1step/rhs_vecs-eps-converted
+-to.pdf>
+(epstopdf)                    date: 2021-03-03 11:35:30
+(epstopdf)                    size: 92938 bytes
+(epstopdf)             Command: <repstopdf --outfile=FIGS/explicit_1step/rhs_ve
+cs-eps-converted-to.pdf FIGS/explicit_1step/rhs_vecs.eps>
+(epstopdf)             \includegraphics on input line 114.
+Package epstopdf Info: Output file is already uptodate.
+
+
+pdfTeX warning: /Library/TeX/texbin/pdflatex (file ./FIGS/explicit_1step/rhs_ve
+cs-eps-converted-to.pdf): PDF inclusion: found PDF version <1.7>, but at most v
+ersion <1.5> allowed
+<FIGS/explicit_1step/rhs_vecs-eps-converted-to.pdf, id=17, 578.16pt x 289.08pt>
+
+File: FIGS/explicit_1step/rhs_vecs-eps-converted-to.pdf Graphic file (type pdf)
+
+<use FIGS/explicit_1step/rhs_vecs-eps-converted-to.pdf>
+Package pdftex.def Info: FIGS/explicit_1step/rhs_vecs-eps-converted-to.pdf  use
+d on input line 114.
+(pdftex.def)             Requested size: 384.0pt x 191.99759pt.
+[2 <./FIGS/explicit_1step/ustar_vecs-eps-converted-to.pdf>]
+Package epstopdf Info: Source file: <FIGS/explicit_1step/p_soln.eps>
+(epstopdf)                    date: 2021-03-03 11:29:39
+(epstopdf)                    size: 822610 bytes
+(epstopdf)             Output file: <FIGS/explicit_1step/p_soln-eps-converted-t
+o.pdf>
+(epstopdf)                    date: 2021-03-03 11:35:30
+(epstopdf)                    size: 111072 bytes
+(epstopdf)             Command: <repstopdf --outfile=FIGS/explicit_1step/p_soln
+-eps-converted-to.pdf FIGS/explicit_1step/p_soln.eps>
+(epstopdf)             \includegraphics on input line 123.
+Package epstopdf Info: Output file is already uptodate.
+
+
+pdfTeX warning: /Library/TeX/texbin/pdflatex (file ./FIGS/explicit_1step/p_soln
+-eps-converted-to.pdf): PDF inclusion: found PDF version <1.7>, but at most ver
+sion <1.5> allowed
+<FIGS/explicit_1step/p_soln-eps-converted-to.pdf, id=132, 578.16pt x 289.08pt>
+File: FIGS/explicit_1step/p_soln-eps-converted-to.pdf Graphic file (type pdf)
+<use FIGS/explicit_1step/p_soln-eps-converted-to.pdf>
+Package pdftex.def Info: FIGS/explicit_1step/p_soln-eps-converted-to.pdf  used 
+on input line 123.
+(pdftex.def)             Requested size: 384.0pt x 191.99759pt.
+Package epstopdf Info: Source file: <FIGS/explicit_1step/pressure_gradient.eps>
+
+(epstopdf)                    date: 2021-03-03 11:29:40
+(epstopdf)                    size: 822836 bytes
+(epstopdf)             Output file: <FIGS/explicit_1step/pressure_gradient-eps-
+converted-to.pdf>
+(epstopdf)                    date: 2021-03-03 11:35:30
+(epstopdf)                    size: 91041 bytes
+(epstopdf)             Command: <repstopdf --outfile=FIGS/explicit_1step/pressu
+re_gradient-eps-converted-to.pdf FIGS/explicit_1step/pressure_gradient.eps>
+(epstopdf)             \includegraphics on input line 136.
+Package epstopdf Info: Output file is already uptodate.
+
+
+pdfTeX warning: /Library/TeX/texbin/pdflatex (file ./FIGS/explicit_1step/pressu
+re_gradient-eps-converted-to.pdf): PDF inclusion: found PDF version <1.7>, but 
+at most version <1.5> allowed
+<FIGS/explicit_1step/pressure_gradient-eps-converted-to.pdf, id=133, 578.16pt x
+ 289.08pt>
+File: FIGS/explicit_1step/pressure_gradient-eps-converted-to.pdf Graphic file (
+type pdf)
+<use FIGS/explicit_1step/pressure_gradient-eps-converted-to.pdf>
+Package pdftex.def Info: FIGS/explicit_1step/pressure_gradient-eps-converted-to
+.pdf  used on input line 136.
+(pdftex.def)             Requested size: 384.0pt x 191.99759pt.
+Package epstopdf Info: Source file: <FIGS/explicit_1step/pressure_correction.ep
+s>
+(epstopdf)                    date: 2021-03-03 11:29:41
+(epstopdf)                    size: 286791 bytes
+(epstopdf)             Output file: <FIGS/explicit_1step/pressure_correction-ep
+s-converted-to.pdf>
+(epstopdf)                    date: 2021-03-03 11:35:31
+(epstopdf)                    size: 24108 bytes
+(epstopdf)             Command: <repstopdf --outfile=FIGS/explicit_1step/pressu
+re_correction-eps-converted-to.pdf FIGS/explicit_1step/pressure_correction.eps>
+
+(epstopdf)             \includegraphics on input line 141.
+Package epstopdf Info: Output file is already uptodate.
+
+
+pdfTeX warning: /Library/TeX/texbin/pdflatex (file ./FIGS/explicit_1step/pressu
+re_correction-eps-converted-to.pdf): PDF inclusion: found PDF version <1.7>, bu
+t at most version <1.5> allowed
+<FIGS/explicit_1step/pressure_correction-eps-converted-to.pdf, id=134, 578.16pt
+ x 289.08pt>
+File: FIGS/explicit_1step/pressure_correction-eps-converted-to.pdf Graphic file
+ (type pdf)
+<use FIGS/explicit_1step/pressure_correction-eps-converted-to.pdf>
+Package pdftex.def Info: FIGS/explicit_1step/pressure_correction-eps-converted-
+to.pdf  used on input line 141.
+(pdftex.def)             Requested size: 384.0pt x 191.99759pt.
+[3 <./FIGS/explicit_1step/rhs_vecs-eps-converted-to.pdf>]
+Package epstopdf Info: Source file: <FIGS/explicit_100steps/pressure_correction
+.eps>
+(epstopdf)                    date: 2021-03-03 11:55:58
+(epstopdf)                    size: 284473 bytes
+(epstopdf)             Output file: <FIGS/explicit_100steps/pressure_correction
+-eps-converted-to.pdf>
+(epstopdf)                    date: 2021-03-03 12:24:54
+(epstopdf)                    size: 24440 bytes
+(epstopdf)             Command: <repstopdf --outfile=FIGS/explicit_100steps/pre
+ssure_correction-eps-converted-to.pdf FIGS/explicit_100steps/pressure_correctio
+n.eps>
+(epstopdf)             \includegraphics on input line 159.
+Package epstopdf Info: Output file is already uptodate.
+
+
+pdfTeX warning: /Library/TeX/texbin/pdflatex (file ./FIGS/explicit_100steps/pre
+ssure_correction-eps-converted-to.pdf): PDF inclusion: found PDF version <1.7>,
+ but at most version <1.5> allowed
+<FIGS/explicit_100steps/pressure_correction-eps-converted-to.pdf, id=159, 578.1
+6pt x 289.08pt>
+File: FIGS/explicit_100steps/pressure_correction-eps-converted-to.pdf Graphic f
+ile (type pdf)
+<use FIGS/explicit_100steps/pressure_correction-eps-converted-to.pdf>
+Package pdftex.def Info: FIGS/explicit_100steps/pressure_correction-eps-convert
+ed-to.pdf  used on input line 159.
+(pdftex.def)             Requested size: 384.0pt x 191.99759pt.
+Package epstopdf Info: Source file: <FIGS/explicit_100steps/pressure_gradient.e
+ps>
+(epstopdf)                    date: 2021-03-03 11:55:58
+(epstopdf)                    size: 820902 bytes
+(epstopdf)             Output file: <FIGS/explicit_100steps/pressure_gradient-e
+ps-converted-to.pdf>
+(epstopdf)                    date: 2021-03-03 12:24:55
+(epstopdf)                    size: 97109 bytes
+(epstopdf)             Command: <repstopdf --outfile=FIGS/explicit_100steps/pre
+ssure_gradient-eps-converted-to.pdf FIGS/explicit_100steps/pressure_gradient.ep
+s>
+(epstopdf)             \includegraphics on input line 165.
+Package epstopdf Info: Output file is already uptodate.
+
+
+pdfTeX warning: /Library/TeX/texbin/pdflatex (file ./FIGS/explicit_100steps/pre
+ssure_gradient-eps-converted-to.pdf): PDF inclusion: found PDF version <1.7>, b
+ut at most version <1.5> allowed
+<FIGS/explicit_100steps/pressure_gradient-eps-converted-to.pdf, id=160, 578.16p
+t x 289.08pt>
+File: FIGS/explicit_100steps/pressure_gradient-eps-converted-to.pdf Graphic fil
+e (type pdf)
+<use FIGS/explicit_100steps/pressure_gradient-eps-converted-to.pdf>
+Package pdftex.def Info: FIGS/explicit_100steps/pressure_gradient-eps-converted
+-to.pdf  used on input line 165.
+(pdftex.def)             Requested size: 384.0pt x 191.99759pt.
+[4 <./FIGS/explicit_1step/p_soln-eps-converted-to.pdf> <./FIGS/explicit_1step/p
+ressure_gradient-eps-converted-to.pdf>]
+Package epstopdf Info: Source file: <FIGS/explicit_100steps/rhs_spectrum.eps>
+(epstopdf)                    date: 2021-03-03 12:21:57
+(epstopdf)                    size: 333720 bytes
+(epstopdf)             Output file: <FIGS/explicit_100steps/rhs_spectrum-eps-co
+nverted-to.pdf>
+(epstopdf)                    date: 2021-03-03 12:24:55
+(epstopdf)                    size: 126804 bytes
+(epstopdf)             Command: <repstopdf --outfile=FIGS/explicit_100steps/rhs
+_spectrum-eps-converted-to.pdf FIGS/explicit_100steps/rhs_spectrum.eps>
+(epstopdf)             \includegraphics on input line 174.
+Package epstopdf Info: Output file is already uptodate.
+
+
+pdfTeX warning: /Library/TeX/texbin/pdflatex (file ./FIGS/explicit_100steps/rhs
+_spectrum-eps-converted-to.pdf): PDF inclusion: found PDF version <1.7>, but at
+ most version <1.5> allowed
+<FIGS/explicit_100steps/rhs_spectrum-eps-converted-to.pdf, id=179, 502.87875pt 
+x 309.155pt>
+File: FIGS/explicit_100steps/rhs_spectrum-eps-converted-to.pdf Graphic file (ty
+pe pdf)
+<use FIGS/explicit_100steps/rhs_spectrum-eps-converted-to.pdf>
+Package pdftex.def Info: FIGS/explicit_100steps/rhs_spectrum-eps-converted-to.p
+df  used on input line 174.
+(pdftex.def)             Requested size: 384.0pt x 236.0688pt.
+Package epstopdf Info: Source file: <FIGS/explicit_100steps/p_spectrum.eps>
+(epstopdf)                    date: 2021-03-03 12:42:50
+(epstopdf)                    size: 448739 bytes
+(epstopdf)             Output file: <FIGS/explicit_100steps/p_spectrum-eps-conv
+erted-to.pdf>
+(epstopdf)                    date: 2021-03-03 12:43:19
+(epstopdf)                    size: 140954 bytes
+(epstopdf)             Command: <repstopdf --outfile=FIGS/explicit_100steps/p_s
+pectrum-eps-converted-to.pdf FIGS/explicit_100steps/p_spectrum.eps>
+(epstopdf)             \includegraphics on input line 180.
+Package epstopdf Info: Output file is already uptodate.
+
+
+pdfTeX warning: /Library/TeX/texbin/pdflatex (file ./FIGS/explicit_100steps/p_s
+pectrum-eps-converted-to.pdf): PDF inclusion: found PDF version <1.7>, but at m
+ost version <1.5> allowed
+<FIGS/explicit_100steps/p_spectrum-eps-converted-to.pdf, id=180, 467.7475pt x 2
+95.1025pt>
+File: FIGS/explicit_100steps/p_spectrum-eps-converted-to.pdf Graphic file (type
+ pdf)
+<use FIGS/explicit_100steps/p_spectrum-eps-converted-to.pdf>
+Package pdftex.def Info: FIGS/explicit_100steps/p_spectrum-eps-converted-to.pdf
+  used on input line 180.
+(pdftex.def)             Requested size: 384.0pt x 242.27829pt.
+[5 <./FIGS/explicit_1step/pressure_correction-eps-converted-to.pdf> <./FIGS/exp
+licit_100steps/pressure_correction-eps-converted-to.pdf>] [6 <./FIGS/explicit_1
+00steps/pressure_gradient-eps-converted-to.pdf> <./FIGS/explicit_100steps/rhs_s
+pectrum-eps-converted-to.pdf>] [7 <./FIGS/explicit_100steps/p_spectrum-eps-conv
+erted-to.pdf>]
+Package epstopdf Info: Source file: <FIGS/explicit_100BF/composite.eps>
+(epstopdf)                    date: 2021-03-03 13:08:08
+(epstopdf)                    size: 302863 bytes
+(epstopdf)             Output file: <FIGS/explicit_100BF/composite-eps-converte
+d-to.pdf>
+(epstopdf)                    date: 2021-03-03 13:15:42
+(epstopdf)                    size: 197324 bytes
+(epstopdf)             Command: <repstopdf --outfile=FIGS/explicit_100BF/compos
+ite-eps-converted-to.pdf FIGS/explicit_100BF/composite.eps>
+(epstopdf)             \includegraphics on input line 197.
+Package epstopdf Info: Output file is already uptodate.
+
+
+pdfTeX warning: /Library/TeX/texbin/pdflatex (file ./FIGS/explicit_100BF/compos
+ite-eps-converted-to.pdf): PDF inclusion: found PDF version <1.7>, but at most 
+version <1.5> allowed
+<FIGS/explicit_100BF/composite-eps-converted-to.pdf, id=397, 475.7775pt x 262.9
+825pt>
+File: FIGS/explicit_100BF/composite-eps-converted-to.pdf Graphic file (type pdf
+)
+<use FIGS/explicit_100BF/composite-eps-converted-to.pdf>
+Package pdftex.def Info: FIGS/explicit_100BF/composite-eps-converted-to.pdf  us
+ed on input line 197.
+(pdftex.def)             Requested size: 384.0pt x 212.26425pt.
+[8
+
+ <./FIGS/explicit_100BF/composite-eps-converted-to.pdf>]
+No file modeled_pressure_projection.bbl.
+[9] (./modeled_pressure_projection.aux) ) 
+Here is how much of TeX's memory you used:
+ 2705 strings out of 492649
+ 37670 string characters out of 6129622
+ 103290 words of memory out of 5000000
+ 6515 multiletter control sequences out of 15000+600000
+ 16725 words of font info for 63 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 42i,10n,24p,850b,254s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2018/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2018/texmf-dist/fon
+ts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2018/texmf-dist/font
+s/type1/public/amsfonts/cm/cmcsc10.pfb></usr/local/texlive/2018/texmf-dist/font
+s/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2018/texmf-dist/fonts
+/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2018/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2018/texmf-dist/fonts/t
+ype1/public/amsfonts/cm/cmmi5.pfb></usr/local/texlive/2018/texmf-dist/fonts/typ
+e1/public/amsfonts/cm/cmmi6.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1
+/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/p
+ublic/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/pub
+lic/amsfonts/cm/cmmi9.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/publi
+c/amsfonts/cm/cmr10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmr12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/am
+sfonts/cm/cmr5.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfo
+nts/cm/cmr6.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmr7.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm
+/cmr8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+r9.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy1
+0.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.
+pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pf
+b></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb>
+</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></
+usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></us
+r/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr
+/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmti8.pfb></usr/l
+ocal/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb>
+Output written on modeled_pressure_projection.pdf (9 pages, 1269970 bytes).
+PDF statistics:
+ 541 PDF objects out of 1000 (max. 8388607)
+ 220 compressed objects within 3 object streams
+ 0 named destinations out of 1000 (max. 500000)
+ 51 words of extra memory for PDF output out of 10000 (max. 10000000)
+

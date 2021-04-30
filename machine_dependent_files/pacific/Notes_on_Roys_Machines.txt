@@ -1,0 +1,286 @@
+Roy's machines
+
+
+Connection:
+To connect to the cluster, the easiest way would be to connect to the gate machine using
+ssh kucla@gate.tau.ac.il 
+The password is 
+Encho24!
+From the gate machine you can connect to the head node of the cluster using
+ssh kucla@pacific.tau.ac.il
+or to the analysis node of the cluster using
+ssh kucla@atlantic.tau.ac.il
+
+One way I find useful to make these connections simple is to add the following in your .bashrc
+      alias vpn_tau_pacific=‘ssh -f -t -Y kucla@gate.tau.ac.il -L 2222:pacific.tau.ac.il:22 -N’  
+      alias vpn_tau_atlantic=‘ssh -f -t -Y kucla@gate.tau.ac.il -L 2223:atlantic.tau.ac.il:22 -N’ 
+   
+   this will allow you to run the connection in the background forwarding to port 2222 or 2223
+
+   then if you want to ssh to atlantic or pacific you simply use
+    ssh -Y -p 2222 kucla@localhost
+or 
+ ssh -Y -p 2223 kucla@localhost
+    and if you want to copy files you use
+    scp -P 2222 kucla@localhost  
+    with whatever directory files you need.
+    This is especially useful when you are tying to copy lots of files so that you don’t have to go through gate.tau.ac.il.
+    
+    
+    
+EXAMPLE:    
+
+1st run 1 of these
+alias vpn_tau_pacific=‘ssh -f -t -Y kucla@gate.tau.ac.il -L 2222:pacific.tau.ac.il:22 -N’  
+alias vpn_tau_atlantic=‘ssh -f -t -Y kucla@gate.tau.ac.il -L 2223:atlantic.tau.ac.il:22 -N’
+
+
+Then, to scp from lacosta to Atlantic
+
+scp -P 2223 local_file_on_lacosta kucla@localhost:/home/kucla/KBW/.
+
+scp -P 2223 kucla@localhost:/atlantic/kucla/nesting_test_1/output/slices/2D/\* .
+
+
+
+scp -P 2223 kucla@localhost:/home/kucla/KBW/data_from_outer_run/input/data_tools/interp_\*.py . 
+
+
+vpn_tau_atlantic
+scp -P 2223 kucla@localhost:/atlantic/kucla/p3_c2_6ipers/output/slices/2D/XY_2.nc .
+scp -P 2223 kucla@localhost:/atlantic/kucla/p3_c2_6ipers/output/slices/2D/XY_3.nc .
+scp -P 2223 kucla@localhost:/atlantic/kucla/p3_c2_6ipers/output/slices/2D/YZ_0.nc .
+scp -P 2223 kucla@localhost:/atlantic/kucla/p3_c2_6ipers/output/slices/2D/YZ_2.nc .
+
+git pull; ./prepare_run.sh; pushd $WORK/p3_c2_6ipers; qsub run.sh
+
+We now have intel-based modules to work with as well:
+module load intel/parallel_studio_xe_2020.0
+module load hdf5/hdf5-1.10.6_intel
+module load netcdf-c-4.7.3_intel_mpicc_mpif90
+module load netcdf-fortran-4.5.2_intel_mpicc_mpif90
+module load mpi/openmpi-3.1.0-intel
+
+With these modules I am able to compile ROMS. I still want to check mvapich2 as MPI but maybe at a later stage.
+
+
+
+
+----------------------------------------------------------------------------------------------------------------
+previous comet run:
+
+
+  apply_BCs
+                        at sidewalls 3 near bdry points get BC values, at top/bottom just endpts get BC values
+                        enforce_homogeneous_neumann on u,v,w,s1 in X,Y npts=1.5 fixed_ends= T
+                        taper w in z, xx=1.5
+
+   
+  pressure projection   enforce_homogeneous_neumann on div_u in X,Y npts=4 fixed_ends= F
+		        compute pressure
+                        enforce_homogeneous_neumann on phi in X,Y npts=4 fixed_ends= F
+                        compute gradient
+                        enforce_homogeneous_neumann on phi_z in X,Y npts=4 fixed_ends= F
+                        project
+                        enforce_homogeneous_neumann on w in X,Y npts=6 fixed_ends= F
+----------------------------------------------------------------------------------------------------------------
+
+
+
+
+----------------------------------------------------------------------------------------------------------------
+1st 2 iper test on atlantic:   by 2 ip, very poor behavior near all edges, unacceptable
+
+                     filter_fraction = 0.125d0
+                     filter_function = F
+                     filter_deriv = F
+
+  apply_BCS
+                      place BCs only at endpoints but NOT at z=Lz
+                      smooth_near_boundaries u,v,w,s1 X&Y only  npts=5, ntimes=1, fixed_ends=T
+
+
+
+  pressure projection
+                      smooth_near_boundaries w* Z dir only  npts=4, ntimes=3, fixed_ends=T
+                      compute divergence
+                      smooth_near_boundaries div Z dir only  npts=4, ntimes=3, fixed_ends=F
+                      project
+                      smooth_near_boundaries u,v,w,s1 X,Y,Z only  npts=5, ntimes=1, fixed_ends=T
+----------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------
+2nd 2 iper test on atlantic:   
+
+                     filter_fraction = 0.0625d0
+                     filter_function = F
+                     filter_deriv = F
+
+  apply_BCS
+                      place BCs only at endpoints but NOT at z=Lz
+                      shift functions to zero end values, taper over npts=1.5d0, unshift
+                      no additional smoothing, dont apply to w in z direction
+
+
+  differentiate       while computing divergence...
+                      taper d/dx u* in x   ==> div is cos expandable in x  npts=1.5d0
+                      taper d/dy v* in y   ==> div is cos expandable in y  npts=1.5d0
+
+  pressure_projection
+                      compute div, compute pressure, project
+                      smooth_near_boundaries u,v,w,s1 X,Y,Z  npts=3, ntimes=2, fixed_ends=T
+
+
+/atlantic/kucla/nesting_test_1    run here but moved afterward to nesting_test_2
+
+............................     Toggling, istep          7150
+ ..........................................................
+ ...............     ADVECTIVE CFL ratios
+ ...............              x :    6.902752778630032E-002
+ ...............              y :    5.891768723624355E-002
+ ...............              z :    1.752833098911288E-002
+  time for last time step:      16.2660163630499
+               total time:      117571.212099261
+ smooth exit after         7171  time steps
+Fri Feb 21 07:35:38 IST 2020
+
+
+ffmpeg -framerate 16 -pattern_type glob -i 'zeta*.png' -c:v libx264 -vf "fps=16,format=yuv422p" zeta.avi
+ffmpeg -framerate 16 -pattern_type glob -i 'buoy*.png' -c:v libx264 -vf "fps=16,format=yuv422p" buoy.avi
+
+----------------------------------------------------------------------------------------------------------------
+
+
+
+
+----------------------------------------------------------------------------------------------------------------
+3rd 2 iper test on atlantic:  
+
+
+  rearrange netcdf storage order for XY planes --> time,y,x   redo plot_zeta_in XY_plane script
+
+                     filter_fraction = 0.0625d0
+                     filter_function = F
+                     filter_deriv = F
+
+  apply_BCS
+                      place BCs only at endpoints but NOT at z=Lz
+                      shift functions to zero end values, taper over npts=1.5d0, unshift
+                      no additional smoothing, dont apply to w in z direction
+  
+  differentiate       while computing divergence...
+                      taper d/dx u* in x   ==> div is cos expandable in x   npts=1.5d0
+                      taper d/dy v* in y   ==> div is cos expandable in y   npts=1.5d0
+                    
+
+  pressure_projection
+                      compute div, compute pressure, project
+                      no additional smoothing  
+
+                     
+
+
+/atlantic/kucla/nesting_test_3       TEST OF NO ADDITIONAL SMOOTHING IN PRESSURE PROJECT
+                                     at 0.34 ipers, soln looks exactly the same don't keep
+                                     NOW TEST NO TAPERING IN DIV  --> w cfl 25% larger after 50 steps
+                                     NOW SEE IF SPECTRAL FILTERING HELPS WITH THIS:  T .0625
+
+
+----------------------------------------------------------------------------------------------------------------
+
+                       spectral filtering function and derivs (user_params and explicit_rhs)
+                       gently ensure neumann after apply_BCs (NOT s1, NOT in z for w)  (seems like I was also smoothing w by mistake)
+                       taper u_x in x and v_y in y inside of divergence calculation
+                       in pressure_projection no smoothing of div, but smooth u,v,w after projection
+
+
+
+
+
+
+
+                       possible improvements:
+                        (2) use extrapolated bcs for s1 when flow is outward
+
+
+
+
+
+
+
+scp -P 2223 kucla@localhost:/atlantic/kucla/nesting_test_3/output/slices/2D/\*_0_\*004.nc .
+
+
+
+
+
+
+
+LOCAL INSTALLS
+
+git clone https://github.com/ImageMagick/ImageMagick.git
+./configure --prefix=/home/kucla/KBW/kbw_installs/ImageMagick
+
+
+
+
+(1) HDF5
+
+./configure --prefix=/home/kucla/KBW/kbw_installs/hdf5 --enable-fortran
+make
+make check
+make install
+make check-install
+
+
+
+(2) netcdf-c-4.7.3  (latest on 2/6/20)
+
+#export LDFLAGS="-L/home/kucla/KBW/kbw_installs/hdf5/lib -L/powerapps/share/python/anaconda3.53-no-avx/lib"
+#export CPPFLAGS="-I/home/kucla/KBW/kbw_installs/hdf5/include"
+./configure --prefix=/home/kucla/KBW/kbw_installs/netcdf-c --disable-netcdf-4 --disable-dap
+make check install   
+
+
+
+(3) netcdf-fortran-4.5.2 (latest on 2/6/20)
+
+export LDFLAGS="-L/home/kucla/KBW/kbw_installs/netcdf-c/lib"
+export LD_LIBRARY_PATH=/home/kucla/KBW/kbw_installs/netcdf-c/lib:$LD_LIBRARY_PATH
+export LT_SYS_LIBRARY_PATH=$LD_LIBRARY_PATH
+export CPPFLAGS="-I/home/kucla/KBW/kbw_installs/netcdf-c/include"
+export CC=/powerapps/share/intel/l_mkl_2020.0.166/bin/icc
+export CXX=/powerapps/share/intel/l_mkl_2020.0.166/bin/icpc
+export FC=/powerapps/share/intel/l_mkl_2020.0.166/bin/ifort
+export F77=/powerapps/share/intel/l_mkl_2020.0.166/bin/ifort
+./configure --prefix=/home/kucla/KBW/kbw_installs/netcdf-fortran
+make check install
+
+#   NB netcdf-fortran installed by me and so explicit links to
+#      libraries for compilation specified in Make.inc. However,
+#      since netcdf is not under module control, the shared library
+#      needed is not in my path and so needs to be added explicitly
+
+#  this adds the path to the shared library libnetcdff.so.7 that is needed by flow.x at runtime
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/kucla/KBW/kbw_installs/netcdf-fortran/lib
+
+
+
+
+./configure --prefix=/home/kucla/KBW/kbw_installs/ncview --x-libraries=/usr/lib64 --with-netcdf_incdir=/powerapps/share/netcdf-C-4.4.1.1/include --with-netcdf_libname=libnetcdf.a --with-netcdf_libdir=/powerapps/share/netcdf-C-4.4.1.1//lib 
+
+
+ncrcat -v time,y,z,u_avg,v_avg,w_avg,s1_avg YZ_0_* YZ_x_avgd.nc
+
+ncpdq -O -a jdimension,timedimension,kdimension YZ_x_avgd.nc YZ_x_avgd.nc
+
+ncks -v u_IGW,v_IGW,z,time -d jdimension,190 -d timedimension,1537 YZ_0.nc IGW_profiles.nc
+ncks -v u_IO,v_IO,z,time -d timedimension,1537 XY_avgd.nc IO_profiles.nc
+ncks -v zeta,x,y,z,time -d jdimension,190 -d idimension,122 zeta_021504.nc zeta_profile.nc
+ncks -v u_IGW,v_IGW,x,y,z,time -d jdimension,190 -d kdimension,488 output/slices/2D/YZ_0.nc output/slices/1D/IGW_tseries.nc
+
+

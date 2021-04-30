@@ -1,0 +1,30 @@
+\relax 
+\@writefile{toc}{\contentsline {section}{\numberline {1.}The model problem}{1}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.}Pressure projection using cosine expansions}{1}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces The function $u_s^*(x)$ for $n=1$, even extended across $x=L$. The function ``smoothly jumps" from the value $u(0)=1$ to the value $u_B(\Delta t)$ at the boundaries $x=0,L$ in such a way that the derivatives are equal to zero there. Here $u_s^*(x)$ is a well-behaved function with a narrow transition scale of width $\gamma =5\Delta x$ where $\Delta x = L/256$ }}{2}}
+\newlabel{fig:smooth_ustar}{{1}{2}}
+\newlabel{eq:ustar_def}{{2.1}{2}}
+\newlabel{eq:smoothing}{{2.2}{2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces The function $\frac  {\partial }{\partial x} u_s^*(x)$ for $n=1$, even extended across $x=L$. }}{3}}
+\newlabel{fig:divustar}{{2}{3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces The function $\phi (x)$ for $n=1$, even extended across $x=L$. The pressure field is linear in $x$ throughout the interior of the domain but transitions to a vanishing slope within $\gamma $ transition regions near the boundaries. The function is well behaved, has vanishing derivatives at the boundaries and has continuous second derivatives. The pointwise residual $\phi _xx +\frac  {-1}{\Delta t}\frac  {\partial }{\partial x} u_s^* $, normalized by the maximum magnitude of $\phi _xx$, is everywhere less than $10^{-12}$. }}{4}}
+\newlabel{fig:psoln}{{3}{4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces The function $\phi _x(x)$ for $n=1$, even extended across $x=L$. The gradient is approximately constant in the interior but zero at the boundaries. }}{4}}
+\newlabel{fig:pgrad}{{4}{4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces The function $u(t^{n+1},x)=u_s^* - \Delta t \phi _x$ for $n=1$, even extended across $x=L$. The velocity is essentially constant and matches the boundary value $u_B()t^{n+1}$. $u(t^{n+1},x)$ is (at worst) a $C^1$ function, inheriting this property from $\phi _x$. }}{5}}
+\newlabel{fig:soln1}{{5}{5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces The computed solution $u(T,x)=u_s^* - \Delta t \phi _x$ after 100 time steps, even extended across $x=L$. The velocity is nearly constant and approximately matches the boundary value $u_B(T)=1$. It is a little noisy at small scales, but not significantly worse than after a single time step, {\em  eg.} the mean magnitude of the difference between the computed and exact solutions is $4.5 \times 10^{-7}$. }}{5}}
+\newlabel{fig:soln2}{{6}{5}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.}Time stepping}{5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces The function $\phi _x(x)$ at step 100, even extended across $x=L$. The gradient $\phi _x$ is essentially constant in the interior but vanishes at the boundaries. $\phi _x$ has a well behaved expansion in a cosine series. }}{6}}
+\newlabel{fig:pgrad2}{{7}{6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Fourier transform of the even-extended source term in the Poisson equation for pressure. Odd coefficients are equal to zero and not shown. }}{6}}
+\newlabel{fig:rhs_spectrum}{{8}{6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Fourier transform of the even-extended functions $\phi $ and $\phi _x$. Odd coefficients are equal to zero and not shown. }}{7}}
+\newlabel{fig:p_spectrum}{{9}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Various fields after 100 time steps for nonzero body forcing.}}{8}}
+\newlabel{fig:composite}{{10}{8}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.}Removal of divergence resulting from body forces}{8}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.}Indirect imposition of boundary conditions by nudging}{8}}
+\bibstyle{jfm}
+\bibdata{ttbl.bib}

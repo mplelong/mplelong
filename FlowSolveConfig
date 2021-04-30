@@ -1,0 +1,28 @@
+
+--------------------------------------------------------------------------------------
+host:                  lacosta
+OS:                    Darwin 18.7.0
+user:                  kraig
+compile date:          2021-04-30T22:22:58Z
+SHELL:                 /bin/sh
+VENDOR:                gcc
+LD_LIBRARY_PATH:      
+DYLD_LIBRARY_PATH:    
+BASE:                  /Users/kraig/Desktop/flow_solve_BC
+OUTPUT_ROOT:           /Users/kraig/Desktop/flow_solve_BC/output
+F90:                   /usr/local/bin/mpif90
+mpif90 details:        COLLECT_GCC=/usr/local/bin/gfortran gcc version 8.2.0 (GCC)
+F77:                   /usr/local/bin/mpif77
+FOPTFLAGS:             -g -O3 -cpp -ffree-form -ffree-line-length-none
+F77OPTFLAGS:           -g -O3 -cpp -ffixed-form -ffixed-line-length-none
+FLINKER:               /usr/local/bin/mpif90
+NETCDF_INC:            -I/usr/local/include
+NETCDF_LIB:            -L/usr/local/lib -lnetcdff -lnetcdf
+FFTW_INC:              -I/usr/local/include
+FFTW_LIB:              -L/usr/local/lib -lfftw3
+BLAS_LIB:              -L/usr/local/opt/openblas/lib -lblas
+ALL_EXTERNAL_LIBS:     -L/usr/local/lib -lnetcdff -lnetcdf -L/usr/local/lib -lfftw3 -L/usr/local/opt/openblas/lib -lblas
+ALL_INCLUDES:          -I/usr/local/include -I/usr/local/include
+XTRA_LIBS:            
+ 
+--------------------------------------------------------------------------------------
