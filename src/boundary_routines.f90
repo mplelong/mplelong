@@ -314,7 +314,7 @@ subroutine extrapolate_to_boundaries
 	use decomposition_params
 	use boundary_data
 	use dependent_variables,   only: u,v,w,s1,s2
-	use independent_variables, only: Lx,Ly,Lz
+	use independent_variables, only: Lx,Ly,Lz,x_periodic,y_periodic,z_periodic
 	use methods_params,        only: do_second_scalar
 	
 	implicit none
@@ -352,7 +352,7 @@ subroutine extrapolate_to_boundaries
 	
 	
 	! fix BLs near east and west boundaries x=0 and x=Lx
-	if( locnx > 1 ) then
+	if( locnx > 1 .and. .NOT. x_periodic ) then
 		if( x(1)==0.d0 ) then     ! east bdry
 			do k=1,locnz
 				do j=1,ny
@@ -420,7 +420,7 @@ subroutine extrapolate_to_boundaries
 	endif
 	
 	! fix BLs near south and north boundaries y=0 and y=Ly
-	if( ny > 1 ) then
+	if( ny > 1  .and. .NOT. y_periodic ) then
 		do k=1,locnz
 			do i=1,locnx
 				
@@ -482,7 +482,7 @@ subroutine extrapolate_to_boundaries
 	endif
 	
 	! fix BLs near bottom and top boundaries
-	if( locnz > 1 ) then
+	if( locnz > 1  .and. .NOT. z_periodic ) then
 		if( z(1)==0.d0 ) then     ! bottom bdry
 			do i=1,locnx
 				do j=1,ny
@@ -556,7 +556,7 @@ subroutine fill_boundary_arrays
 	use mpi_params,              only: myid
 	use decomposition_params
 	use boundary_data
-	use independent_variables,   only: Lx,Ly,Lz,tnp1
+	use independent_variables,   only: Lx,Ly,Lz,tnp1,x_periodic,y_periodic,z_periodic
 	use methods_params,          only: do_second_scalar
 	implicit none
 	integer                         :: id
@@ -596,21 +596,21 @@ subroutine fill_boundary_arrays
 	tval = tnp1   ! during a time step, we need BVALSand normal DERIVS at the next time step
 	do id=1,nvars
 	
-		if(locnx>1) then
+		if(locnx>1 .and. .NOT. x_periodic) then
 			side='E'
 			call user_bvals_EW(x,y,z,tval,id,east_vals(1,1,id),east_derivs(1,1,id),locnx,ny,locnz,side,Lx)
 			side='W'
 			call user_bvals_EW(x,y,z,tval,id,west_vals(1,1,id),west_derivs(1,1,id),locnx,ny,locnz,side,Lx)
 		endif
 		
-		if(ny>1) then
+		if(ny>1 .and. .NOT. y_periodic) then
 			side='S'
 			call user_bvals_NS(x,y,z,tval,id,south_vals(1,1,id),south_derivs(1,1,id),locnx,ny,locnz,side,Ly)
 			side='N'
 			call user_bvals_NS(x,y,z,tval,id,north_vals(1,1,id),north_derivs(1,1,id),locnx,ny,locnz,side,Ly)
 		endif
 		
-		if(locnz>1) then
+		if(locnz>1 .and. .NOT. z_periodic) then
 			side='B'
 			call user_bvals_BT(x,y,z,tval,id,bottom_vals(1,1,id),bottom_derivs(1,1,id),locnx,ny,locnz,side,Lz)
 			side='T'
@@ -632,7 +632,7 @@ subroutine boundary_smooth(f,dir,npts)
 !------------------------------------------------------------------------
 	use mpi_params,                  only: myid
 	use decomposition_params
-	use independent_variables,       only: x,y,z
+	use independent_variables,       only: x,y,z,x_periodic,y_periodic,z_periodic
 	implicit none
 	integer, intent(in)                 :: npts(3)  ! x,y,z dirs respectively
 	real(kind=8), intent(inout)         :: f(array_size(IDIM,YBLOCK,myid),     &
@@ -665,7 +665,7 @@ subroutine boundary_smooth(f,dir,npts)
 		first_entry=.FALSE.
 	endif
 	
-	if( locnx > 1 ) then
+	if( locnx > 1 .and. .NOT. x_periodic ) then
 		if( dir=='x' .or. dir=='xz' .or. dir=='xy' .or. dir=='xyz' ) then
 			idir='x'    
 			do k=1,locnz
@@ -676,7 +676,7 @@ subroutine boundary_smooth(f,dir,npts)
 		endif
 	endif
 	
-	if( ny > 1 ) then
+	if( ny > 1 .and. .NOT. y_periodic ) then
 		if( dir=='y' .or. dir=='xy' .or. dir=='yz' .or. dir=='xyz' ) then
 			idir='y'
 			do k=1,locnz
@@ -687,7 +687,7 @@ subroutine boundary_smooth(f,dir,npts)
 		endif
 	endif
 	
-	if( locnz > 1 ) then
+	if( locnz > 1 .and. .NOT. z_periodic ) then
 		if( dir=='z' .or. dir=='xz' .or. dir=='yz' .or. dir=='xyz' ) then
 			idir='z'
 			do i=1,locnx

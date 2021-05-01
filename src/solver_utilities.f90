@@ -141,13 +141,14 @@ subroutine divergence(u,v,w,div)
 	!------------------------------------------------------------
 	use mpi_params,             only: myid,comm,ierr
  	use decomposition_params
- 	use independent_variables,  only: nx,ny,nz
+ 	use independent_variables,  only: nx,ny,nz,x_periodic,y_periodic,z_periodic
  	use intermediate_variables, only: tmpX,tmpY,tmpZ
  	use differentiation_params, only: Q            ! (Q+1)/2 terms in Bernoulli series
  
  	implicit none
  	include 'mpif.h'
  	integer,parameter             ::   order=1
+ 	integer                       ::   Qval
  	real(kind=8), intent(in)      ::   u( array_size(IDIM,YBLOCK,myid),   &
                                           array_size(JDIM,YBLOCK,myid),   &
                                           array_size(KDIM,YBLOCK,myid)  )
@@ -163,17 +164,29 @@ subroutine divergence(u,v,w,div)
  	real(kind=8), intent(out)     :: div( array_size(IDIM,YBLOCK,myid),   &
                                           array_size(JDIM,YBLOCK,myid),   &
                                           array_size(KDIM,YBLOCK,myid)  ) 
-    
+
                                              
  	!----------------------------------------
  	!    div <--- dv/dy
  	!----------------------------------------
+ 	if( y_periodic ) then
+ 		Qval = 0
+ 	else	
+ 		Qval = Q
+ 	endif
+ 	
 	call ddy( v, div, order, Q )                       ! ==> dv/dy in YBLOCK format
 	
  
  	!----------------------------------------
  	!    div <--- dv/dy + dw/dz
  	!----------------------------------------
+ 	if( z_periodic ) then
+ 		Qval = 0
+ 	else	
+ 		Qval = Q
+ 	endif
+ 	
   	call yblock_2_zblock(w(1,1,1),tmpZ(1,1,1,1))   	
   	call ddz( tmpZ(1,1,1,1), tmpZ(1,1,1,2), order,Q )           ! ==> dw/dz in ZBLOCK format  	
   	call zblock_2_yblock(tmpZ(1,1,1,2),tmpY(1,1,1,6))  ! ==> dw/dz in YBLOCK format
@@ -184,6 +197,12 @@ subroutine divergence(u,v,w,div)
  	!----------------------------------------
  	!    div <--- dv/dy + dw/dz + dudx
  	!----------------------------------------
+ 	if( x_periodic ) then
+ 		Qval = 0
+ 	else	
+ 		Qval = Q
+ 	endif
+ 	
   	call yblock_2_xblock(u,tmpX) 		
   	call ddx( tmpX, tmpX(1,1,1,2), order,Q )           ! ==> du/dx in XBLOCK format 		
   	call xblock_2_yblock(tmpX(1,1,1,2),tmpY(1,1,1,6))  ! ==> du/dx in YBLOCK format
@@ -267,7 +286,7 @@ subroutine test_divergence
 end subroutine test_divergence
 
 
-subroutine gradient(f,fx,fy,fz,Qval)
+subroutine gradient(f,fx,fy,fz,Q0)
 	!------------------------------------------------------------
 	!  Compute spatial gradient of f using Bernoulli/Cos method.
 	!  Input and output data arrays arranged in YBLOCK format.
@@ -279,7 +298,7 @@ subroutine gradient(f,fx,fy,fz,Qval)
 	use independent_variables
 	implicit none
 	integer                       ::   order=1
-	integer                       ::   Qval
+	integer                       ::   Q0,Qval
 	real(kind=8)                  ::   f( array_size(IDIM,YBLOCK,myid),   &
                                           array_size(JDIM,YBLOCK,myid),   &
                                           array_size(KDIM,YBLOCK,myid)  )
@@ -297,6 +316,12 @@ subroutine gradient(f,fx,fy,fz,Qval)
                                           array_size(KDIM,YBLOCK,myid)  )    
 
  	if( array_size(IDIM,YBLOCK,myid) > 1 ) then
+ 		if( y_periodic ) then
+ 			Qval = 0
+ 		else	
+ 			Qval = Q0
+ 		endif
+ 	
   		call ddy( f, fy, order, Qval )
  	else
   		fy = 0.d0
@@ -304,6 +329,12 @@ subroutine gradient(f,fx,fy,fz,Qval)
  	
 
  	if( nz > 1 ) then
+ 		if( z_periodic ) then
+ 			Qval = 0
+ 		else	
+ 			Qval = Q0
+ 		endif
+ 		
   		call yblock_2_zblock(f,tmpZ)  
   		call ddz( tmpZ, tmpZ(1,1,1,2), order, Qval )
   		call zblock_2_yblock(tmpZ(1,1,1,2),fz)
@@ -313,6 +344,12 @@ subroutine gradient(f,fx,fy,fz,Qval)
 
 
  	if( nx > 1 ) then
+ 		if( x_periodic ) then
+ 			Qval = 0
+ 		else	
+ 			Qval = Q0
+ 		endif
+ 		
   		call yblock_2_xblock(f,tmpX)
   		call ddx( tmpX, tmpX(1,1,1,2), order, Qval )
   		call xblock_2_yblock(tmpX(1,1,1,2),fx)

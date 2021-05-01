@@ -106,9 +106,9 @@ subroutine preliminary_tasks
   		write(0,*) message
   		call LogMessage(message,logfile)
  	endif
-	call initialize_coord(x,nx,Lx)
-	call initialize_coord(y,ny,Ly)
-	call initialize_coord(z,nz,Lz)
+	call initialize_coord(x,nx,Lx,x_periodic)
+	call initialize_coord(y,ny,Ly,y_periodic)
+	call initialize_coord(z,nz,Lz,z_periodic)
 	
 	call get_my_xvals(myxvals,YBLOCK,myid)
 	call get_my_zvals(myzvals,YBLOCK,myid)
@@ -183,10 +183,18 @@ subroutine preliminary_tasks
  	allocate( kxfilter(nx), kyfilter(ny), kzfilter(nz) )
  	
  	dim = 1   ! x
- 	exp_type = 'cos'
-	call fourier_init(exp_type,nx,Lx,kx,kxfilter,cos_plan(dim),plan_i)
-	exp_type = 'sin'
-	call fourier_init(exp_type,nx,Lx,kx,kxfilter,sin_plan(dim),plan_i)
+ 	if( x_periodic ) then
+ 		exp_type = 'fourier'
+		call fourier_init(exp_type,nx,Lx,kx,kxfilter,fourier_plan(idim,1),fourier_plan(idim,2))
+		fourier_done(idim) = .TRUE.
+ 	else
+ 		exp_type = 'cos'
+		call fourier_init(exp_type,nx,Lx,kx,kxfilter,cos_plan(dim),plan_i)
+		exp_type = 'sin'
+		call fourier_init(exp_type,nx,Lx,kx,kxfilter,sin_plan(dim),plan_i)
+		cos_done(idim) = .TRUE.
+		sin_done(idim) = .TRUE.
+	endif
 	if(myid==0) then
 		open(1,file='output/debug_data/x_wavenumbers')
 		do i=1,nx
@@ -196,10 +204,18 @@ subroutine preliminary_tasks
 	endif
 	
 	dim = 2   ! y
- 	exp_type = 'cos'
-	call fourier_init(exp_type,ny,Ly,ky,kyfilter,cos_plan(dim),plan_i)
-	exp_type = 'sin'
-	call fourier_init(exp_type,ny,Ly,ky,kyfilter,sin_plan(dim),plan_i)
+	if( y_periodic ) then
+		exp_type = 'fourier'
+		call fourier_init(exp_type,ny,Ly,ky,kyfilter,fourier_plan(idim,1),fourier_plan(idim,2))
+		fourier_done(idim) = .TRUE.
+	else
+ 		exp_type = 'cos'
+		call fourier_init(exp_type,ny,Ly,ky,kyfilter,cos_plan(dim),plan_i)
+		exp_type = 'sin'
+		call fourier_init(exp_type,ny,Ly,ky,kyfilter,sin_plan(dim),plan_i)
+		cos_done(idim) = .TRUE.
+		sin_done(idim) = .TRUE.
+	endif
 	if(myid==0) then
 		open(1,file='output/debug_data/y_wavenumbers')
 		do j=1,ny
@@ -209,10 +225,18 @@ subroutine preliminary_tasks
 	endif
 	
 	dim = 3   ! z
- 	exp_type = 'cos'
-	call fourier_init(exp_type,nz,Lz,kz,kzfilter,cos_plan(dim),plan_i)
-	exp_type = 'sin'
-	call fourier_init(exp_type,nz,Lz,kz,kzfilter,sin_plan(dim),plan_i)
+	if( z_periodic ) then
+		exp_type = 'fourier'
+		call fourier_init(exp_type,nz,Lz,kz,kzfilter,fourier_plan(idim,1),fourier_plan(idim,2))
+		fourier_done(idim) = .TRUE.
+	else
+ 		exp_type = 'cos'
+		call fourier_init(exp_type,nz,Lz,kz,kzfilter,cos_plan(dim),plan_i)
+		exp_type = 'sin'
+		call fourier_init(exp_type,nz,Lz,kz,kzfilter,sin_plan(dim),plan_i)
+		cos_done(idim) = .TRUE.
+		sin_done(idim) = .TRUE.
+	endif
 	if(myid==0) then
 		open(1,file='output/debug_data/z_wavenumbers')
 		do k=1,nz

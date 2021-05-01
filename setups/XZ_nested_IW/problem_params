@@ -13,6 +13,9 @@ BC_XZ_test           ! runlabel
 30000.d0             ! Lx       (m)     30 km = 1/5 of 150 km 
 1.d0                 ! Ly       (m)       
 600.d0               ! Lz       (m)     1/5 of 3000 m
+.FALSE.              ! x coordinate periodic?
+.FALSE.              ! y coordinate periodic?
+.FALSE.              ! z coordinate periodic?
 r                    ! defn of scalar s1 ( t = temp in deg C, r = Boussinesq density, i.e. rho )
 p                    ! defn of scalar s2 ( p =  passive tracer )
 .TRUE.               ! Call user forcing routine?         

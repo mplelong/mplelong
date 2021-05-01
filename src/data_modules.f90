@@ -52,15 +52,23 @@
 		real(kind=8),allocatable        :: x(:)   ! [m] x(:), nx values
 		real(kind=8),allocatable        :: y(:)   ! [m] y(:), ny values 
 		real(kind=8),allocatable        :: z(:)   ! [m] z(:), nz values
+		logical                         :: x_periodic
+		logical                         :: y_periodic
+		logical                         :: z_periodic
 	contains
-		subroutine initialize_coord(x,nx,Lx)
+		subroutine initialize_coord(x,nx,Lx,periodic)
 			implicit none
 			integer         :: nx,i
 			real(kind=8)    :: x(nx),Lx,dx
+			logical         :: periodic
 			if( nx > 1 ) then
-				dx = Lx/(nx-1.)
+				if( periodic ) then
+					dx = Lx/dfloat(nx)  ! open interval[0,Lx)
+				else
+					dx = Lx/(nx-1.d0)   ! closed interval[0,Lx]
+				endif
 				do i=1,nx
-					x(i) = (i-1.d0)*dx   ! equally spaced in closed interval [0,Lx]
+					x(i) = (i-1.d0)*dx 
 				enddo
 			else
 				x(1)=0.d0

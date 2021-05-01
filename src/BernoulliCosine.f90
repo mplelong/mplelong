@@ -21,7 +21,7 @@ SUBROUTINE deriv_BC(f,df,n,dir,Qval,debug)
 !    data needed to carry out the differentiation obtained from modules
 !---------------------------------------------------------------------------------------------
 	use mpi_params,                          only: myid,comm,ierr
-	use independent_variables,               only: x,y,z,nx,ny,nz,Lx,Ly,Lz
+	use independent_variables,               only: x,y,z,nx,ny,nz,Lx,Ly,Lz,x_periodic,y_periodic,z_periodic
 	use differentiation_params,              only: LU_x,ipiv_x,LU_y,ipiv_y,LU_z,ipiv_z, &
 	                                               U_x,dU_x,U_y,dU_y,U_z,dU_z,Q
 	use fourier_differentiation_tools,       only: differentiate_fcs
@@ -53,16 +53,20 @@ SUBROUTINE deriv_BC(f,df,n,dir,Qval,debug)
 		allocate( U(nmax,M,2), dU(nmax,M,2) )  ! big enough for all 3 directions		
 		first_entry=.FALSE.
 	endif
-
 	
-	if( myid==0 .and. Qval .ne. 0 .and. Qval .ne. Q ) stop ' Qval has to be either zero or Q in deriv_BC '
-	
+	if( myid==0 .and. Qval .ne. 0 .and. Qval .ne. Q ) stop ' Qval has to be either zero or Q in deriv_BC '	
+		
 	if( n==1 ) then
 		df=0.d0
 		return
 	endif
 	
-	if( QVAL==0 ) then	
+	method = 'cos'       ! always cos unless coordinate is periodic
+	
+	if( QVAL==0 ) then
+		if(dir==1 .and. x_periodic) method='fourier'
+		if(dir==2 .and. y_periodic) method='fourier'
+		if(dir==3 .and. z_periodic) method='fourier'
 		call differentiate_fcs(f,df,n,dir,method,order)
 		return	
 	endif

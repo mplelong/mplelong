@@ -205,7 +205,7 @@ subroutine update_ustar
 	use mpi_params,                           only: myid
 	use decomposition_params
 	use dependent_variables,                  only: u,v,w,s1,s2
-	use independent_variables,                only: Lx, Ly, Lz
+	use independent_variables,                only: Lx,Ly,Lz,x_periodic,y_periodic,z_periodic
 	use intermediate_variables,               only: ustar,vstar,wstar,tmpY
 	use boundary_data
 	use etc,                                  only: istep,istart
@@ -287,51 +287,63 @@ subroutine update_ustar
 	! construct an array that matches the required Dirichlet bcs at east/west
 	!------------------------------------------------------------------------------
 	id = 1  ! u
-	tmpY(:,:,:,4) = 0.d0
-	if( x(1) == 0. ) then     ! myid owns east boundary, update psi_u
-		do k=1,locnz
-			do j=1,ny
-				a = east_vals(j,k,id) - ustar(j,1,k)
-				tmpY(j,:,k,4) =  a*step_e(:)
+	if( locnx > 1 .and. .NOT. x_periodic ) then
+		tmpY(:,:,:,4) = 0.d0
+		if( x(1) == 0. ) then     ! myid owns east boundary, update psi_u
+			do k=1,locnz
+				do j=1,ny
+					a = east_vals(j,k,id) - ustar(j,1,k)
+					tmpY(j,:,k,4) =  a*step_e(:)
+				enddo
 			enddo
-		enddo
-	endif
-	if( x(locnx) == Lx ) then     ! myid owns west boundary, update psi_u
-		do k=1,locnz
-			do j=1,ny
-				b = west_vals(j,k,id) - ustar(j,locnx,k)
-				tmpY(j,:,k,4) = tmpY(j,:,k,4) + b*step_w(:)
+		endif
+		if( x(locnx) == Lx ) then     ! myid owns west boundary, update psi_u
+			do k=1,locnz
+				do j=1,ny
+					b = west_vals(j,k,id) - ustar(j,locnx,k)
+					tmpY(j,:,k,4) = tmpY(j,:,k,4) + b*step_w(:)
+				enddo
 			enddo
-		enddo
+		endif
 	endif
 	
+	!------------------------------------------------------------------------------	
+	! construct an array that matches the required Dirichlet bcs at south/north
+	!------------------------------------------------------------------------------
 	id = 2  ! v  YBLOCK, myid owns both y=0 and y=Ly
-	tmpY(:,:,:,5) = 0.d0
-	do k=1,locnz
-		do i=1,locnx
-			a = south_vals(i,k,id) - vstar(1,i,k)
-			b = north_vals(i,k,id) - vstar(ny,i,k)
-			tmpY(1:ny,i,k,5) = a*step_s(1:ny) + b*step_n(1:ny)
-		enddo
-	enddo
-	
-	id = 3  ! w
-	tmpY(:,:,:,6) = 0.d0
-	if( z(1) == 0. ) then     ! myid owns bottom boundary, update psi_w
-		do i=1,locnx
-			do j=1,ny
-				a = bottom_vals(i,j,id) - wstar(j,i,1)
-				tmpY(j,i,:,6) =  a*step_b(:)
+	if( ny > 1 .and. .NOT. y_periodic ) then
+		tmpY(:,:,:,5) = 0.d0
+		do k=1,locnz
+			do i=1,locnx
+				a = south_vals(i,k,id) - vstar(1,i,k)
+				b = north_vals(i,k,id) - vstar(ny,i,k)
+				tmpY(1:ny,i,k,5) = a*step_s(1:ny) + b*step_n(1:ny)
 			enddo
 		enddo
 	endif
-	if( z(locnz) == Lz ) then     ! myid owns top boundary, update psi_w
-		do i=1,locnx
-			do j=1,ny
-				b = top_vals(i,j,id) - wstar(j,i,locnz)
-				tmpY(j,i,:,6) = tmpY(j,i,:,6) + b*step_t(:)
+	
+	!------------------------------------------------------------------------------	
+	! construct an array that matches the required Dirichlet bcs at bottom/top
+	!------------------------------------------------------------------------------
+	id = 3  ! w
+	if( locnz > 1 .and. .NOT. z_periodic ) then
+		tmpY(:,:,:,6) = 0.d0
+		if( z(1) == 0. ) then     ! myid owns bottom boundary, update psi_w
+			do i=1,locnx
+				do j=1,ny
+					a = bottom_vals(i,j,id) - wstar(j,i,1)
+					tmpY(j,i,:,6) =  a*step_b(:)
+				enddo
 			enddo
-		enddo
+		endif
+		if( z(locnz) == Lz ) then     ! myid owns top boundary, update psi_w
+			do i=1,locnx
+				do j=1,ny
+					b = top_vals(i,j,id) - wstar(j,i,locnz)
+					tmpY(j,i,:,6) = tmpY(j,i,:,6) + b*step_t(:)
+				enddo
+			enddo
+		endif
 	endif
 	
 	!---------------------------------------------
@@ -415,14 +427,13 @@ subroutine update_ustar
  	endif
 
 	
-	!---------------------------------------------
-	! add psi functions to ustar vector to get
-	! u_star_hat, v_star_hat and w_star_hat
-	! overwrite u, v and w
-	!---------------------------------------------
-	ustar(:,:,:) = ustar(:,:,:) + tmpY(:,:,:,4)
-	vstar(:,:,:) = vstar(:,:,:) + tmpY(:,:,:,5)
-	wstar(:,:,:) = wstar(:,:,:) + tmpY(:,:,:,6)
+	!--------------------------------------------------------------------------------
+	! add psi functions to ustar vector to get u_star_hat, v_star_hat and w_star_hat
+	! overwrite ustar, vstar and wstar
+	!--------------------------------------------------------------------------------
+	if( locnx > 1 .and. .NOT. x_periodic ) ustar(:,:,:) = ustar(:,:,:) + tmpY(:,:,:,4)
+	if( ny    > 1 .and. .NOT. y_periodic ) vstar(:,:,:) = vstar(:,:,:) + tmpY(:,:,:,5)
+	if( locnz > 1 .and. .NOT. z_periodic ) wstar(:,:,:) = wstar(:,:,:) + tmpY(:,:,:,6)
 	
 	
 	if( istep==istart ) then

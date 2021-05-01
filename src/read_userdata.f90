@@ -69,6 +69,15 @@ subroutine ReadUserData
   
 	if(myid==0) read(1,*) Lz
 	call mpi_bcast(Lz,1,MPI_DOUBLE_PRECISION,0,comm,ierr)
+	
+	if(myid==0) read(1,*) x_periodic
+  	call mpi_bcast(x_periodic,1,MPI_LOGICAL,0,comm,ierr)
+  	
+  	if(myid==0) read(1,*) y_periodic
+  	call mpi_bcast(x_periodic,1,MPI_LOGICAL,0,comm,ierr)
+  	
+  	if(myid==0) read(1,*) z_periodic
+  	call mpi_bcast(x_periodic,1,MPI_LOGICAL,0,comm,ierr)
   
   	if(myid==0) read(1,*) scalar_kind(1)
   	call mpi_bcast(scalar_kind(1),1,MPI_CHARACTER,0,comm,ierr)
