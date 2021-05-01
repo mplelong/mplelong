@@ -38,3 +38,10 @@ FlowSolveConfig
 ehthumbs.db
 Thumbs.db
 
+FlowSolveConfig
+output/codes_etc/input/flow_solve_user_routines.f90
+output/codes_etc/input/user_params_module.f90
+output/codes_etc/Make.inc
+output/codes_etc/src/boundary_routines.f90
+output/codes_etc/src/flow_solve.f90
+output/codes_etc/src/p3dfft/Make.inc
