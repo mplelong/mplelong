@@ -3,11 +3,11 @@
 *.o
 *.x
 *.pyc
-*.exe
 *.mod
 *.a
 fort.*
 a.out
+FlowSolveConfig
 
 # Packages #
 ############
@@ -29,6 +29,7 @@ a.out
 # OS generated files #
 ######################
 .swp
+.bak
 .DS_Store
 .DS_Store?
 ._*
@@ -36,3 +37,4 @@ a.out
 .Trashes
 ehthumbs.db
 Thumbs.db
+
