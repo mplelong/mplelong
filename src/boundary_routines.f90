@@ -554,20 +554,22 @@ end subroutine extrapolate_to_boundaries
 
 subroutine fill_boundary_arrays
 	use mpi_params,              only: myid
-	use dependent_variables,     only: w
 	use decomposition_params
 	use boundary_data
-	use independent_variables,   only: t_secs,dt,Lx,Ly,Lz,tn,tnp1
-	use user_params,             only: parent_soln,parent_deriv,x0,y0,z0
+	use independent_variables,   only: Lx,Ly,Lz,tnp1
+	use methods_params,          only: do_second_scalar
 	implicit none
-	integer                         :: i,j,k,id
-	integer,save                    :: locnx,ny,locnz
+	integer                         :: id
+	integer,save                    :: locnx,ny,locnz,nvars=4
 	real(kind=8),allocatable,save   :: x(:),y(:),z(:)
 	real(kind=8)                    :: XVAL,YVAL,ZVAL,tval
-	character(len=80)               :: dir
+	character(len=80)               :: dir,side
 	logical,save                    :: first_entry=.TRUE.
 	
 	if( first_entry ) then
+	
+		if( do_second_scalar )  nvars = 5
+		
 		locnx = array_size(JDIM,YBLOCK,myid)
 		ny    = array_size(IDIM,YBLOCK,myid)
 		locnz = array_size(KDIM,YBLOCK,myid)
@@ -591,152 +593,32 @@ subroutine fill_boundary_arrays
 		first_entry=.FALSE.
 	endif
 	
-	tval = tnp1   ! during a time step, we need BVALS at the next time step
+	tval = tnp1   ! during a time step, we need BVALSand normal DERIVS at the next time step
+	do id=1,nvars
 	
-	! east/west U,V,W,PD values
-	if( x(1) == 0.d0 ) then
-		XVAL = x0
-		do k=1,locnz
-			ZVAL = z0 + z(k)
-			do j=1,ny
-				YVAL = y0 + y(j)
-				do id=1,4
-					east_vals(j,k,id) = parent_soln(XVAL,YVAL,ZVAL,tval,id)
-					!if(id==3) east_vals(j,k,id) = w(j,1,k)   ! CAN use current value since using slope + offset
-				enddo
-			enddo
-		enddo
-	endif
-	if( x(locnx) == Lx ) then
-		XVAL = x0 + Lx
-		do k=1,locnz
-			ZVAL = z0 + z(k)
-			do j=1,ny
-				YVAL = y0 + y(j)
-				do id=1,4
-					west_vals(j,k,id) = parent_soln(XVAL,YVAL,ZVAL,tval,id)
-					!if(id==3) west_vals(j,k,id) = w(j,locnx,k)   ! CAN use current value since using slope + offset
-				enddo
-			enddo
-		enddo
-	endif
-	
-	! south/north U,V,W,PD values  YBLOCKS have all y values, i.e. both end planes
-	if( ny > 1 ) then
-		do i=1,locnx
-			XVAL = x0 + x(i)
-			do k=1,locnz
-				ZVAL = z0 + z(k)
-				do id=1,4
-					YVAL = y0
-					south_vals(i,k,id) = parent_soln(XVAL,YVAL,ZVAL,tval,id)
-					YVAL = y0 + Ly
-					north_vals(i,k,id) = parent_soln(XVAL,YVAL,ZVAL,tval,id)
-				enddo
-			enddo
-		enddo
-	endif
-	
-	! bottom/top U,V,W,PD values
-	if( z(1) == 0.d0 ) then
-		do i=1,locnx
-			XVAL = x0 + x(i)
-			do j=1,ny
-				YVAL = y0 + y(j)
-				do id=1,4
-					ZVAL = z0
-					bottom_vals(i,j,id) = parent_soln(XVAL,YVAL,ZVAL,tval,id)
-				enddo
-			enddo
-		enddo
-	endif
-	if( z(locnz) == Lz ) then
-		do i=1,locnx
-			XVAL = x0 + x(i)
-			do j=1,ny
-				YVAL = y0 + y(j)
-				do id=1,4
-					ZVAL = z0 + Lz
-					top_vals(i,j,id) = parent_soln(XVAL,YVAL,ZVAL,tval,id)
-				enddo
-			enddo
-		enddo
-	endif
-	
-	
-	
-	! east/west d/dx U,V,W,PD values
-	dir='x'
-	if( x(1) == 0.d0 ) then
-		XVAL = x0
-		do k=1,locnz
-			ZVAL = z0 + z(k)
-			do j=1,ny
-				YVAL = y0 + y(j)
-				do id=1,4
-					east_derivs(j,k,id) = parent_deriv(XVAL,YVAL,ZVAL,tval,id,dir)
-				enddo
-			enddo
-		enddo
-	endif
-	if( x(locnx) == Lx ) then
-		XVAL = x0 + Lx
-		do k=1,locnz
-			ZVAL = z0 + z(k)
-			do j=1,ny
-				YVAL = y0 + y(j)
-				do id=1,4
-					west_derivs(j,k,id) = parent_deriv(XVAL,YVAL,ZVAL,tval,id,dir)
-				enddo
-			enddo
-		enddo
-	endif
-	
-	
-	! south/north d/dy U,V,W,PD values  YBLOCKS have all y values, i.e. both end planes
-	if( ny > 1 ) then
-		dir = 'y' 
-		do i=1,locnx
-			XVAL = x0 + x(i)
-			do k=1,locnz
-				ZVAL = z0 + z(k)
-				do id=1,4
-					YVAL=y0
-					south_derivs(i,k,id) = parent_deriv(XVAL,YVAL,ZVAL,tval,id,dir)
-					YVAL=y0+Ly
-					north_derivs(i,k,id) = parent_deriv(XVAL,YVAL,ZVAL,tval,id,dir)
-				enddo
-			enddo
-		enddo
-	endif
-	
-	! bottom/top d/dz U,V,W,PD values
-	dir='z'
-	if( z(1) == 0.d0 ) then
-		do i=1,locnx
-			XVAL = x0 + x(i)
-			do j=1,ny
-				YVAL = y0 + y(j)
-				do id=1,4
-					ZVAL = z0
-					bottom_derivs(i,j,id) = parent_deriv(XVAL,YVAL,ZVAL,tval,id,dir)
-				enddo
-			enddo
-		enddo
-	endif
-	if( z(locnz) == Lz ) then
-		do i=1,locnx
-			XVAL = x0 + x(i)
-			do j=1,ny
-				YVAL = y0 + y(j)
-				do id=1,4
-					ZVAL = z0 + Lz
-					top_derivs(i,j,id) = parent_deriv(XVAL,YVAL,ZVAL,tval,id,dir)
-				enddo
-			enddo
-		enddo
-	endif
-	
+		if(locnx>1) then
+			side='E'
+			call user_bvals_EW(x,y,z,tval,id,east_vals(1,1,id),east_derivs(1,1,id),locnx,ny,locnz,side,Lx)
+			side='W'
+			call user_bvals_EW(x,y,z,tval,id,west_vals(1,1,id),west_derivs(1,1,id),locnx,ny,locnz,side,Lx)
+		endif
+		
+		if(ny>1) then
+			side='S'
+			call user_bvals_NS(x,y,z,tval,id,south_vals(1,1,id),south_derivs(1,1,id),locnx,ny,locnz,side,Ly)
+			side='N'
+			call user_bvals_NS(x,y,z,tval,id,north_vals(1,1,id),north_derivs(1,1,id),locnx,ny,locnz,side,Ly)
+		endif
+		
+		if(locnz>1) then
+			side='B'
+			call user_bvals_BT(x,y,z,tval,id,bottom_vals(1,1,id),bottom_derivs(1,1,id),locnx,ny,locnz,side,Lz)
+			side='T'
+			call user_bvals_BT(x,y,z,tval,id,top_vals(1,1,id),top_derivs(1,1,id),locnx,ny,locnz,side,Lz)
+		endif
+		
+	enddo	
+			
  return
 end subroutine fill_boundary_arrays
 

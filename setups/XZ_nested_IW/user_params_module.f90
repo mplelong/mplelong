@@ -11,9 +11,6 @@ module user_params
 	!  (f0, g, rho0 all set in problem_params)
 	!-------------------------------------------------------------------------------------
 	
-	
-	
-	
 	real(kind=8), parameter          :: L = 1.5d5      !! [m]
 	real(kind=8), parameter          :: H = 3000.d0    !! [m]
 	real(kind=8), parameter          :: N = 2.d-3      !! [1/s]  used in setting ambient s1=rho_bar(z) 
@@ -37,7 +34,7 @@ module user_params
 	real(kind=8), parameter          :: gamma_x=Lx/6.  !! [m] size of forcing zone in x
 	real(kind=8), parameter          :: gamma_z=Lz/128.!! [1] size of forcing zone in z
 	real(kind=8), parameter          :: sigma = f0/5.  !! [1/s] frequency of forcing
-	real(kind=8), parameter          :: A = 2.*f0      !! [m/s2] amplitude of acceleration term on rhs of u
+	real(kind=8), parameter          :: A = 0.*f0      !! [m/s2] amplitude of acceleration term on rhs of u
 
 
 	!--------------------------------------------------------------------------------------

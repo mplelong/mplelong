@@ -48,7 +48,7 @@ call preliminary_tasks
        call pressure_projection
         call apply_bcs
          call diffuse        
-          call write_results 
+          call write_results
            call toggle
             enddo
 end program flow_solve

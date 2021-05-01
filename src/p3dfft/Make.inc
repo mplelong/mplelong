@@ -5,7 +5,7 @@ VENDOR=gcc
 #    Root directories for external software... generally
 #    below these directories will be include, lib, bin
 #
-#        mac osx 10.11 el capitan -- all under homebrew
+#        mac osx 10.14.6 Mojave -- all under homebrew
 #
 #--------------------------------------------------------------------
 MPI_ROOT= /usr/local
@@ -26,14 +26,14 @@ FLINKER = ${F90}
 
 #--------------------------------------------------------------------
 #    Vendor specific compilation parameters
-#    -fallow-argument-mismatch   -cpp
+#    -fallow-argument-mismatch 
 #--------------------------------------------------------------------
 
 ifeq ($(VENDOR), gcc)
 	LDFLAGS =
 	FOPTFLAGS   = -g -O3 -cpp -ffree-form -ffree-line-length-none   #-fbounds-check -ffpe-trap=zero,overflow,underflow -fbacktrace
 	F77OPTFLAGS = -g -O3 -cpp -ffixed-form -ffixed-line-length-none #-fbounds-check -ffpe-trap=zero,overflow,underflow -fbacktrace
-	BLAS_LIB =  -L/usr/local/opt/openblas/lib -lblas           #openblas
+	BLAS_LIB =  -L/usr/local/opt/openblas/lib -lblas                #openblas
 endif
 
 
