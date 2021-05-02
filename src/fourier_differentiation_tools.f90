@@ -563,7 +563,6 @@ SUBROUTINE differentiate_fcs(f,df,n,dir,method,order)
 	
 	if( n .ne. nx .and. n .ne. ny .and. n .ne. nz )    stop ' bad n value passed to differentiate_fcs '
 	if( dir .ne. 1 .and. dir .ne. 2 .and. dir .ne. 3 ) stop ' bad dir value passed to differentiate_fcs '
-	if( trim(method) .ne. 'cos' ) stop ' we should only be using cos expansions in differentiate_fcs '
 	
    
 	if(dir==1) then
