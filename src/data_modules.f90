@@ -32,7 +32,7 @@
 		logical                         :: forcing_key(5)=.TRUE.
 		logical                         :: restart=.FALSE.
 		logical                         :: ambient_profile(2)=.FALSE.
-		logical                         :: do_sponging=.FALSE.
+		logical                         :: do_sponging = .FALSE.
 	end module methods_params
 
 
@@ -57,15 +57,19 @@
 		logical                         :: z_periodic
 	contains
 		subroutine initialize_coord(x,nx,Lx,periodic)
+			use mpi_params, only: myid
 			implicit none
-			integer         :: nx,i
-			real(kind=8)    :: x(nx),Lx,dx
-			logical         :: periodic
+			integer            :: nx,i
+			real(kind=8)       :: x(nx),Lx,dx
+			logical            :: periodic
 			if( nx > 1 ) then
 				if( periodic ) then
 					dx = Lx/dfloat(nx)  ! open interval[0,Lx)
+					if( myid==0 .and. mod(nx,2) .ne. 0 ) stop 'periodic dimensions should have an even number of gridpoints'
 				else
 					dx = Lx/(nx-1.d0)   ! closed interval[0,Lx]
+					if( myid==0 .and. mod(nx,2) == 0 )  &
+						write(0,*) 'WARNING: nonperiodic dimensions generally have an odd number of gridpoints'
 				endif
 				do i=1,nx
 					x(i) = (i-1.d0)*dx 
