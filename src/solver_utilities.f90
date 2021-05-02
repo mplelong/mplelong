@@ -616,7 +616,7 @@ subroutine initialize_fourier_stuff
 	!  Create the required FFTW3 plans
 	!  Store results in differentiation_params module
 	!------------------------------------------------------------------
-	use mpi_params,                 only: myid
+	use mpi_params,                 only: myid,comm,ierr
 	use independent_variables
 	use differentiation_params
 	use fourier_differentiation_tools 
@@ -629,7 +629,9 @@ subroutine initialize_fourier_stuff
 	real(kind=8), allocatable          :: in(:), out(:)
 
 	allocate( kx(nx),ky(ny),kz(nz) )
+	kx=0.d0 ; ky=0.d0; kz=0.d0
  	allocate( kxfilter(nx), kyfilter(ny), kzfilter(nz) )
+ 	kxfilter=0.d0 ; kyfilter=0.d0 ; kzfilter=0.d0
  	
  	dim = 1   ! x
  	if( x_periodic ) then
