@@ -115,7 +115,7 @@ subroutine diffuse
 	!-----------------------------------------------------------------------------------
 	use mpi_params,                   only: myid
  	use decomposition_params
- 	use independent_variables,        only: dt,ny,nz              ! need global nz to pass to z_diffusion
+ 	use independent_variables,        only: dt,ny,nz,x_periodic,y_periodic ! need global nz to pass to z_diffusion
  	use dependent_variables,          only: u,v,v,w,s1,s2,s1_bar,s2_bar
 	use intermediate_variables,       only: tmpX,tmpY,tmpZ
 	use differentiation_params,       only: kx,ky,kxfilter,kyfilter
@@ -127,13 +127,20 @@ subroutine diffuse
  	integer                              :: i,j,k,ig,id,fid,dir
  	real(kind=8)                         :: xx,yy
  	real(kind=8),allocatable,save        :: diff_factor(:,:,:)
- 	character(len=80),save               :: exp_type='cos'
+ 	character(len=80),save               :: exp_type(2)
  	real(kind=8), external               :: myexp
  	logical, save                        :: first_entry=.TRUE.
 	
 	if( first_entry) then
 	
 		if( do_second_scalar )  nvars = 5
+		
+		!---------------------------------------------------
+		!  set expansion type in x & y directions
+		!---------------------------------------------------
+		exp_type(:) = 'cos'
+		if( x_periodic ) exp_type(1)='fourier'
+		if( y_periodic ) exp_type(2)='fourier'
 		
 		locnx = array_size(JDIM,YBLOCK,myid)
 		locnz = array_size(KDIM,YBLOCK,myid)

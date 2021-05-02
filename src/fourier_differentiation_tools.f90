@@ -539,7 +539,7 @@ SUBROUTINE differentiate_fcs(f,df,n,dir,method,order)
 !-------------------------------------------------------------------------
 	use independent_variables,        only: nx,ny,nz
 	use differentiation_params,       only: kx,ky,kz,kxfilter,kyfilter,kzfilter, \
-	                                        cos_plan,sin_plan
+	                                        cos_plan,sin_plan,fourier_plan
 	implicit none 
 	integer, intent(in)                  :: n
 	integer, intent(in)                  :: dir       ! 1,2,3 for diff wrt to x,y,z coordinate
@@ -582,8 +582,13 @@ SUBROUTINE differentiate_fcs(f,df,n,dir,method,order)
 	endif
   
 	exp_type = method
-	plans(1) = cos_plan(dir)
-	plans(2) = sin_plan(dir)
+	if( method=='cos') then
+		plans(1) = cos_plan(dir)
+		plans(2) = sin_plan(dir)
+	elseif( method=='fourier' ) then
+		plans(1) = fourier_plan(dir,1)
+		plans(2) = fourier_plan(dir,2)
+	endif
   	
 	call fourier_deriv(f,df,n,order,exp_type,k,kfilter,tmp,plans)
 	

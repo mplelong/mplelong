@@ -190,7 +190,7 @@ subroutine test_transform_xy
 	use decomposition_params
 	use intermediate_variables, only: tmpY
 	use dimensional_scales,     only: length_scale
-	use independent_variables,  only: x,y,Lx,Ly
+	use independent_variables,  only: x,y,Lx,Ly,x_periodic,y_periodic
 	use etc
  
 	implicit none     
@@ -214,9 +214,13 @@ subroutine test_transform_xy
 	enddo
  
  
-	dir = 1   ! 1=for  -1=inv  
+	  
 	exp_type(1)='cos'   ! x dir
 	exp_type(2)='cos'   ! y dir
+	if( x_periodic ) exp_type(1)='fourier'
+	if( y_periodic ) exp_type(2)='fourier'
+	
+	dir = 1   ! 1=for  -1=inv
 	call transform_xy(tmpY(1,1,1,1),tmpY(1,1,1,2),dir,exp_type)   ! in,out,dir...
   
 	dir=-1

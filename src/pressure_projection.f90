@@ -497,7 +497,7 @@ subroutine poisson_solver(test_flag)
 	!---------------------------------------------------------------
 	use mpi_params,                only: myid
  	use intermediate_variables,    only: phi,div_u,tmpY,tmpZ
- 	use independent_variables,     only: dt,nx,ny,nz,y,Lx,Ly,Lz,zg=>z
+ 	use independent_variables,     only: dt,nx,ny,nz,y,Lx,Ly,Lz,zg=>z,x_periodic,y_periodic
  	use decomposition_params
  	use differentiation_params,    only: kx,ky,kxfilter,kyfilter
  	use etc,                       only: istep,istart
@@ -519,6 +519,8 @@ subroutine poisson_solver(test_flag)
 		!  set expansion type in x & y directions
 		!---------------------------------------------------
 		exp_type(:) = 'cos'
+		if( x_periodic ) exp_type(1)='fourier'
+		if( y_periodic ) exp_type(2)='fourier'
 		
 		locnx = array_size(JDIM,YBLOCK,myid)   ! locnx in YBLOCK
 		locnz = array_size(KDIM,YBLOCK,myid)   ! locnz in YBLOCK
