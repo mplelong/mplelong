@@ -26,7 +26,7 @@ subroutine preliminary_tasks
 	!  Read user data
 	!-------------------
 	if(myid==0) then
-  		message = '...  Reading input/user_params and input/io_params ...'
+  		message = '................  Reading input/user_params and input/io_params ...'
   		write(0,*) message
   		call LogMessage(message,logfile)
  	endif
@@ -43,7 +43,7 @@ subroutine preliminary_tasks
 	!  Set params for data decomposition
 	!---------------------------------------
 	if(myid==0) then
-  		message = '...  Calling Decomposition2D ...'
+  		message = '................  Calling Decomposition2D ...'
   		write(0,*) message
   		call LogMessage(message,logfile)
  	endif
@@ -54,11 +54,10 @@ subroutine preliminary_tasks
 	! Allocate dependent and intermediate variables
 	!-----------------------------------------------	
 	if(myid==0) then
-  		message = '...  Allocating memory for dependent/intermediate variables ...'
+  		message = '................  Allocating memory for dependent/intermediate variables ...'
   		write(0,*) message
   		call LogMessage(message,logfile)
- 	endif
- 	
+ 	endif	
  	call AllocateIndependentVariables
  	call AllocateDependentVariables
  	call AllocateIntermediateVariables
