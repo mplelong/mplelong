@@ -757,10 +757,13 @@ subroutine smooth_near_boundary(f,x,n,gamma,dir)
 	real(kind=8), allocatable, save     :: fs(:)
 	real(kind=8)                        :: L,w,gamma
 	real(kind=8), external              :: myexp
-	integer, save                       :: locnx,ny,locnz
+	integer, save                       :: locnx,ny,locnz,p
 	logical, save                       :: first_entry=.TRUE.
 	
 	if( first_entry ) then
+	
+		p = 2    ! power of exponential decay window
+		
 		locnx = array_size(JDIM,YBLOCK,myid)
 		   ny = array_size(IDIM,YBLOCK,myid)
 		locnz = array_size(KDIM,YBLOCK,myid)
@@ -769,7 +772,7 @@ subroutine smooth_near_boundary(f,x,n,gamma,dir)
 		allocate( fs(nmax) )         ! for sure big enough for all calls
 		fs = 0.d0
 		
-		if( myid==0 .and. myexp(-x(n)/gamma) > 1.e-9 ) then
+		if( myid==0 .and. myexp(-(x(n)/gamma)**p) > 1.e-9 ) then
 			write(0,*) 'WARNING: boundary smoothing extending across processor edges,  dir=',dir
 		endif
 		
@@ -799,7 +802,7 @@ subroutine smooth_near_boundary(f,x,n,gamma,dir)
 		! interior values
 		do i=2,n-1
 			! neighbor weights, 1 at boundary --> 0 in interior
-			w = myexp(-x(i)/gamma) + myexp(-(L-x(i))/gamma)
+			w = myexp(-(x(i)/gamma)**p) + myexp(-((L-x(i))/gamma)**p)
 			fs(i) = ( w*f(i-1) + f(i) + w*f(i+1)) / (2.d0*w + 1.d0)    
 		enddo
 	
@@ -807,14 +810,14 @@ subroutine smooth_near_boundary(f,x,n,gamma,dir)
 		if( x(1) == 0.d0 ) then
 			fs(1) = fs(1)
 		else
-			w = myexp(-x(i)/gamma) 
+			w = myexp(-(x(i)/gamma)**p) 
 			fs(1) = (f(1) + w*f(2)) / (w+1.d0)	
 		endif
 	
 		if( x(n) == L ) then
 			fs(n) = fs(n)
 		else
-			w = myexp(-(L-x(n))/gamma)
+			w = myexp(-((L-x(n))/gamma)**p)
 			fs(n) = (f(n) + w*f(n-1)) / (w+1.d0)
 		endif
 	
