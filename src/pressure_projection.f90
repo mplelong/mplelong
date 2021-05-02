@@ -9,13 +9,13 @@ subroutine pressure_projection
 	use decomposition_params
 	implicit none
 	real(kind=8),allocatable,save    :: x(:),y(:),z(:)   ! local values
-	integer, save                    :: locnx,ny,locnz,npts
+	integer, save                    :: locnx,ny,locnz,npts(3)
 	integer                          :: i,j,k
 	character(len=80)                :: dir
 	logical, save                    :: first_entry=.TRUE., test_flag=.FALSE.
 	
 	if( first_entry) then
-		npts = 4                                ! near-boundary smoothing scale		
+		npts(:) = 4                                ! near-boundary smoothing scale		
 		locnx = array_size(JDIM,YBLOCK,myid)
 		ny    = array_size(IDIM,YBLOCK,myid)
 		locnz = array_size(KDIM,YBLOCK,myid)		

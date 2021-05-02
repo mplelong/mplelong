@@ -190,14 +190,31 @@ subroutine test_transform_xy
 	use decomposition_params
 	use intermediate_variables, only: tmpY
 	use dimensional_scales,     only: length_scale
-	use independent_variables,  only: x,y,Lx,Ly,x_periodic,y_periodic
+	use independent_variables,  only: nx,ny,nz,Lx,Ly,x_periodic,y_periodic
 	use etc
  
 	implicit none     
-	integer                       :: dir,i,j,k
+	integer                       :: dir,i,j,k,locnx,locnz,nmin=32
 	character(len=80)             :: exp_type(2)
 	real(kind=8)                  :: pi,kx,ky,ans,diff,tol=1.e-15
+	real(kind=8), allocatable     :: x(:),y(:)
  
+ 	locnx = array_size(JDIM,YBLOCK,myid)
+	locnz = array_size(KDIM,YBLOCK,myid)
+	
+	if( nx>1 .AND. ny>1 .AND. nz>1 ) then
+		! don't do a 3d test with strict tolerance for small problems
+		if( nx< nmin .OR. ny < nmin .OR. nz < nmin ) return
+	endif
+		
+	!--------------------
+	! local x,y,z vals
+	!--------------------
+	allocate( x(locnx), y(ny) )
+	call get_my_xvals(x,YBLOCK,myid)
+	call get_my_yvals(y,YBLOCK,myid)
+
+
  	!---------------------------------------------------------------
 	!   test the 2d transform of a known function of x and y
 	!---------------------------------------------------------------
@@ -205,16 +222,14 @@ subroutine test_transform_xy
 	kx=1.d0*pi/Lx 
 	ky=1.d0*pi/Ly   
  
-	do k=1,array_size(KDIM,YBLOCK,myid)
-		do i=1,array_size(JDIM,YBLOCK,myid)
-			do j=1,array_size(IDIM,YBLOCK,myid)  
+	do k=1,locnz
+		do i=1,locnx
+			do j=1,ny  
 				tmpY(j,i,k,1) = cos(kx*x(i)) + sin(ky*y(j))     ! in
 			enddo
 		enddo
 	enddo
- 
- 
-	  
+ 	  
 	exp_type(1)='cos'   ! x dir
 	exp_type(2)='cos'   ! y dir
 	if( x_periodic ) exp_type(1)='fourier'
@@ -245,6 +260,7 @@ subroutine test_transform_xy
   		call LogMessage(message,logfile)
  	endif 
  
+ 	deallocate( x,y )
  return
 end subroutine test_transform_xy
 

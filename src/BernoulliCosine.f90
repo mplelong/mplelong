@@ -861,11 +861,94 @@ integer recursive function factorial(m) result (fac)
       fac = m * factorial(m - 1)
     end if
   end function factorial
-  
 
 
+subroutine verify_deriv_BC
+	use mpi_params,                       only: myid
+	use differentiation_params,           only: Q
+	use independent_variables,            only: x,y,z,Lx,Ly,Lz,nx,ny,nz,x_periodic,y_periodic,z_periodic
+	implicit none 
+	real(kind=8), allocatable                :: in(:),out(:)
+	real(kind=8)                             :: pi, tol=1.e-8, diff
+	integer                                  :: j, Qval, dir, nmin=64
+	logical                                  :: debug
+	
+	pi = 4.d0*atan(1.d0)	  
 
+	!----------------------------------------------------
+	! verify BC differentiation
+	!----------------------------------------------------
+	if( .not. x_periodic ) then
+		allocate( in(nx),out(nx) )
+		debug = .FALSE.
+		in=0.d0 ; out=0.d0
+ 		do j=1,nx
+ 			in(j) = sin( pi*x(j)/Lx )   ! even extension has discontinuous derivs at x=0, x=Lx
+ 		enddo
+ 	
+ 		dir = 1
+ 		Qval = Q
+ 		call deriv_BC(in,out,nx,dir,Qval,debug)  ! Bernoulli/Cosine derivative
+ 	
+ 		if(myid==0 .and. nx>nmin) then
+ 			do j=1,nx
+ 				diff = abs(out(j) - (pi/Lx)*cos( pi*x(j)/Lx ))
+ 				!write(0,*) x(j), in(j), out(j), (pi/Lx)*cos( pi*x(j)/Lx )
+ 				if( diff  > tol ) stop ' problem verifying x Bernoulli-cosine differentiation in preliminary_tasks '
+ 			enddo
+ 		endif
+ 		write(0,*) '                         ....................... d/dx using Bernoulli-cosine method looks fine, tol=',tol
+ 		deallocate( in,out )
+ 	endif
+ 	
+ 	if( .not. y_periodic ) then
+		allocate( in(ny),out(ny) )
+		debug = .FALSE.
+		in=0.d0 ; out=0.d0
+ 		do j=1,ny
+ 			in(j) = sin( pi*y(j)/Ly )   ! even extension has discontinuous derivs at y=0, y=Ly
+ 		enddo
+ 	
+ 		dir = 2
+ 		Qval = Q
+ 		call deriv_BC(in,out,ny,dir,Qval,debug)  ! Bernoulli/Cosine derivative
+ 	
+ 		if(myid==0 .and. ny>nmin) then
+ 			do j=1,ny
+ 				diff = abs(out(j) - (pi/Ly)*cos( pi*y(j)/Ly ))
+ 				!write(0,*) y(j), in(j), out(j), (pi/Ly)*cos( pi*y(j)/Ly )
+ 				if( abs(diff) > tol ) stop ' problem verifying y Bernoulli-cosine differentiation in preliminary_tasks '
+ 			enddo
+ 		endif
+ 		write(0,*) '                         ....................... d/dy using Bernoulli-cosine method looks fine, tol=',tol
+ 		deallocate( in,out )
+ 	endif
+ 	
+ 	if( .not. z_periodic ) then
+ 		allocate( in(nz),out(nz) )
+ 		debug = .TRUE.
+		in=0.d0 ; out=0.d0
+ 		do j=1,nz
+ 			in(j) = sin( pi*z(j)/Lz )   ! even extension has discontinuous derivs at z=0, z=Lz
+ 		enddo
+ 	
+ 		dir = 3
+ 		Qval = Q
+ 		call deriv_BC(in,out,nz,dir,Qval,debug)  ! Bernoulli/Cosine derivative
+ 	
+ 		if(myid==0 .and. nz>nmin) then
+ 			do j=1,nz
+ 				diff = abs(out(j) - (pi/Lz)*cos( pi*z(j)/Lz ))
+ 				!write(0,*) z(j), in(j), out(j), (pi/Lz)*cos( pi*z(j)/Lz ), diff
+ 				if( diff > tol ) stop ' problem verifying z Bernoulli-cosine differentiation in preliminary_tasks '
+ 			enddo
+ 		endif
+ 		write(0,*) '                         ....................... d/dz using Bernoulli-cosine method looks fine, tol=',tol
+ 		deallocate( in,out )
+ 	endif 
 
+ return
+end subroutine verify_deriv_BC
 
 
 

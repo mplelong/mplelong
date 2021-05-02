@@ -57,8 +57,42 @@ subroutine apply_bcs
 	endif
 	
 	
+	!--------------------------------------------------------
+	! below here is just testing output 
+	!--------------------------------------------------------
+	if( istep > istart ) return
+	
+	if( istep==istart .and. tnp1 == 0.d0 ) then   ! initial, immediate test applying BCs to ICS
+	
+		if(myid==0) then
+ 			open(1,file='output/debug_data/check_NS_bdry_scheme')
+ 				do j=1,ny
+ 					write(1,*) y(j),u(j,1,1),v(j,1,1),w(j,1,1),s1(j,1,1)
+ 				enddo	
+ 			close(1)
+ 		endif
+ 		
+ 		if( z(1)==0.d0 ) then
+ 			open(1,file='output/debug_data/check_B_bdry_scheme')			
+ 				do k=1,locnz
+ 					write(1,*) z(k),u(1,1,k),v(1,1,k),w(1,1,k),s1(1,1,k)
+ 				enddo
+ 			close(1)
+ 		endif
+ 		
+ 		if( z(locnz)==Lz ) then	 		
+ 			open(1,file='output/debug_data/check_T_bdry_scheme')
+ 				do k=1,locnz
+ 					write(1,*) z(k),u(1,1,k),v(1,1,k),w(1,1,k),s1(1,1,k)
+ 				enddo
+ 			close(1)
+ 		endif 
+ 		
+ 	endif
+ 	
 			
-	if( istep==istart .and. tnp1 > 0.d0) then	
+	if( istep==istart .and. tnp1 > 0.d0) then	! test at end of first step
+	
 		if(myid==0) then
 			i=1 ; k=locnz/2
  			open(1,file='output/debug_data/final_u_of_y')
@@ -82,7 +116,8 @@ subroutine apply_bcs
  					write(1,*) z(k),u(j,i,k),v(j,i,k),w(j,i,k),s1(j,i,k)
  				enddo
  			close(1)
- 		endif 		 		
+ 		endif 	
+ 			 		
 	endif
 			
  return

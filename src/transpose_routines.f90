@@ -762,3 +762,32 @@ subroutine zblock_2_yblock_1d(in,out)
 
  return
 end subroutine zblock_2_yblock_1d
+
+
+subroutine test_transposes
+	use mpi_params,                 only: myid
+	use intermediate_variables,     only: tmpX,tmpY,tmpZ
+	use etc
+	implicit none
+	
+	if(myid==0) then
+  		message = ' ................  Calling transpose routines with zero arrays to test for hangs ...'
+  		write(0,*) message
+  		call LogMessage(message,logfile)
+  		tmpX =1.d0 ; tmpY=2.d0; tmpZ=3.d0
+ 	endif
+ 	
+ 	call xblock_2_yblock(tmpX,tmpY)
+ 	call yblock_2_xblock(tmpY,tmpX)
+ 	call yblock_2_zblock(tmpY,tmpZ)   
+ 	call zblock_2_yblock(tmpZ,tmpY)
+ 	
+ 	if(myid==0) then
+  		message = ' ................                      X <--> Y and Y <--> Z execute  ... '
+  		write(0,*) message
+  		call LogMessage(message,logfile)
+ 	endif
+	
+ return
+end subroutine test_transposes
+
