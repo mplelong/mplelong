@@ -15,7 +15,9 @@ from data_processing_utilities import parse_problem_params
 #-----------------------------------------------------------------------------------------
 
 root_dir = sys.argv[1]
+print(root_dir)
 tscale = sys.argv[2]
+print(tscale)
 
 if(tscale=='s'):
 	xnorm = 1.

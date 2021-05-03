@@ -8,7 +8,6 @@ echo run.sh now running on lacosta
 #------------------
 # prepare things
 #------------------
-root_dir = /Users/kraig/flow_solve_BC/
 make clean
 make flow.x
 make outdirs
@@ -24,4 +23,7 @@ mpirun -np 4 ./flow.x
 #---------------------------------------------------------
 cd input/data_tools
 python concatenate_results.py
-python python_scripts/plot_cfl.py $root_dir hrs    # plot the time scale in hours
+python python_scripts/plot_cfl.py /Users/kraig/flow_solve_BC/ hrs    # plot the time scale in hours
+
+cd /Users/kraig/flow_solve_BC/
+open -a Preview output/figures/cfl.eps
