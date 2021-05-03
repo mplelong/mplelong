@@ -113,6 +113,7 @@ clean:
 	rm -f runlog FlowSolveConfig 
 	rm -f svn_status fort.* *.tmp a.out *.aux *.log *.synctex.gz *.pdf *.toc
 	rm -f *~
+	rm -f input/data_tools/python_scripts/*.pyc input/data_tools/*.pyc
 	clear
 	@echo " "
 	@echo "---------------- "
