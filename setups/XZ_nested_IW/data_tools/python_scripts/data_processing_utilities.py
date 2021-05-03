@@ -1,3 +1,77 @@
+def parse_problem_params(root_dir):   # e.g. '/Users/kraig/flow_solve_BC/'
+	#---------------------------------------------------------------------------------------
+	# Routine to parse the problem_params file so that the values can be used directly
+	# in python analysis scripts.
+	#---------------------------------------------------------------------------------------
+	import os,math,sys         
+	import numpy as np
+
+	#--------------------------------------------------------------------------- 
+	# root directory 
+	# (below which the input directory containing the problem_params file exists)
+	#---------------------------------------------------------------------------
+	datafile = root_dir + 'input/problem_params'
+	sep = ' '                                       # cut strings at white space
+
+	#---------------------------------------
+	# Open file & read data columns...
+	#---------------------------------------
+	strings = []
+	with open(datafile) as f:
+		for line in f:
+			strings.append(line.split(sep, 1)[0])   # split once at sep, keep first bit
+        	#print(line.split(sep, 1)[0])
+
+	#------------------------------------------------
+	# brute force parsing  
+	#  string.replace("d", "e") exponential notation
+	#  string.replace(".", "")  logical notation
+	#------------------------------------------------
+	p=np.array(range(0,3))
+	T_diff = np.array(np.arange(0,3))
+	runlabel = strings[0]
+	restart_flag = strings[1].replace (".", "")
+	do_second_scalar = strings[2].replace (".", "")
+	AB_order = int(strings[3])
+	p1 = int(strings[4])
+	p2 = int(strings[5])
+	nx = int(strings[6])
+	ny = int(strings[7])
+	nz = int(strings[8])
+	dt = float(strings[9].replace("d", "e"))
+	t0 = float(strings[10].replace("d", "e"))
+	tf = float(strings[11].replace("d", "e"))
+	Lx = float(strings[12].replace("d", "e"))
+	Ly = float(strings[13].replace("d", "e"))
+	Lz = float(strings[14].replace("d", "e"))
+	x_periodic = strings[15].replace (".", "")
+	y_periodic = strings[16].replace (".", "")
+	z_periodic = strings[17].replace (".", "")
+	s1_def = strings[18]
+	s2_def = strings[19]
+	user_forcing_flag = strings[20].replace (".", "")
+	rho0 = float(strings[21].replace("d", "e"))
+	g = float(strings[22].replace("d", "e"))
+	f0 = float(strings[23].replace("d", "e"))
+	nu = float(strings[24].replace("d", "e"))
+	kappa1= float(strings[25].replace("d", "e"))
+	kappa2 = float(strings[26].replace("d", "e"))
+	high_order_flag = strings[27].replace (".", "")
+	p[0] = int(strings[28])
+	p[1] = int(strings[29])
+	p[2] = int(strings[30])
+	T_diff[0] = float(strings[31].replace("d", "e"))
+	T_diff[1] = float(strings[32].replace("d", "e"))
+	T_diff[2] = float(strings[33].replace("d", "e"))
+	#print(dt,T_diff[2],high_order_flag)
+
+	# pack up the results
+	problem_params = [runlabel,restart_flag,do_second_scalar,AB_order,p1,p2,nx,ny,nz,dt,t0,tf,Lx,Ly,Lz, \
+                 	x_periodic,y_periodic,z_periodic,s1_def,s2_def,user_forcing_flag,rho0,g,f0,nu,     \
+                 	kappa1,kappa2,high_order_flag,p,T_diff]
+
+	return problem_params
+
 def prepare_BernoulliCosine(x,Q):
 #-------------------------------------------------------------------------------------------------
 #    construct and factor the matrices required for the Bernoulli expansion coefficients
@@ -113,6 +187,52 @@ def ddx(f,x,frac,Q,LU,basis_functions):
 		dfdx = f_Q_x + f_s_x
 		
 	return dfdx
+
+def vort_z(u,v,x,z,flags,frac,LU_x,LU_y,Q,basis_functions):     #  
+#------------------------------------------------------------------------------
+#  compute the vertical vorticity v_x - u_y  given an XY plane of data
+#  input data arranged as in flow_solve XY planes:  data[y,x]
+#  flags[0:1](x,y directions) have the following meanings
+#      0  direction is periodic
+#     -1  function can be expanded and differentiated term by term as a cosine series
+#     +1  function can be expanded and differentiated term by term as a sine series
+#     otherwise  use optional arguments for Bernoulli-Cosine method
+#------------------------------------------------------------------------------
+	import os,sys
+	import numpy as np        
+	[ny,nx]=u.shape     # input array shape
+	order=1             # first derivatives
+	u_y = np.zeros_like(u)
+	v_x = np.zeros_like(v)
+	 
+#----------------------------------
+#   do the y derivatives first
+#----------------------------------
+	flag = flags[1]
+	if( flag == 0 or np.abs(flag) == 1 ):                     # fourier, cos or sine
+		Ly = y[-1]-y[0]  
+		for i in range(nx):
+			u_y[:,i] = dst_filtered(u[:,i],order,Ly,flag,frac)
+	else:														# Bernoiulli Cosine
+		[x_basis_functions,y_basis_functions] = basis_functions         
+		for i in range(nx):
+			u_y[:,i] = ddx(u[:,i],y,frac,Q,LU_y,y_basis_functions)
+	
+#----------------------------------
+#   do the x derivatives next
+#----------------------------------
+	flag = flags[0]
+	if( flag == 0 or np.abs(flag) == 1 ):                     # fourier, cos or sine
+		Lx = x[-1]-x[0]  
+		for j in range(ny):
+			v_x[j,:] = dst_filtered(v[j,:],order,Lx,flag,frac)
+	else:                                                       # Bernoiulli Cosine
+		[x_basis_functions,y_basis_functions] = basis_functions
+		for j in range(ny):
+			v_x[j,:] = ddx(v[j,:],x,frac,Q,LU_x,x_basis_functions)
+	
+	ans = v_x - u_y
+	return ans
 
 
 def grad_2d(f,x,z,frac,LU_x,LU_z,Q,basis_functions):
