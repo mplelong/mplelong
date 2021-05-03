@@ -2,19 +2,19 @@ BC_XZ_test           ! runlabel
 .FALSE.              ! Restart flag. Read initial conditions from saved netcdf files?
 .FALSE.              ! Compute evolution a second scalar field?
 4                    ! Order of explicit Adams-Bashforth time stepping, must be <= 4
-1                    ! MPI decomposition parameter p1, splits (nx)   
-1                    ! MPI decomposition parameter p2, splits (ny,nz)  p1*p2=numprocs=np
-513                  ! nx    split by (p1)
-1                    ! ny    split by (p1,p2)   
-257                  ! nz    split by (p2)     
+2                    ! MPI decomposition parameter p1, splits (nx)   
+2                    ! MPI decomposition parameter p2, splits (ny,nz)  p1*p2=numprocs=np
+129                  ! nx    split by (p1)
+32                   ! ny    split by (p1,p2)   
+129                  ! nz    split by (p2)     
 47.95215d0           ! dt       (s)    
 0.d0                 ! t_start  (s)    
 49103.d0             ! t_end    (s)     49103.d0 = 1 wave period  ~ 1024 steps
 30000.d0             ! Lx       (m)     30 km = 1/5 of 150 km 
-1.d0                 ! Ly       (m)       
+30000.d0             ! Ly       (m)       
 600.d0               ! Lz       (m)     1/5 of 3000 m
 .FALSE.              ! x coordinate periodic?
-.FALSE.              ! y coordinate periodic?
+.TRUE.               ! y coordinate periodic?
 .FALSE.              ! z coordinate periodic?
 r                    ! defn of scalar s1 ( t = temp in deg C, r = Boussinesq density, i.e. rho )
 p                    ! defn of scalar s2 ( p =  passive tracer )
@@ -35,13 +35,19 @@ p                    ! defn of scalar s2 ( p =  passive tracer )
 ----------------------------------------------------------------------------------------------------
 you can keep notes below here...
 ----------------------------------------------------------------------------------------------------
+
+Diffusion:
 p=1 and the given diffusion times at Nyquist correspond to Laplacian diffusion 
 with nu=kappa=1.e-4 m2/s nx=513,nz=257 Lx=30km Lz=600m
 i.e. results should be (and are) identical using the high_order_operator logic & code
-
 keeping the same diffusion times, I get good solutions for p=1,2,3,4,5 (didn't try higher orders)
 
+3D:
+2d problem (ky=0) with 257x33x129:  solns look fine for at least 150 steps, but slow (p1=p2=1)
+2d problem (ky=0) with 129x33x129:  solns look fine for at least 650 steps
+2d problem (ky=0) with 129x33x129:  p1=1,p2=2   all good for 1 period integration, much faster as expected
 
+p1>1 with p2=1 is not configured, primary decomposition is in y & z via p2 with additional available via p1
 
 
 
