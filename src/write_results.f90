@@ -85,7 +85,6 @@ subroutine init_netcdf(fid)
 		npts = maxval((/nx,ny,nz/))
 		allocate( scratch(npts)  )
 		scratch = 0.d0
-		variable_key(6,fid)=1         ! output div_u*
 		first_entry=.FALSE.
 	endif
  
