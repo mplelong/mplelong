@@ -62,3 +62,10 @@ TO SWITCH BETWEEN XY XZ AND YZ CONFIGURATIONS:
 	(1) change nx,ny,nz and periodicity flags here
 	(2) make corresponding changes in io_params
 	(3) change orientation flag in user_params_module.f90
+	
+
+Ignore s1 for these tests: in the plane of the vorticity s1 is advected but has no
+counterbalancing pressure gradient, thus it evolves. It behaves differently when the 
+transverse direction has (erroneous) BCs applied or when the BCs are periodic. The real
+test is on the velocity fields. Showing that these are good in all 3 orientations is
+pretty solid evidence of the inertia terms, the diffusion terms and the pressure projection.
