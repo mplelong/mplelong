@@ -21,21 +21,27 @@ and sync up befor returning control to this script.
 #---------------------------------------------------------------------------------------
 import os,math,sys         
 import numpy as np
-#---------------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------
+# path to python3 w/o relying on usr path
+#------------------------------------------------------------------------
+PYTHON="/usr/local/bin/python3"
+
 
 #--------------------------------------------------------------------------- 
 # root directory 
 # (below which the output directory containing the saved data files exists)
 #---------------------------------------------------------------------------
 root_dir = sys.argv[1]
+root_dir = root_dir + '/'
 
 #--------------------------------------
 # script control params
 #--------------------------------------
-do_XY=True ; delete_XY=True
-do_XZ=True ; delete_XZ=True
-do_YZ=True ; delete_YZ=True
-do_XYZ=True ; delete_XYZ=True
+do_XY=True  ; delete_XY=False
+do_XZ=True  ; delete_XZ=False
+do_YZ=True  ; delete_YZ=False
+do_XYZ=True ; delete_XYZ=False
 
 print("---------------------------------------------------------------------------------")
 print (" Running concatenate_results.py XY, XZ, YZ, XYZ: ",do_XY,do_XZ,do_YZ,do_XYZ) 
@@ -66,8 +72,9 @@ if( do_XZ ):
 	inc = 1                                 # time slice increment
 	numprocs = 4                            # number of processors to be used by concat_XZ_mpi.py	
 	
-	cmd_base = 'mpirun -np ' + str(numprocs) + ' python python_scripts/concat_XZ_mpi.py '
+	cmd_base = 'mpirun -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_XZ_mpi.py '
 	command = cmd_base + root_dir + ' ' + str(p1) + ' ' + str(p2) + ' ' + str(start_slice) + ' ' + str(end_slice) + ' ' + str(inc) + ' ' + fnrs
+	print(command)
 	os.system(command)
 	if( delete_XZ ):
 		command = 'rm -f ' + root_dir + 'output/2D/' + fnrs + '_*.nc'
@@ -92,7 +99,7 @@ if( do_YZ ):
 	iproc = 1                               # iproc for the YZ plane (depends on x value of YZ plane saved)
 	numprocs = 4                            # number of processors to be used by concat_YZ_mpi.py	
 	
-	cmd_base = 'mpirun -np ' + str(numprocs) + ' python python_scripts/concat_YZ_mpi.py '
+	cmd_base = 'mpirun -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_YZ_mpi.py '
 	command = cmd_base + root_dir + ' ' + str(p1) + ' ' + str(p2) + ' ' + str(start_slice) + ' ' +  str(end_slice) + ' ' + str(inc) + ' ' + str(iproc) + ' ' + fnrs
 	os.system(command)
 	if( delete_XY ):
@@ -100,6 +107,7 @@ if( do_YZ ):
 		os.system(command)
 	command = 'ls -lh ' + root_dir + 'output/slices/2D/' + fnrs + '* > paths/concatenated_' + fnrs + '_files'
 	os.system(command)
+
 
 
 #---------------------------------------------------- 
@@ -118,7 +126,7 @@ if( do_XY ):
 	jproc = 1                               # jproc for the XY plane (depends on z level of XY plane saved)
 	numprocs = 4                            # number of processors to be used by concat_XY_mpi.py	
 	
-	cmd_base = 'mpirun -np ' + str(numprocs) + ' python python_scripts/concat_XY_mpi.py '
+	cmd_base = 'mpirun -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_XY_mpi.py '
 	command = cmd_base + root_dir + ' ' + str(p1) + ' ' + str(p2) + ' ' + str(start_slice) + ' ' + str(end_slice) + ' ' + str(inc) + ' ' + str(iproc) + ' ' + fnrs
 	os.system(command)
 	if( delete_XY ):
@@ -139,7 +147,7 @@ if( do_XYZ ):
 	inc = 200                               # time slice increment
 	numprocs = 5                            # number of processors to be used by concat_YZ_mpi.py	
 	
-	cmd_base = 'mpirun -np ' + str(numprocs) + ' python python_scripts/concat_XYZ_mpi.py '
+	cmd_base = 'mpirun -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_XYZ_mpi.py '
 	command = cmd_base + root_dir + ' ' + str(p1) + ' ' + str(p2) + ' ' + str(start_slice) + ' ' + str(end_slice) + ' ' + str(inc) + ' ' + fnrs
 	os.system(command)
 	if( delete_XYZ ):

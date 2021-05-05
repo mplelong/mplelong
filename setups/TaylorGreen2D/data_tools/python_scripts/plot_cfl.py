@@ -15,9 +15,8 @@ from data_processing_utilities import parse_problem_params
 #-----------------------------------------------------------------------------------------
 
 root_dir = sys.argv[1]
-print(root_dir)
+root_dir = root_dir + '/'
 tscale = sys.argv[2]
-print(tscale)
 
 if(tscale=='s' or tscale=='secs'):
 	xnorm = 1.
@@ -38,7 +37,7 @@ kappa1,kappa2,high_order_flag,p,T_diff] = problem_params
 
 data_file = root_dir + 'output/cfl.dat'     # t, cfl_x, cfl_y, cfl_z
 plot_dir  = root_dir + 'output/figures/'
-plot_file = plot_dir + 'cfl.eps'
+plot_file = plot_dir + 'cfl.png'
 
 if not os.path.exists(plot_dir):
 	cmd = 'mkdir -p ' + plot_dir
