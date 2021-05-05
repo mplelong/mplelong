@@ -273,7 +273,8 @@ subroutine z_diffusion(f,ans,nz,id)
  	real(kind=8),save              :: xnorm
  	integer,save                   :: kk=1  ! transform full data array, i.e. start at position 1
  	integer(kind=8),save           :: plans(2)
- 	integer                        :: k,kz_nyq,fid
+ 	integer                        :: k,fid
+ 	integer, save                  :: kz_nyq
  	real(kind=8)                   :: zz
  	real(kind=8), external         :: myexp
  	logical,save                   :: first_entry=.TRUE.
