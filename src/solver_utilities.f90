@@ -165,7 +165,7 @@ subroutine divergence(u,v,w,div)
  	real(kind=8), intent(out)     :: div( array_size(IDIM,YBLOCK,myid),   &
                                           array_size(JDIM,YBLOCK,myid),   &
                                           array_size(KDIM,YBLOCK,myid)  ) 
-
+                                          
  	!----------------------------------------
  	!    div <--- dv/dy
  	!----------------------------------------
@@ -177,7 +177,7 @@ subroutine divergence(u,v,w,div)
  	
 	call ddy( v, div, order, Qval )                        ! ==> dv/dy in YBLOCK format
 	
- 
+	
  	!----------------------------------------
  	!    div <--- dv/dy + dw/dz
  	!----------------------------------------
@@ -193,7 +193,7 @@ subroutine divergence(u,v,w,div)
   	
   	div(:,:,:) = div(:,:,:) + tmpY(:,:,:,6)
  	
- 
+ 	
  	!----------------------------------------
  	!    div <--- dv/dy + dw/dz + dudx
  	!----------------------------------------
