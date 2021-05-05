@@ -133,7 +133,7 @@ subroutine extrapolate_from_boundaries
 	use decomposition_params
 	use boundary_data
 	use dependent_variables,   only: u,v,w,s1,s2
-	use independent_variables, only: Lx,Ly,Lz
+	use independent_variables, only: Lx,Ly,Lz,x_periodic,y_periodic,z_periodic
 	use methods_params,        only: do_second_scalar
 	
 	implicit none
@@ -165,7 +165,7 @@ subroutine extrapolate_from_boundaries
 	
 	
 	! fix BLs near east and west boundaries x=0 and x=Lx
-	if( locnx > 1 ) then
+	if( locnx > 1 .and. .NOT. x_periodic  ) then
 		if( x(1)==0.d0 ) then     ! east bdry
 			do k=1,locnz
 				do j=1,ny
@@ -194,7 +194,7 @@ subroutine extrapolate_from_boundaries
 				enddo
 			enddo			
 		endif
-		if( x(locnx)==Lx ) then   ! west bdry
+		if( x(locnx)==Lx .and. .NOT. x_periodic  ) then   ! west bdry
 			do k=1,locnz
 				do j=1,ny
 					id = 1  ! u
@@ -224,7 +224,7 @@ subroutine extrapolate_from_boundaries
 	endif
 	
 	! fix BLs near south and north boundaries y=0 and y=Ly
-	if( ny > 1 ) then
+	if( ny > 1  .and. .NOT. y_periodic ) then
 		do k=1,locnz
 			do i=1,locnx
 				id = 1  ! u
@@ -277,7 +277,7 @@ subroutine extrapolate_from_boundaries
 	endif
 	
 	! fix BLs near bottom and top boundaries
-	if( locnz > 1 ) then
+	if( locnz > 1  .and. .NOT. z_periodic ) then
 		if( z(1)==0.d0 ) then     ! bottom bdry
 			do i=1,locnx
 				do j=1,ny
@@ -306,7 +306,7 @@ subroutine extrapolate_from_boundaries
 			enddo			
 		endif
 		
-		if( z(locnz)==Lz ) then   ! top bdry
+		if( z(locnz)==Lz  .and. .NOT. z_periodic ) then   ! top bdry
 			do i=1,locnx
 				do j=1,ny
 					id = 1  ! u
@@ -758,6 +758,7 @@ subroutine smooth_near_boundary(f,x,n,gamma,dir)
 	real(kind=8)                        :: L,w,gamma
 	real(kind=8), external              :: myexp
 	integer, save                       :: locnx,ny,locnz,p
+	logical                             :: periodic
 	logical, save                       :: first_entry=.TRUE.
 	
 	if( first_entry ) then
@@ -772,12 +773,9 @@ subroutine smooth_near_boundary(f,x,n,gamma,dir)
 		allocate( fs(nmax) )         ! for sure big enough for all calls
 		fs = 0.d0
 		
-		if( myid==0 .and. myexp(-(x(n)/gamma)**p) > 1.e-9 ) then
-			write(0,*) 'WARNING: boundary smoothing extending across processor edges,  dir=',dir
-		endif
-		
 		first_entry=.FALSE.
 	endif
+			
 	
 	if( n==1 ) return   ! don't smooth collapsed dimensions
 	
