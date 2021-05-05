@@ -144,7 +144,7 @@ cleansrcdir:
 	cp -f Make.inc src
 	cd src;  make clean
 	cp -f Make.inc src/p3dfft
-	cd src/p3dfft;  make clean
+	cd src/p3dfft;  make clean ; rm -f Make.inc
 	
 show:
 	@echo
