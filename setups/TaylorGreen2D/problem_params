@@ -1,0 +1,64 @@
+TG_YZ_test           ! runlabel  
+.FALSE.              ! Restart flag. Read initial conditions from saved netcdf files?
+.FALSE.              ! Compute evolution a second scalar field?
+4                    ! Order of explicit Adams-Bashforth time stepping, must be <= 4
+2                    ! MPI decomposition parameter p1, splits (nx)   
+2                    ! MPI decomposition parameter p2, splits (ny,nz)  p1*p2=numprocs=np
+17                   ! nx    split by (p1)
+128                  ! ny    split by (p1,p2)   
+128                  ! nz    split by (p2)     
+0.001d0              ! dt       (s)    
+0.d0                 ! t_start  (s)    
+1.d0                 ! t_end    (s)     1001 steps
+1.d0                 ! Lx       (m)      
+1.d0                 ! Ly       (m)       
+1.d0                 ! Lz       (m)     
+.FALSE.              ! x coordinate periodic?
+.TRUE.               ! y coordinate periodic?
+.TRUE.               ! z coordinate periodic?
+p                    ! defn of scalar s1 ( t = temp in deg C, r = Boussinesq density, i.e. rho )
+p                    ! defn of scalar s2 ( p =  passive tracer )
+.FALSE.              ! Call user forcing routine?         
+1027.d0              ! rho_0  constant reference density  (kg/m3)
+9.81d0               ! g  gravity                         (m/s2)
+0.d-4                ! f0 Coriolis parameter at Lx/2 Ly/2 (1/s)
+1.d-2                ! nu     viscosity                   (m2/s)  
+1.d-2                ! kappa  diffusivity for s1          (m2/s)
+1.d-2                ! kappa  diffusivity for s2          (m2/s)
+.FALSE.              ! high_order_operators,  Use high order diffusion operators? 
+99                   ! half order of high order diffusion operators, x direction    (only read and used if TRUE)
+99                   ! half order of high order diffusion operators, y direction    (only read and used if TRUE)
+99                   ! half order of high order diffusion operators, z direction    (only read and used if TRUE)
+9999999.d0           ! diffusive time scale at x nyquist wavenumber (s)  (only read and used if TRUE)
+9999999.d0           ! diffusive time scale at y nyquist wavenumber (s)  (only read and used if TRUE)
+9999999.d0           ! diffusive time scale at z nyquist wavenumber (s)  (only read and used if TRUE)
+----------------------------------------------------------------------------------------------------
+you can keep notes below here...
+----------------------------------------------------------------------------------------------------
+2d Taylor Green vortex solutions: in the plane of the vorticity
+	(a) inertial balances the pressure gradient
+	(b) time dependence balances the diffusion of momentum
+	==> exact decaying solutions. Passing these tests in all three orientations validates
+	all aspects of the code except for the buoyancy and rotation terms
+
+------------------------------------------------------------------------
+I:  treat the plane that the vortices live in as periodic
+------------------------------------------------------------------------
+
+XY orientation: 128x128x(16/17)  computed solns match exact solutions to at least 8 digits (all I printed)
+	(1) Let the subdomain match the periodic domain (L=1 in all 3 dimensions) and use periodic BCs in all 3 directions
+	(2) Same problem but z treated as nonperiodic w/ nz=17   (slower but expected as several O(n) steps > n log n for small n)
+	(3) p1=p2=2 decomposition... exact agreement and input/data_tools/concatenate_results.py glues things together
+
+YZ orientation 17x128x128
+	(1) nonperiodic in x, p1=p2=2  computed solns match exact solutions to at least 8 digits (all I printed)
+	
+XZ orientation 128x17x128
+	(1) nonperiodic in y, p1=p2=2  computed solns match exact solutions to at least 8 digits (all I printed) 
+
+
+
+TO SWITCH BETWEEN XY XZ AND YZ CONFIGURATIONS:
+	(1) change nx,ny,nz and periodicity flags here
+	(2) make corresponding changes in io_params
+	(3) change orientation flag in user_params_module.f90
