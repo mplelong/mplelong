@@ -5,6 +5,9 @@
 #-------------------------------------------------------------------------
 echo run.sh now running on lacosta
 
+# absolute pathname, able to deal w/ symlinks etc
+flow_solve_root="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
 #------------------
 # prepare things
 #------------------
@@ -23,8 +26,8 @@ mpirun -np 4 ./flow.x
 # 2nd arg for plot_cfl.py is s or hrs or days
 #---------------------------------------------------------
 cd input/data_tools
-python concatenate_results.py
-python python_scripts/plot_cfl.py /Users/kraig/flow_solve_BC/ s    # plot the time scale seconds
+python concatenate_results.py "$flow_solve_root/"
+python python_scripts/plot_cfl.py "$flow_solve_root/"  s    # plot the time scale seconds
 
-cd /Users/kraig/flow_solve_BC/
+cd "$flow_solve_root"
 open -a Preview output/figures/cfl.eps
