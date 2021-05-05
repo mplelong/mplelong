@@ -4,7 +4,7 @@ subroutine pressure_projection
 !------------------------------------------------------------
 	use mpi_params,               only: myid
 	use intermediate_variables,   only: div_u,phi,ustar,vstar,wstar
-	use independent_variables,    only: Lx,Ly,Lz
+	use independent_variables,    only: Lx,Ly,Lz,x_periodic,y_periodic,z_periodic
 	use etc,                      only: istep,istart 
 	use decomposition_params
 	implicit none
@@ -43,7 +43,6 @@ subroutine pressure_projection
 	
 	dir='xy'
 	call boundary_smooth(div_u,dir,npts)     ! this helps with w at east and west boundaries
-	
 	
 	if( istep==istart ) then
 	
@@ -537,17 +536,17 @@ subroutine poisson_solver(test_flag)
 		!  TEST THE 1D SOLVER ENGINE
 		!------------------------------------------------------------
 		!  solve phi'' = rhs  ; phi'=0 at z=0,Lz
-		!   phi = cos(pi*z/Lz)  phi_zz = -(pi/Lz)^2 cos(pi*z/Lz)
+		!   phi = cos(2.*pi*z/Lz)  phi_zz = -(2.*pi/Lz)^2 cos(pi*z/Lz)
 		!   to do this test, call routine with kx=ky=kval=0.d0
 		!-------------------------------------------------------------------------
 			pi = 4.d0*atan(1.d0)
 			do k=1,nz
-				rhs(k) = -(pi/Lz)**2 * cos( pi*zg(k)/Lz )
+				rhs(k) = -(2.*pi/Lz)**2 * cos( 2.*pi*zg(k)/Lz )
 			enddo
 			kval=0.d0
 			call cos_z_solver_phi(ans,rhs,nz,kval,kval)
 			do k=1,nz
-				exact = cos( pi*zg(k)/Lz )
+				exact = cos( 2.*pi*zg(k)/Lz )
 				diff = abs(exact-ans(k))
 				!write(0,*) ans(k),exact
 				if( diff .gt. tol ) stop 'problem in cos_z_solver test problem'
@@ -657,7 +656,7 @@ subroutine test_poisson_solver
 !          grad^2 phi = -(k^2+l^2+m^2)*cos(kx)*cos(ly)*cos(mz)
 !-------------------------------------------------------------------------
 	use mpi_params,              only: myid,comm,ierr
-	use independent_variables,   only: Lx,Ly,Lz,dt
+	use independent_variables,   only: Lx,Ly,Lz,dt,x_periodic,y_periodic,z_periodic
 	use intermediate_variables,  only: tmpY,div_u,phi
 	use decomposition_params
 	use etc
@@ -684,6 +683,9 @@ subroutine test_poisson_solver
 		kk = 6.d0 * pi/Lx
 		ll = 0.d0 * pi/Ly
 		mm = 1.d0 * pi/Lz
+		
+		! make sure test is periodic if problem is periodic
+		if( z_periodic ) mm = 2.d0 * pi/Lz
 				
 		first_entry = .FALSE.
 	endif
@@ -739,7 +741,8 @@ subroutine cos_z_solver_phi(phi,f,nz,kx,ky)
 !               z in [0,L]  global length nz     !
 !                                                !
 !------------------------------------------------!
-	use differentiation_params, only: kz,kzfilter,cos_plan  ! cos_plan(3) in x,y,z dirs
+	use differentiation_params, only: kz,kzfilter,cos_plan,fourier_plan
+	use independent_variables,  only: z_periodic
 	implicit none
 	integer, intent(in)            :: nz
 	real(kind=8)                   :: phi(nz),f(nz),kx,ky
@@ -754,10 +757,19 @@ subroutine cos_z_solver_phi(phi,f,nz,kx,ky)
 	if( first_entry ) then
 		allocate( wrk(nz) )
 		wrk(:) = 0.d0
-		plans(1:2) = cos_plan(3)
-		xnorm = 1.d0/(2.d0*(nz-1.d0))
-		kz_nyq = nz             ! location of nyquist wavenumber
-		kk=1                    ! transform full data array, i.e. start at position 1		
+		if( z_periodic ) then
+			plans(1:2) = fourier_plan(3,1:2)
+			xnorm = 1.d0/nz
+			kz_nyq = nz/2 + 1             ! location of nyquist wavenumber
+			kk=1                          ! fourier never trims endpts
+		else
+			plans(1:2) = cos_plan(3)
+			xnorm = 1.d0/(2.d0*(nz-1.d0))
+			kz_nyq = nz                   ! location of nyquist wavenumber
+			kk=1                          ! don't trim endpts, cos expansion
+		endif
+		
+				
 		first_entry=.FALSE.
 	endif
 	
