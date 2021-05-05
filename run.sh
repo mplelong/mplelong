@@ -1,1 +1,1 @@
-machine_dependent_files/run.sh_lacosta
+input/run.sh
