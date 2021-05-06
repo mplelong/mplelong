@@ -11,7 +11,7 @@ VENDOR=gcc
 #        heron
 #
 #--------------------------------------------------------------------
-MPI_ROOT = 
+MPI_ROOT = /usr/lib64/openmpi
 NETCDF_ROOT = /usr
 FFTW3_ROOT = /usr
 
@@ -23,8 +23,8 @@ BASE=${PWD}
 #--------------------------------------------------------------------
 #    Compiler wrappers for MPI
 #--------------------------------------------------------------------
-F77 = mpif77
-F90 = mpif90
+F77 = ${MPI_ROOT}/bin/mpif77
+F90 = ${MPI_ROOT}/bin/mpif90
 FLINKER = ${F90}
 
 #--------------------------------------------------------------------
@@ -34,18 +34,18 @@ FLINKER = ${F90}
 
 ifeq ($(VENDOR), gcc_debug)
 	LDFLAGS =
-	FOPTFLAGS   = -g -O3 -cpp -ffree-form -ffree-line-length-none -fallow-argument-mismatch -fbounds-check -ffpe-trap=zero,overflow,underflow -fbacktrace
-	F77OPTFLAGS = -g -O3 -cpp -ffixed-form -ffixed-line-length-none -fallow-argument-mismatch -fbounds-check -ffpe-trap=zero,overflow,underflow -fbacktrace
+	FOPTFLAGS   = -g -O3 -cpp -ffree-form -ffree-line-length-none -fbounds-check -ffpe-trap=zero,overflow,underflow -fbacktrace
+	F77OPTFLAGS = -g -O3 -cpp -ffixed-form -ffixed-line-length-none -fbounds-check -ffpe-trap=zero,overflow,underflow -fbacktrace
 	BLAS_LIB =  /usr/lib64/libblas.a
 	LAPACK_LIB = /usr/lib64/liblapack.a
 endif
 
 ifeq ($(VENDOR), gcc)
 	LDFLAGS =
-	FOPTFLAGS   = -g -O3 -cpp -ffree-form -ffree-line-length-none -fallow-argument-mismatch 
-	F77OPTFLAGS = -g -O3 -cpp -ffixed-form -ffixed-line-length-none -fallow-argument-mismatch 
-	BLAS_LIB =  /usr/lib64/libblas.a
-	LAPACK_LIB = /usr/lib64/liblapack.a
+	FOPTFLAGS   = -g -O3 -cpp -ffree-form -ffree-line-length-none  
+	F77OPTFLAGS = -g -O3 -cpp -ffixed-form -ffixed-line-length-none  
+	BLAS_LIB =  /usr/lib64/libopenblas.a
+	LAPACK_LIB =  
 endif
 
 
