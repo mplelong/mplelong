@@ -21,19 +21,7 @@ and sync up befor returning control to this script.
 #---------------------------------------------------------------------------------------
 import os,math,sys         
 import numpy as np
-
-#------------------------------------------------------------------------
-# path to python3 w/o relying on usr path
-#------------------------------------------------------------------------
-PYTHON="/usr/local/bin/python3"
-
-
-#--------------------------------------------------------------------------- 
-# root directory 
-# (below which the output directory containing the saved data files exists)
-#---------------------------------------------------------------------------
-root_dir = sys.argv[1]
-root_dir = root_dir + '/'
+from python_scripts.data_processing_utilities import parse_problem_params
 
 #--------------------------------------
 # script control params
@@ -43,18 +31,40 @@ do_XZ=True  ; delete_XZ=False
 do_YZ=True  ; delete_YZ=False
 do_XYZ=True ; delete_XYZ=False
 
+
+
+#--------------------------------------------------------------------------- 
+# flow_solve root directory 
+# (below which the output directory containing the saved data files exists)
+#---------------------------------------------------------------------------
+root_dir = sys.argv[1]
+#  add / for convenience
+root_dir = root_dir + '/'
+
+#------------------------------------------------------------------------
+# path to python w/ mpi4py and corresponding mpirun
+#------------------------------------------------------------------------
+PYTHON="$PYTHON"    # get env variable
+MPIRUN="$MPIRUN"    # get env variable
+
+
+
+#--------------------------------------------------------------------------- 
+# get the processor decomposition used by flow_solve p1,p2 
+#---------------------------------------------------------------------------
+params = parse_problem_params(root_dir)  
+
+[runlabel,restart_flag,do_second_scalar,AB_order,p1,p2,nx,ny,nz,dt,t0,tf,Lx,Ly,Lz, \
+x_periodic,y_periodic,z_periodic,s1_def,s2_def,user_forcing_flag,rho0,g,f0,nu,     \
+kappa1,kappa2,high_order_flag,p,T_diff] = params
+
+
+
 print("---------------------------------------------------------------------------------")
 print (" Running concatenate_results.py XY, XZ, YZ, XYZ: ",do_XY,do_XZ,do_YZ,do_XYZ) 
 print (" ...  delete distributed files  XY, XZ, YZ, XYZ: ",delete_XY,delete_XZ,delete_YZ,delete_XYZ)
 print("---------------------------------------------------------------------------------")
 
-
-#--------------------------------------------- 
-# processor decomposition used by flow_solve
-# when writing the output files
-#---------------------------------------------
-p1=2
-p2=2
 
 
 #------------------------------------------------------------------------------ 
@@ -72,9 +82,8 @@ if( do_XZ ):
 	inc = 1                                 # time slice increment
 	numprocs = 4                            # number of processors to be used by concat_XZ_mpi.py	
 	
-	cmd_base = 'mpirun -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_XZ_mpi.py '
+	cmd_base = MPIRUN + ' -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_XZ_mpi.py '
 	command = cmd_base + root_dir + ' ' + str(p1) + ' ' + str(p2) + ' ' + str(start_slice) + ' ' + str(end_slice) + ' ' + str(inc) + ' ' + fnrs
-	print(command)
 	os.system(command)
 	if( delete_XZ ):
 		command = 'rm -f ' + root_dir + 'output/2D/' + fnrs + '_*.nc'
@@ -99,7 +108,7 @@ if( do_YZ ):
 	iproc = 1                               # iproc for the YZ plane (depends on x value of YZ plane saved)
 	numprocs = 4                            # number of processors to be used by concat_YZ_mpi.py	
 	
-	cmd_base = 'mpirun -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_YZ_mpi.py '
+	cmd_base = MPIRUN + ' -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_YZ_mpi.py '
 	command = cmd_base + root_dir + ' ' + str(p1) + ' ' + str(p2) + ' ' + str(start_slice) + ' ' +  str(end_slice) + ' ' + str(inc) + ' ' + str(iproc) + ' ' + fnrs
 	os.system(command)
 	if( delete_XY ):
@@ -126,7 +135,7 @@ if( do_XY ):
 	jproc = 1                               # jproc for the XY plane (depends on z level of XY plane saved)
 	numprocs = 4                            # number of processors to be used by concat_XY_mpi.py	
 	
-	cmd_base = 'mpirun -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_XY_mpi.py '
+	cmd_base = MPIRUN + ' -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_XY_mpi.py '
 	command = cmd_base + root_dir + ' ' + str(p1) + ' ' + str(p2) + ' ' + str(start_slice) + ' ' + str(end_slice) + ' ' + str(inc) + ' ' + str(iproc) + ' ' + fnrs
 	os.system(command)
 	if( delete_XY ):
@@ -147,7 +156,7 @@ if( do_XYZ ):
 	inc = 200                               # time slice increment
 	numprocs = 5                            # number of processors to be used by concat_YZ_mpi.py	
 	
-	cmd_base = 'mpirun -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_XYZ_mpi.py '
+	cmd_base = MPIRUN + ' -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_XYZ_mpi.py '
 	command = cmd_base + root_dir + ' ' + str(p1) + ' ' + str(p2) + ' ' + str(start_slice) + ' ' + str(end_slice) + ' ' + str(inc) + ' ' + fnrs
 	os.system(command)
 	if( delete_XYZ ):
