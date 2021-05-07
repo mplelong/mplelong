@@ -12,7 +12,8 @@ def fourier_wavenumbers(dk,N):
 #-----------------------------------------------------------------------------------------
 	import numpy as np
 	if N%2 == 0:     
-		k = dk * np.array(range(N/2+1) + range(-N/2+1,0,1))
+		k = dk * np.array([*range(int(N/2+1)),*range(int(-N/2+1),0,1)]) # Python 3
+		#k = dk * np.array(range(N/2+1) + range(-N/2+1,0,1))   # Python 2
 	else:
 		print("fourier_wavenumbers:  N must be even  ",N )
 		exit()
@@ -143,7 +144,8 @@ def dst_filtered(f,n,L,flag,frac):
 		if(frac>0.): 
 			filter = fourier_filter(k,frac)
 			FHAT = FHAT*filter
-		df = ifft(FHAT)[0:M/2+1].real  # nth derivative in [0,L] as real-valued array
+		#df = ifft(FHAT)[0:M/2+1].real  # nth derivative in [0,L] as real-valued array  #Python 2
+		df = ifft(FHAT)[0:int(M/2+1)].real  # nth derivative in [0,L] as real-valued array   #Python 3
 		
 	if( np.abs(flag) > 1 ):
 		print("dst problem, called with illegal flag value  ",flag)
