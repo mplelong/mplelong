@@ -1,0 +1,41 @@
+Tri-periodic_test    ! runlabel  
+.FALSE.              ! Restart flag. Read initial conditions from saved netcdf files?
+.FALSE.              ! Compute evolution a second scalar field?
+4                    ! Order of explicit Adams-Bashforth time stepping, must be <= 4
+2                    ! MPI decomposition parameter p1, splits (nx)   
+2                    ! MPI decomposition parameter p2, splits (ny,nz)  p1*p2=numprocs=np
+64                   ! nx    split by (p1)
+64                   ! ny    split by (p1,p2)   
+64                   ! nz    split by (p2)     
+0.001d0              ! dt       (s)    
+0.d0                 ! t_start  (s)    
+1.d0                 ! t_end    (s)     1001 steps
+1.d0                 ! Lx       (m)      
+1.d0                 ! Ly       (m)       
+1.d0                 ! Lz       (m)     
+.TRUE.               ! x coordinate periodic?
+.TRUE.               ! y coordinate periodic?
+.TRUE.               ! z coordinate periodic?
+p                    ! defn of scalar s1 ( t = temp in deg C, r = Boussinesq density, i.e. rho )
+p                    ! defn of scalar s2 ( p =  passive tracer )
+.FALSE.              ! Call user forcing routine?         
+1027.d0              ! rho_0  constant reference density  (kg/m3)
+9.81d0               ! g  gravity                         (m/s2)
+0.d-4                ! f0 Coriolis parameter at Lx/2 Ly/2 (1/s)
+1.d-3                ! nu     viscosity                   (m2/s)  
+1.d-3                ! kappa  diffusivity for s1          (m2/s)
+1.d-3                ! kappa  diffusivity for s2          (m2/s)
+.FALSE.              ! high_order_operators,  Use high order diffusion operators? 
+99                   ! half order of high order diffusion operators, x direction    (only read and used if TRUE)
+99                   ! half order of high order diffusion operators, y direction    (only read and used if TRUE)
+99                   ! half order of high order diffusion operators, z direction    (only read and used if TRUE)
+9999999.d0           ! diffusive time scale at x nyquist wavenumber (s)  (only read and used if TRUE)
+9999999.d0           ! diffusive time scale at y nyquist wavenumber (s)  (only read and used if TRUE)
+9999999.d0           ! diffusive time scale at z nyquist wavenumber (s)  (only read and used if TRUE)
+----------------------------------------------------------------------------------------------------
+you can keep notes below here...
+----------------------------------------------------------------------------------------------------
+Test an exact tri-periodic soln from 
+	Antuono, M. (2020). 
+	Tri-periodic fully three-dimensional analytic solutions for the Navier–Stokes equations. 
+	Journal of Fluid Mechanics, 890, A23. doi:10.1017/jfm.2020.126
