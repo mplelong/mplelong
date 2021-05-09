@@ -1,21 +1,21 @@
-TG_YZ_test           ! runlabel  
+TG_XY_FSRL_test      ! runlabel  
 .FALSE.              ! Restart flag. Read initial conditions from saved netcdf files?
 .FALSE.              ! Compute evolution a second scalar field?
 4                    ! Order of explicit Adams-Bashforth time stepping, must be <= 4
 2                    ! MPI decomposition parameter p1, splits (nx)   
 2                    ! MPI decomposition parameter p2, splits (ny,nz)  p1*p2=numprocs=np
-17                   ! nx    split by (p1)
+128                  ! nx    split by (p1)
 128                  ! ny    split by (p1,p2)   
-128                  ! nz    split by (p2)     
+17                   ! nz    split by (p2)     
 0.001d0              ! dt       (s)    
 0.d0                 ! t_start  (s)    
 1.d0                 ! t_end    (s)     1001 steps
 1.d0                 ! Lx       (m)      
 1.d0                 ! Ly       (m)       
 1.d0                 ! Lz       (m)     
-.FALSE.              ! x coordinate periodic?
+.TRUE.               ! x coordinate periodic?
 .TRUE.               ! y coordinate periodic?
-.TRUE.               ! z coordinate periodic?
+.FALSE.              ! z coordinate periodic?
 p                    ! defn of scalar s1 ( t = temp in deg C, r = Boussinesq density, i.e. rho )
 p                    ! defn of scalar s2 ( p =  passive tracer )
 .FALSE.              ! Call user forcing routine?         

@@ -15,7 +15,7 @@ module user_params
 	
 	real(kind=8), parameter          :: L = 1.d0            !! [m]
 	real(kind=8), parameter          :: vortex_mode = 1     !! [1] dimensionless, isotropic mode
-	character(len=80), parameter     :: orientation = 'YZ'  !! 'XY', 'XZ' or 'YZ' 
+	character(len=80), parameter     :: orientation = 'XY'  !! 'XY', 'XZ' or 'YZ' 
 	
 	
 	!-------------------------------------------------------------------------------------
@@ -47,6 +47,7 @@ contains
 	subroutine change_default_values
 		use differentiation_params,   only: Q, filter_fraction
 		use io_params,                only: variable_key
+		use independent_variables,    only: FS_XY_PERIODIC
 		implicit none
 		!--------------------------------------------------------------------------------------------
 		!  For example, can set values different than defaults for Bernoulli/Cosine differentiation
@@ -59,6 +60,8 @@ contains
 		
 		variable_key(6,:)=1                  ! for debugging, output div_u*
 		variable_key(9:11,:) = 1             ! for debugging, output ustar,vstar and wstar
+		
+		FS_XY_PERIODIC=.TRUE.                ! FS rigid lids, XY periodic BCs
 		
 	end subroutine change_default_values
 

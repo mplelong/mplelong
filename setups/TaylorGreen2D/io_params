@@ -3,13 +3,13 @@ XZ           !!===>  rootname for this file-set, 2D XZ plane
 append       !!===>  append w/ each write or create new file
 20           !!===>  steps between writes     (20 ==> 51 frames over 1000 steps)
 1            !!===>  istart
-16           !!===>  iend
+128          !!===>  iend
 1            !!===>  i inc
 65           !!===>  jstart
 65           !!===>  jend
 1            !!===>  j inc
 1            !!===>  kstart
-128          !!===>  kend 
+17           !!===>  kend 
 1            !!===>  k inc
 1            !!===>  write u  (don't write if 0, write if 1)
 1            !!===>  write v
@@ -19,14 +19,14 @@ append       !!===>  append w/ each write or create new file
 YZ           !!===>  rootname for this file-set, 2D YZ plane
 append       !!===>  append w/ each write or create new file
 20           !!===>  steps between writes     (20 ==> 51 frames over 1000 steps)
-9            !!===>  istart
-9            !!===>  iend
+65           !!===>  istart
+65           !!===>  iend
 1            !!===>  i inc
 1            !!===>  jstart
 128          !!===>  jend
 1            !!===>  j inc
 1            !!===>  kstart
-128          !!===>  kend 
+17           !!===>  kend 
 1            !!===>  k inc
 1            !!===>  write u  (don't write if 0, write if 1)
 1            !!===>  write v
@@ -37,13 +37,13 @@ XY           !!===>  rootname for this file-set, 2D XY plane
 append       !!===>  append w/ each write or create new file
 20           !!===>  steps between writes     (20 ==> 51 frames over 1000 steps)
 1            !!===>  istart
-16           !!===>  iend
+128          !!===>  iend
 1            !!===>  i inc
 1            !!===>  jstart
 128          !!===>  jend
 1            !!===>  j inc
-65           !!===>  kstart
-65           !!===>  kend 
+9            !!===>  kstart
+9            !!===>  kend 
 1            !!===>  k inc
 1            !!===>  write u  (don't write if 0, write if 1)
 1            !!===>  write v
@@ -54,13 +54,13 @@ XYZ          !!===>  rootname for this file-set, 3D XYZ volume
 new          !!===>  append w/ each write or create new file
 200          !!===>  steps between writes    200 ==> 5 in 1000 steps (including the initial fields)
 1            !!===>  istart
-16           !!===>  iend
+128          !!===>  iend
 1            !!===>  i inc
 1            !!===>  jstart
 128          !!===>  jend
 1            !!===>  j inc
 1            !!===>  kstart
-128          !!===>  kend 
+17           !!===>  kend 
 1            !!===>  k inc
 1            !!===>  write u  (don't write if 0, write if 1)
 1            !!===>  write v
