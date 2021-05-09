@@ -48,7 +48,7 @@ subroutine ddx(f,df,order,fid)
 	!--------------------------------------------------------------------------
 	! loop through 2nd & 3rd array indices, perform stride 1
 	! global differentiation operation, with data local to myid
-	!--------------------------------------------------------------------------  
+	!-------------------------------------------------------------------------- 
  	do k=1,array_size(KDIM,XBLOCK,myid)  
   		do j=1,array_size(JDIM,XBLOCK,myid)   		
   			call deriv_BC(f(1,j,k),df(1,j,k),nx,dir,method,debug)  ! Bernoulli/Cosine derivative
@@ -239,7 +239,7 @@ subroutine test_divergence
 !  preliminary tasks.
 !---------------------------------------------------------------
 	use mpi_params,              only: myid,comm,ierr
-	use independent_variables,   only: Lx,Ly,Lz,nx,nz
+	use independent_variables,   only: Lx,Ly,Lz,nx,nz,x_periodic,y_periodic,z_periodic
 	use intermediate_variables,  only: tmpY,tmpZ
 	use decomposition_params
 	use etc
@@ -256,6 +256,11 @@ subroutine test_divergence
 	if( nx>1 .AND. ny>1 .AND. nz>1 ) then
 		! don't do a 3d test with strict tolerance for small problems
 		if( nx< nmin .OR. ny < nmin .OR. nz < nmin ) return
+	endif
+	if( x_periodic .or. y_periodic .or. z_periodic ) then
+		! don't do non-periodic analytical test
+		if(myid==0) write(0,*)'...    Skipping non-periodic test of divergence routine '
+		return
 	endif
 		
 	!--------------------
@@ -297,8 +302,8 @@ subroutine test_divergence
 			do j=1,ny
 				ans = 2.d0*( x(i)/Lx**2 + y(j)/Ly**2 + z(k)/Lz**2 ) - kval*sin(kval*y(j))
 				diff = ans - tmpY(j,i,k,4)
-				!if(i==1 .and. j==1) write(0,*) z(k)/Lz, ans, tmpY(j,i,k,4), diff				
-				if( abs( diff ) > tol ) stop '    test of divergence routine failed '
+				if(myid==0 .and. i==1 .and. j==1) write(0,*) k, z(k)/Lz, ans, tmpY(j,i,k,4), diff				
+				!if( abs( diff ) > tol ) stop '    test of divergence routine failed '
 			enddo
 		enddo
 	enddo
@@ -377,7 +382,7 @@ subroutine test_gradient
 	!  preliminary tasks.
 	!---------------------------------------------------------------
 	use mpi_params,              only: myid,comm,ierr
-	use independent_variables,   only: Lx,Ly,Lz,nx,nz
+	use independent_variables,   only: Lx,Ly,Lz,nx,nz,x_periodic,y_periodic,z_periodic
 	use intermediate_variables,  only: tmpY,tmpX,tmpZ
 	use decomposition_params
 	use etc
@@ -408,6 +413,12 @@ subroutine test_gradient
 	if( nx>1 .AND. ny>1 .AND. nz>1 ) then
 		! don't do a 3d test with strict tolerance for small problems
 		if( nx< nmin .OR. ny < nmin .OR. nz < nmin ) return
+	endif
+	
+	if( x_periodic .or. y_periodic .or. z_periodic ) then
+		! don't do non-periodic analytical test
+		if(myid==0) write(0,*)'...    Skipping non-periodic test of gradient routine '
+		return
 	endif
 	
 	!--------------------------------------------------------------------
@@ -516,7 +527,7 @@ subroutine test_mudotgradf
 !  preliminary tasks.
 !---------------------------------------------------------------
 	use mpi_params,              only: myid,comm,ierr
-	use independent_variables,   only: Lx,Ly,Lz,nx,nz
+	use independent_variables,   only: Lx,Ly,Lz,nx,nz,x_periodic,y_periodic,z_periodic
 	use intermediate_variables,  only: tmpY
 	use decomposition_params
 	use differentiation_params,  only: Q
@@ -545,6 +556,12 @@ subroutine test_mudotgradf
 	if( nx>1 .AND. ny>1 .AND. nz>1 ) then
 		! don't do a 3d test with strict tolerance for small problems
 		if( nx< nmin .OR. ny < nmin .OR. nz < nmin ) return
+	endif
+	
+	if( x_periodic .or. y_periodic .or. z_periodic ) then
+		! don't do non-periodic analytical test
+		if(myid==0) write(0,*)'...    Skipping non-periodic test of mudotgradf routine '
+		return
 	endif
 	
 	!----------------------------------------------------------------------
