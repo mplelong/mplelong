@@ -585,6 +585,9 @@ SUBROUTINE differentiate_fcs(f,df,n,dir,method,order)
 	if( method=='cos') then
 		plans(1) = cos_plan(dir)
 		plans(2) = sin_plan(dir)
+	elseif( method=='sin') then
+		plans(1) = sin_plan(dir)
+		plans(2) = cos_plan(dir)
 	elseif( method=='fourier' ) then
 		plans(1) = fourier_plan(dir,1)
 		plans(2) = fourier_plan(dir,2)
