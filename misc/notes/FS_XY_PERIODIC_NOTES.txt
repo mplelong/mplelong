@@ -1,0 +1,83 @@
+FS_XY_PERIODIC
+
+FS_XY_PERIODIC is a logical variable, FALSE by default, in independent_variables
+z_FSRL         is a logical variable, FALSE by default, in independent_variables
+s1_z_BC 	   is a character variable with values HOMOGENEOUS_DIRICHLET  or HOMOGENEOUS_NEUMANN
+
+user sets the flag FS_XY_PERIODIC=.TRUE. in change_default_values in user_params.f90
+could also change s1_z_BC to HOMOGENEOUS_DIRICHLET
+
+in preliminary_tasks, after user_ics, check for FS_XY_PERIODIC
+	if true set x_periodic, y_periodic and z_FS all to TRUE
+
+set the orientation to XY and set up for 128x128x17 
+
+--------------------------------------------------------
+u and v are cos in z with Q=0
+w is sin in z  assume/require s1 = b = sin in z
+--------------------------------------------------------
+
+(1) diffusion 
+	no changes needed, regardless of polarity, all fields have cos series expansions
+	that are fine provided they are not term by term differentiated
+	diffusion just reduces the high wavenumber components, no problems staying
+	with cosine expansions.
+
+(2) gradient is a bit trickier   grad phi  is cos in all 3 directions q/ Q=0
+	grad u, grad v ok  but grad w would need to know what field
+	
+	(a) who calls gradient?
+		| => grep "call gradient" src/*.f90
+		src/pressure_projection.f90:	call gradient(phi,tmpY(1,1,1,1),tmpY(1,1,1,2),tmpY(1,1,1,3),Q0)         (project)
+		src/solver_utilities.f90:	call gradient(tmpY(1,1,1,4),tmpY(1,1,1,1),tmpY(1,1,1,2),tmpY(1,1,1,3),Q)    (test_gradient)
+		src/solver_utilities.f90: 	call gradient(f,tmpY(1,1,1,1),tmpY(1,1,1,2),tmpY(1,1,1,3),Q)                (udotgradf)
+		
+		remove this routine
+		src/solver_utilities.f90:	call gradient(f,tmpY(1,1,1,1),tmpY(1,1,1,2),tmpY(1,1,1,3),Q)                (divgradf)
+
+	so gradient needs a field id too and to do something different if id=w and special BC flag
+	
+		gradient gets fid, simply passes it to ddx,ddy,ddz
+		ddx,ddy,ddz decide cos/sin/fourier and pass method to deriv_BC
+		deriv_BC accepts method and doesn't decide on its own
+		divergence and gradient are the only callers of ddx,ddy,ddz
+		
+	(b)	who calls divergence
+		src/pressure_projection.f90:	call divergence(ustar,vstar,wstar,div_u)                               (pressure_projection)
+		src/solver_utilities.f90:	call divergence(tmpY(1,1,1,1),tmpY(1,1,1,2),tmpY(1,1,1,3),tmpY(1,1,1,4))   (test_divergence)
+		
+		get rid of this routine
+		src/solver_utilities.f90:	call divergence(tmpY(1,1,1,1),tmpY(1,1,1,2),tmpY(1,1,1,3),g2f)             (divgradf)
+
+(4) explicit_rhs   taper buoyancy force at top and bottom if s1_z_BC NOT HOMOGENEOUS_DIRICHLET
+	if( z_FSRL and s1_z_BC=='HOMOGENEOUS_NEUMANN' ) then
+
+(5) pressure projection
+	treat w* as sin expanded field
+	don't add psi_w as w* and it's next BC val are both zero, provided s1 is sin expanded or buoyancy is tapered
+
+(6) boundary treatment   user vals only needed for scalars, should be either val or deriv
+	homogeneous Dirichlet or Neumann  s1_z_BC = HOMOGENEOUS_DIRICHLET  HOMOGENEOUS_NEUMANN
+	treat s1 as either straight sin or cos expandable field
+	
+	
+	
+	
+	
+so:
+
+	deriv_BC(f,df,n,dir,method,debug)   + method, -Qval
+	ddz(f,df,order,fid)                 + fid -Qval   same w/ ddx,ddy
+	ddx,ddy,ddz get BC flags from modules and using these and fid, determine the method to pass to deriv_BC
+	gradient gets fid instead of Q in arg list, callers pass fid, gradient just passes it to ddx,ddy,ddz
+	udotgradf -> mudotgradf gets variable id for f, passes it to gradient
+	for test fields independent of flow_solve BCs use fid=999, triggers BC method
+	explicit_rhs calls mudotgradf and passes variable id for f
+	
+	divergence should get fids(3) and just pass these to ddx,ddy,ddz
+	callers of divergence need to pass fids (just pressure projection and test divergence)
+	
+	pressure projection: don't add psi_w if z_FSRL
+	boundary_routines  extrapolate_to and from detect z_FSRL and skip boundary treatment if true
+	rhs for w:  If necessary, taper acceleration due to buoyancy near top/bottom   if( z_FSRL .and. s1_z_BC=='HOMOGENEOUS_NEUMANN') then
+	dont boundary smooth in z when z_FSRL
