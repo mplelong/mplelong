@@ -1,4 +1,4 @@
-SUBROUTINE deriv_BC(f,df,n,dir,Qval,debug)
+SUBROUTINE deriv_BC(f,df,n,dir,method,debug)
 !--------------------------------------------------------------------------------------------
 !
 !    differentiate a 1d data array of length n, no symmetries assumed
@@ -21,7 +21,7 @@ SUBROUTINE deriv_BC(f,df,n,dir,Qval,debug)
 !    data needed to carry out the differentiation obtained from modules
 !---------------------------------------------------------------------------------------------
 	use mpi_params,                          only: myid,comm,ierr
-	use independent_variables,               only: x,y,z,nx,ny,nz,Lx,Ly,Lz,x_periodic,y_periodic,z_periodic
+	use independent_variables,               only: x,y,z,nx,ny,nz,Lx,Ly,Lz
 	use differentiation_params,              only: LU_x,ipiv_x,LU_y,ipiv_y,LU_z,ipiv_z, &
 	                                               U_x,dU_x,U_y,dU_y,U_z,dU_z,Q
 	use fourier_differentiation_tools,       only: differentiate_fcs
@@ -29,8 +29,8 @@ SUBROUTINE deriv_BC(f,df,n,dir,Qval,debug)
 	logical, intent(in)                         :: debug
 	real(kind=8), intent(in)                    :: f(n)
 	real(kind=8), intent(inout)                 :: df(n)
-	integer, intent(in)                         :: n,dir,Qval
-	character(len=80)                           :: method='cos'
+	integer, intent(in)                         :: n,dir
+	character(len=80)                           :: method,BCmethod
 	integer, parameter                          :: order=1
 	real(kind=8)                                :: x0,L  
 	integer                                     :: j,K,nmax
@@ -54,28 +54,27 @@ SUBROUTINE deriv_BC(f,df,n,dir,Qval,debug)
 		first_entry=.FALSE.
 	endif
 	
-	if( myid==0 .and. Qval .ne. 0 .and. Qval .ne. Q ) stop ' Qval has to be either zero or Q in deriv_BC '	
 		
 	if( n==1 ) then
 		df=0.d0
 		return
 	endif
 	
-	method = 'cos'       ! always cos unless coordinate is periodic
-	
-	if( QVAL==0 ) then
-		if(dir==1 .and. x_periodic) method='fourier'
-		if(dir==2 .and. y_periodic) method='fourier'
-		if(dir==3 .and. z_periodic) method='fourier'
+	!-----------------------------------------------------------
+	!  straight Fourier method, 'fourier', 'cos' or 'sin'
+	!-----------------------------------------------------------	
+	if( method=='fourier' .or. method=='cos' .or. method=='sin' ) then
 		call differentiate_fcs(f,df,n,dir,method,order)
 		return	
 	endif
 	
 	if( dir==3 .and. debug .and. myid==0 ) then
-		write(0,*) '                                    debug ON for deriv_BC dir, n, Qval: ',dir,n,Qval
+		write(0,*) '                                    debug ON for deriv_BC dir, n: ',dir,n
 	endif
 	
-	
+	!-----------------------------------------------------------
+	!  for Bernoulli-Cosine, get stuff for correct dir
+	!-----------------------------------------------------------
 	tmp(1:n,:) = 0.d0
 	if(dir==1) then
 		L=Lx
@@ -172,6 +171,7 @@ SUBROUTINE deriv_BC(f,df,n,dir,Qval,debug)
 	!  use standard cosine transform to differentiate f_Q
 	!  store result in tmp(:,3) use tmp(:,4) as work space
 	!---------------------------------------------------------------
+	BCmethod='cos'
 	call differentiate_fcs(tmp(1,1),tmp(1,3),n,dir,method,order)
 	
 	
@@ -870,7 +870,8 @@ subroutine verify_deriv_BC
 	implicit none 
 	real(kind=8), allocatable                :: in(:),out(:)
 	real(kind=8)                             :: pi, tol=1.e-8, diff
-	integer                                  :: j, Qval, dir, nmin=64
+	integer                                  :: j, dir, nmin=64
+	character(len=80), parameter             :: method='BC'
 	logical                                  :: debug
 	
 	pi = 4.d0*atan(1.d0)	  
@@ -887,8 +888,7 @@ subroutine verify_deriv_BC
  		enddo
  	
  		dir = 1
- 		Qval = Q
- 		call deriv_BC(in,out,nx,dir,Qval,debug)  ! Bernoulli/Cosine derivative
+ 		call deriv_BC(in,out,nx,dir,method,debug)  ! Bernoulli/Cosine derivative
  	
  		if(myid==0 .and. nx>nmin) then
  			do j=1,nx
@@ -910,8 +910,7 @@ subroutine verify_deriv_BC
  		enddo
  	
  		dir = 2
- 		Qval = Q
- 		call deriv_BC(in,out,ny,dir,Qval,debug)  ! Bernoulli/Cosine derivative
+ 		call deriv_BC(in,out,ny,dir,method,debug)  ! Bernoulli/Cosine derivative
  	
  		if(myid==0 .and. ny>nmin) then
  			do j=1,ny
@@ -933,8 +932,7 @@ subroutine verify_deriv_BC
  		enddo
  	
  		dir = 3
- 		Qval = Q
- 		call deriv_BC(in,out,nz,dir,Qval,debug)  ! Bernoulli/Cosine derivative
+ 		call deriv_BC(in,out,nz,dir,method,debug)  ! Bernoulli/Cosine derivative
  	
  		if(myid==0 .and. nz>nmin) then
  			do j=1,nz
