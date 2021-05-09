@@ -55,6 +55,9 @@
 		logical                         :: x_periodic
 		logical                         :: y_periodic
 		logical                         :: z_periodic
+		logical                         :: FS_XY_PERIODIC = .FALSE.
+		logical                         :: z_FSRL = .FALSE.
+		character(len=80)               :: s1_z_BC = 'HOMOGENEOUS_NEUMANN' ! HOMOGENEOUS_DIRICHLET  
 	contains
 		subroutine initialize_coord(x,nx,Lx,periodic)
 			use mpi_params, only: myid
