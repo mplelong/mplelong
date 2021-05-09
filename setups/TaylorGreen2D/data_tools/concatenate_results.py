@@ -31,6 +31,13 @@ do_XZ=True  ; delete_XZ=False
 do_YZ=True  ; delete_YZ=False
 do_XYZ=True ; delete_XYZ=False
 
+#------------------------------------------
+# make a directory to store file locations
+#------------------------------------------
+if not os.path.exists('paths'):
+	cmd = 'mkdir paths'
+	os.system(cmd)
+
 
 
 #--------------------------------------------------------------------------- 
