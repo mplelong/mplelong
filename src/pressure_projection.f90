@@ -9,7 +9,7 @@ subroutine pressure_projection
 	use decomposition_params
 	implicit none
 	real(kind=8),allocatable,save    :: x(:),y(:),z(:)   ! local values
-	integer, save                    :: locnx,ny,locnz,npts(3)
+	integer, save                    :: locnx,ny,locnz,npts(3),fids(3)
 	integer                          :: i,j,k
 	character(len=80)                :: dir
 	logical, save                    :: first_entry=.TRUE., test_flag=.FALSE.
@@ -25,7 +25,10 @@ subroutine pressure_projection
 		allocate( x(locnx), y(ny), z(locnz) )
 		call get_my_xvals(x,YBLOCK,myid)
 		call get_my_yvals(y,YBLOCK,myid)
-		call get_my_zvals(z,YBLOCK,myid)		
+		call get_my_zvals(z,YBLOCK,myid)
+		
+		fids(:) = (/1,2,3/)    ! treat like u,v,w when computing divergence
+						
 		first_entry = .FALSE.
 	endif
 	
@@ -39,7 +42,7 @@ subroutine pressure_projection
 	!-------------------------------------------------------------
 	! Compute divergence (u*), uses tmpY(:,:,:,6) for work space.
 	!-------------------------------------------------------------
-	call divergence(ustar,vstar,wstar,div_u)
+	call divergence(ustar,vstar,wstar,div_u,fids)
 	
 	dir='xy'
 	call boundary_smooth(div_u,dir,npts)     ! this helps with w at east and west boundaries
@@ -104,7 +107,7 @@ subroutine project
 	use etc,                             only: istep,istart
 	use decomposition_params
 	implicit none 
-	integer,parameter                            :: Q0=0
+	integer,parameter                            :: fid=6
 	integer                                      :: i, j, k
 	integer, save                                :: locnx, ny, locnz
 	real(kind=8),allocatable,dimension(:),save   :: x, y, z   ! local portions
@@ -127,9 +130,9 @@ subroutine project
 	!--------------------------------------------------------------
 	! Compute grad phi...by design phi satisfies homogeneous
 	! Neumann conditions so term by term differentiation of
-	! it's cos series is ok. Use Q=0 to suppress Bernoulli scheme.
+	! it's cos series is ok. Indicate phi with fid=6.
 	!-------------------------------------------------------------- 
-	call gradient(phi,tmpY(1,1,1,1),tmpY(1,1,1,2),tmpY(1,1,1,3),Q0)
+	call gradient(phi,tmpY(1,1,1,1),tmpY(1,1,1,2),tmpY(1,1,1,3),fid)
  
 	!------------------------------------------------------------
 	! update the velocity components
@@ -204,7 +207,7 @@ subroutine update_ustar
 	use mpi_params,                           only: myid
 	use decomposition_params
 	use dependent_variables,                  only: u,v,w,s1,s2
-	use independent_variables,                only: Lx,Ly,Lz,x_periodic,y_periodic,z_periodic
+	use independent_variables,                only: Lx,Ly,Lz,x_periodic,y_periodic,z_periodic,z_FSRL
 	use intermediate_variables,               only: ustar,vstar,wstar,tmpY
 	use boundary_data
 	use etc,                                  only: istep,istart
@@ -325,7 +328,7 @@ subroutine update_ustar
 	! construct an array that matches the required Dirichlet bcs at bottom/top
 	!------------------------------------------------------------------------------
 	id = 3  ! w
-	if( locnz > 1 .and. .NOT. z_periodic ) then
+	if( locnz > 1 .and. .NOT. z_periodic .and. .NOT. z_FSRL) then
 		tmpY(:,:,:,6) = 0.d0
 		if( z(1) == 0. ) then     ! myid owns bottom boundary, update psi_w
 			do i=1,locnx
@@ -432,7 +435,7 @@ subroutine update_ustar
 	!--------------------------------------------------------------------------------
 	if( locnx > 1 .and. .NOT. x_periodic ) ustar(:,:,:) = ustar(:,:,:) + tmpY(:,:,:,4)
 	if( ny    > 1 .and. .NOT. y_periodic ) vstar(:,:,:) = vstar(:,:,:) + tmpY(:,:,:,5)
-	if( locnz > 1 .and. .NOT. z_periodic ) wstar(:,:,:) = wstar(:,:,:) + tmpY(:,:,:,6)
+	if( locnz > 1 .and. .NOT. z_periodic .and. .NOT. z_FSRL) wstar(:,:,:) = wstar(:,:,:) + tmpY(:,:,:,6)
 	
 	
 	if( istep==istart ) then
