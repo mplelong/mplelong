@@ -667,7 +667,7 @@ subroutine boundary_smooth(f,dir,npts)
 !------------------------------------------------------------------------
 	use mpi_params,                  only: myid
 	use decomposition_params
-	use independent_variables,       only: x,y,z,x_periodic,y_periodic,z_periodic
+	use independent_variables,       only: x,y,z,x_periodic,y_periodic,z_periodic,z_FSRL
 	implicit none
 	integer, intent(in)                 :: npts(3)  ! x,y,z dirs respectively
 	real(kind=8), intent(inout)         :: f(array_size(IDIM,YBLOCK,myid),     &
@@ -722,7 +722,7 @@ subroutine boundary_smooth(f,dir,npts)
 		endif
 	endif
 	
-	if( locnz > 1 .and. .NOT. z_periodic ) then
+	if( locnz > 1 .and. .NOT. z_periodic .and. .NOT. z_FSRL) then
 		if( dir=='z' .or. dir=='xz' .or. dir=='yz' .or. dir=='xyz' ) then
 			idir='z'
 			do i=1,locnx
