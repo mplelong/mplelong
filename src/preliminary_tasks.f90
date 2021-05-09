@@ -94,6 +94,17 @@ subroutine preliminary_tasks
 	call InitialConditions
 	
 	!-----------------------------------------------
+	! user may have called "change_default_values"
+	! check for FS rigid lid xy periodic
+	!-----------------------------------------------
+	if( FS_XY_PERIODIC ) then
+		x_periodic = .TRUE.
+		y_periodic = .TRUE.
+		z_periodic = .FALSE.
+		z_FSRL = .TRUE.
+	endif
+	
+	!-----------------------------------------------
 	! call user routine to prescribe the ambient
 	! scalar profiles s1_bar(z) and s2_bar(z)
 	!-----------------------------------------------	
@@ -174,7 +185,7 @@ subroutine preliminary_tasks
 	!-------------------------------------------
 	call test_divergence
 	call test_gradient  
-	call test_udotgradf
+	call test_mudotgradf
  	call test_transform_xy
  	call test_poisson_solver
  	call test_z_diffusion
