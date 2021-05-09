@@ -29,8 +29,7 @@ subroutine rhs_u
 	! nonlinear term...
 	!  udotgradf computes grad f and leaves f_x,f_y,f_z in tmpY(:,:,:,1-3)
 	!------------------------------------------------------------------------
-	call udotgradf( u, v, w, u, explicit_rhs(1,1,1,id,MM0) )
-	explicit_rhs(:,:,:,id,MM0) = -explicit_rhs(:,:,:,id,MM0)     ! - uvec dot grad u
+	call mudotgradf( u, v, w, u, explicit_rhs(1,1,1,id,MM0), id ) ! - uvec dot grad u
 	
 	!-----------------
 	! rotation...
@@ -55,8 +54,7 @@ subroutine rhs_v
 	! nonlinear term...
 	!  udotgradf computes grad f and leaves results in tmpY(:,:,:,1-3)
 	!-------------------------------------------------------------------
-	call udotgradf( u, v, w, v, explicit_rhs(1,1,1,id,MM0) )
-	explicit_rhs(:,:,:,id,MM0) = -explicit_rhs(:,:,:,id,MM0)     ! - uvec dot grad v
+	call mudotgradf( u, v, w, v, explicit_rhs(1,1,1,id,MM0), id ) ! - uvec dot grad v
 
 	!-----------------
 	! rotation...
@@ -73,21 +71,51 @@ subroutine rhs_w
 	use dimensional_scales,              only: rho0,g
 	use intermediate_variables,          only: explicit_rhs
 	use etc,                             only: MM0
+	use independent_variables,           only: Lz,z_FSRL,s1_z_BC
+	use decomposition_params
 	implicit none
 	integer,parameter                       :: id=3
+	integer                                 :: k
+	integer, save                           :: locnz
+	real(kind=8)                            :: dz,gamma
+	real(kind=8), allocatable               :: z(:)
+	real(kind=8), allocatable, save         :: z_taper(:)
+	real(kind=8), external                  :: myexp
+	logical, save                           :: first_entry=.TRUE.
+		
+	if( first_entry ) then					
+		if( z_FSRL .and. s1_z_BC=='HOMOGENEOUS_NEUMANN') then
+			locnz = array_size(KDIM,YBLOCK,myid)
+			allocate( z(locnz), z_taper(locnz) )
+			call get_my_zvals(z,YBLOCK,myid)
+			dz = z(2)-z(1)
+			gamma = 2.*dz
+			do k=1,locnz
+				z_taper(k) = 1.d0 - myexp(-((z(k)-0.d0)/gamma)**2) - myexp(-((z(k)-Lz)/gamma)**2)
+			enddo
+			deallocate(z)
+		endif		
+		first_entry=.FALSE.
+	endif
 	
 	!-------------------------------------------------------------------
 	! nonlinear term...
 	!  udotgradf computes grad f and leaves results in tmpY(:,:,:,1-3)
 	!-------------------------------------------------------------------
-	call udotgradf( u, v, w, w, explicit_rhs(1,1,1,id,MM0) )
-	explicit_rhs(:,:,:,id,MM0) = -explicit_rhs(:,:,:,id,MM0)     ! - uvec dot grad w
+	call mudotgradf( u, v, w, w, explicit_rhs(1,1,1,id,MM0), id ) ! - uvec dot grad w
 
 	!-----------------
 	! buoyancy...
 	!-----------------
 	if( scalar_kind(1) =='r' ) then
 	 explicit_rhs(:,:,:,id,MM0) = explicit_rhs(:,:,:,id,MM0) - (g/rho0)*s1(:,:,:)    
+	endif
+	
+	! If necessary, taper acceleration due to buoyancy near top/bottom
+	if( z_FSRL .and. s1_z_BC=='HOMOGENEOUS_NEUMANN') then 
+		do k=1,locnz
+			explicit_rhs(:,:,k,id,MM0) = explicit_rhs(:,:,k,id,MM0)*z_taper(k)
+		enddo  
 	endif
 end subroutine rhs_w
 
@@ -116,8 +144,7 @@ subroutine rhs_s1
 	! nonlinear term...
 	!  udotgradf computes grad f and leaves results in tmpY(:,:,:,1-3)
 	!-------------------------------------------------------------------
-	call udotgradf( u, v, w, s1, explicit_rhs(1,1,1,id,MM0) )
-	explicit_rhs(:,:,:,id,MM0) = -explicit_rhs(:,:,:,id,MM0)     ! - uvec dot grad s1
+	call mudotgradf( u, v, w, s1, explicit_rhs(1,1,1,id,MM0), id ) ! - uvec dot grad s1
 
 	!-----------------
 	! ambient profile
@@ -154,8 +181,7 @@ subroutine rhs_s2
 	! nonlinear term...
 	!  udotgradf computes grad f and leaves results in tmpY(:,:,:,1-3)
 	!-------------------------------------------------------------------
-	call udotgradf( u, v, w, s2, explicit_rhs(1,1,1,id,MM0) )
-	explicit_rhs(:,:,:,id,MM0) = -explicit_rhs(:,:,:,id,MM0)     ! - uvec dot grad s2
+	call mudotgradf( u, v, w, s2, explicit_rhs(1,1,1,id,MM0), id ) ! - uvec dot grad s2
 
 	!-----------------
 	! ambient profile
