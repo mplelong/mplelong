@@ -133,7 +133,7 @@ subroutine extrapolate_from_boundaries
 	use decomposition_params
 	use boundary_data
 	use dependent_variables,   only: u,v,w,s1,s2
-	use independent_variables, only: Lx,Ly,Lz,x_periodic,y_periodic,z_periodic
+	use independent_variables, only: Lx,Ly,Lz,x_periodic,y_periodic,z_periodic,z_FSRL
 	use methods_params,        only: do_second_scalar
 	
 	implicit none
@@ -194,7 +194,7 @@ subroutine extrapolate_from_boundaries
 				enddo
 			enddo			
 		endif
-		if( x(locnx)==Lx .and. .NOT. x_periodic  ) then   ! west bdry
+		if( x(locnx)==Lx ) then   ! west bdry
 			do k=1,locnz
 				do j=1,ny
 					id = 1  ! u
@@ -277,7 +277,7 @@ subroutine extrapolate_from_boundaries
 	endif
 	
 	! fix BLs near bottom and top boundaries
-	if( locnz > 1  .and. .NOT. z_periodic ) then
+	if( locnz > 1  .and. .NOT. z_periodic .and. .NOT. z_FSRL ) then
 		if( z(1)==0.d0 ) then     ! bottom bdry
 			do i=1,locnx
 				do j=1,ny
@@ -306,7 +306,7 @@ subroutine extrapolate_from_boundaries
 			enddo			
 		endif
 		
-		if( z(locnz)==Lz  .and. .NOT. z_periodic ) then   ! top bdry
+		if( z(locnz)==Lz ) then   ! top bdry
 			do i=1,locnx
 				do j=1,ny
 					id = 1  ! u
@@ -349,7 +349,7 @@ subroutine extrapolate_to_boundaries
 	use decomposition_params
 	use boundary_data
 	use dependent_variables,   only: u,v,w,s1,s2
-	use independent_variables, only: Lx,Ly,Lz,x_periodic,y_periodic,z_periodic
+	use independent_variables, only: Lx,Ly,Lz,x_periodic,y_periodic,z_periodic,z_FSRL
 	use methods_params,        only: do_second_scalar
 	
 	implicit none
@@ -517,7 +517,7 @@ subroutine extrapolate_to_boundaries
 	endif
 	
 	! fix BLs near bottom and top boundaries
-	if( locnz > 1  .and. .NOT. z_periodic ) then
+	if( locnz > 1  .and. .NOT. z_periodic .and. .NOT. z_FSRL ) then
 		if( z(1)==0.d0 ) then     ! bottom bdry
 			do i=1,locnx
 				do j=1,ny
