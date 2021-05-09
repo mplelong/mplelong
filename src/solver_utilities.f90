@@ -6,12 +6,12 @@
 !
 !-----------------------------------------------------------------------------------------
 
-subroutine ddx(f,df,order,Qval)
+subroutine ddx(f,df,order,fid)
 	!-------------------------------------------------------------------------
 	! assume f and df are decomposed in XBLOCK decomposition
 	!-------------------------------------------------------------------------
 	use mpi_params,             only: myid
- 	use independent_variables,  only: nx
+ 	use independent_variables,  only: nx,FS_XY_PERIODIC,x_periodic
  	use decomposition_params,   only: array_size,IDIM,JDIM,KDIM,XBLOCK 
  	implicit none 
  	integer                        ::  j,k,dir=1
@@ -21,7 +21,8 @@ subroutine ddx(f,df,order,Qval)
 	real(kind=8), intent(inout)    :: df( array_size(IDIM,XBLOCK,myid),    &
                                           array_size(JDIM,XBLOCK,myid),    &
                                           array_size(KDIM,XBLOCK,myid)  )
- 	integer, intent(in)            :: order,Qval
+ 	integer, intent(in)            :: order,fid
+ 	character(len=80)              :: method
  	logical,save                   :: first_entry=.TRUE. , debug=.FALSE.
 	!--------------------------------------------------------------------------
 
@@ -34,6 +35,15 @@ subroutine ddx(f,df,order,Qval)
  		df(:,:,:) = 0.d0
  		return
 	endif
+	
+	if( x_periodic .or. FS_XY_PERIODIC ) then
+		method = 'fourier'     ! Fourier
+	elseif( fid == 6 ) then
+		method = 'cos'         ! pressure, x not periodic 
+	else
+		method = 'BC'          ! Bernoulli-cosine method
+	endif
+	if(fid==999) method = 'BC' ! used for testing
 
 	!--------------------------------------------------------------------------
 	! loop through 2nd & 3rd array indices, perform stride 1
@@ -41,7 +51,7 @@ subroutine ddx(f,df,order,Qval)
 	!--------------------------------------------------------------------------  
  	do k=1,array_size(KDIM,XBLOCK,myid)  
   		do j=1,array_size(JDIM,XBLOCK,myid)   		
-  			call deriv_BC(f(1,j,k),df(1,j,k),nx,dir,Qval,debug)  ! Bernoulli/Cosine derivative
+  			call deriv_BC(f(1,j,k),df(1,j,k),nx,dir,method,debug)  ! Bernoulli/Cosine derivative
   		enddo
  	enddo
  
@@ -49,12 +59,12 @@ subroutine ddx(f,df,order,Qval)
 end subroutine ddx
 
 
-subroutine ddy(f,df,order,Qval)
+subroutine ddy(f,df,order,fid)
 	!-------------------------------------------------------------------------
 	! assume f and df are decomposed in YBLOCK decomposition
 	!-------------------------------------------------------------------------
 	use mpi_params,             only: myid
-	use independent_variables,  only: ny
+	use independent_variables,  only: ny,FS_XY_PERIODIC,y_periodic
  	use decomposition_params,   only: array_size,IDIM,JDIM,KDIM,YBLOCK
  	implicit none 
  	integer                        :: i,k,dir=2
@@ -64,7 +74,8 @@ subroutine ddy(f,df,order,Qval)
  	real(kind=8), intent(out)      :: df( array_size(IDIM,YBLOCK,myid),    &
                                           array_size(JDIM,YBLOCK,myid),    &
                                           array_size(KDIM,YBLOCK,myid)  )
- 	integer, intent(in)            :: order,Qval 
+ 	integer, intent(in)            :: order,fid 
+ 	character(len=80)              :: method
  	logical,save                   :: first_entry=.TRUE. , debug=.FALSE.
 	!--------------------------------------------------------------------------
 	if(first_entry) then
@@ -76,6 +87,15 @@ subroutine ddy(f,df,order,Qval)
  		df(:,:,:)=0.d0
  		return
 	endif
+	
+	if( y_periodic .or. FS_XY_PERIODIC ) then
+		method = 'fourier'     ! Fourier 
+	elseif( fid == 6 ) then
+		method = 'cos'         ! pressure, y not periodic
+	else
+		method = 'BC'          ! Bernoulli-cosine method
+	endif
+	if(fid==999) method = 'BC' ! used for testing
  	
 	!--------------------------------------------------------------------------
 	! loop through x and z array indices, perform stride 1
@@ -83,7 +103,7 @@ subroutine ddy(f,df,order,Qval)
 	!--------------------------------------------------------------------------
  	do k=1,array_size(KDIM,YBLOCK,myid)  
   		do i=1,array_size(JDIM,YBLOCK,myid)
-  			call deriv_BC(f(1,i,k),df(1,i,k),ny,dir,Qval,debug)  ! Bernoulli/Cosine derivative 
+  			call deriv_BC(f(1,i,k),df(1,i,k),ny,dir,method,debug)  ! Bernoulli/Cosine derivative 
  		enddo
  	enddo
  
@@ -91,12 +111,12 @@ subroutine ddy(f,df,order,Qval)
 end subroutine ddy
 
 
-subroutine ddz(f,df,order,Qval)
+subroutine ddz(f,df,order,fid)
 	!-------------------------------------------------------------------------
 	! assume f and df are decomposed in ZBLOCK decomposition (z,x,y)
 	!-------------------------------------------------------------------------
 	use mpi_params,             only: myid,comm,ierr
- 	use independent_variables,  only: nz
+ 	use independent_variables,  only: nz,z_periodic,z_FSRL,s1_z_BC
  	use decomposition_params,   only: array_size,IDIM,JDIM,KDIM,ZBLOCK 
  	implicit none 
  	integer                        :: j,k,dir=3
@@ -106,7 +126,8 @@ subroutine ddz(f,df,order,Qval)
  	real(kind=8)                   :: df( array_size(IDIM,ZBLOCK,myid),    &
                                           array_size(JDIM,ZBLOCK,myid),    &
                                           array_size(KDIM,ZBLOCK,myid)  )
- 	integer, intent(in)            :: order,Qval
+ 	integer, intent(in)            :: order,fid
+ 	character(len=80)              :: method
  	logical,save                   :: first_entry=.TRUE. , debug=.FALSE.
 	!--------------------------------------------------------------------------
 
@@ -119,6 +140,20 @@ subroutine ddz(f,df,order,Qval)
  		df(:,:,:)=0.d0
  		return
 	endif
+	
+	if( z_periodic ) then
+		method = 'fourier'     ! Fourier 
+	elseif( z_FSRL .and. fid < 3 ) then
+		method = 'cos'         ! u,v straight cos expansions in z
+	elseif( z_FSRL .and. fid == 3 )then
+		method = 'cos'         ! w straight sin expansions in z
+	elseif( z_FSRL .and. fid == 4 ) then
+		if(s1_z_BC=='HOMOGENEOUS_NEUMANN')   method='cos'   ! s1 cos expanded in z
+		if(s1_z_BC=='HOMOGENEOUS_DIRICHLET') method='sin'   ! s1 cos expanded in z
+	elseif( fid == 6 ) then
+		method = 'cos'          ! pressure, z not periodic
+	endif
+	if(fid==999) method = 'BC'  ! used for testing
 
 	!--------------------------------------------------------------------------
 	! loop through 2nd & 3rd array indices, perform stride 1
@@ -126,7 +161,7 @@ subroutine ddz(f,df,order,Qval)
 	!--------------------------------------------------------------------------
  	do k=1,array_size(KDIM,ZBLOCK,myid)  
   		do j=1,array_size(JDIM,ZBLOCK,myid)  
-  			call deriv_BC(f(1,j,k),df(1,j,k),nz,dir,Qval,debug)  ! Bernoulli/Cosine derivative
+  			call deriv_BC(f(1,j,k),df(1,j,k),nz,dir,method,debug)  ! Bernoulli/Cosine derivative
   		enddo
  	enddo
 
@@ -134,7 +169,7 @@ subroutine ddz(f,df,order,Qval)
 end subroutine ddz
 
 
-subroutine divergence(u,v,w,div)
+subroutine divergence(u,v,w,div,fids)
 	!------------------------------------------------------------
 	!  Compute divergence of [u,v,w] using BernoulliCosine method
 	!  Input and output data arrays arranged in YBLOCK format.
@@ -144,12 +179,11 @@ subroutine divergence(u,v,w,div)
  	use decomposition_params
  	use independent_variables,  only: nx,ny,nz,x_periodic,y_periodic,z_periodic
  	use intermediate_variables, only: tmpX,tmpY,tmpZ
- 	use differentiation_params, only: Q            ! (Q+1)/2 terms in Bernoulli series
  
  	implicit none
  	include 'mpif.h'
  	integer,parameter             ::   order=1
- 	integer                       ::   Qval
+ 	integer                       ::   fids(3)   ! fids for the input array locally named [u,v,w]
  	real(kind=8), intent(in)      ::   u( array_size(IDIM,YBLOCK,myid),   &
                                           array_size(JDIM,YBLOCK,myid),   &
                                           array_size(KDIM,YBLOCK,myid)  )
@@ -169,26 +203,16 @@ subroutine divergence(u,v,w,div)
  	!----------------------------------------
  	!    div <--- dv/dy
  	!----------------------------------------
- 	if( y_periodic ) then
- 		Qval = 0
- 	else	
- 		Qval = Q
- 	endif
  	
-	call ddy( v, div, order, Qval )                        ! ==> dv/dy in YBLOCK format
+	call ddy( v, div, order, fids(2) )                        ! ==> dv/dy in YBLOCK format
 	
 	
  	!----------------------------------------
  	!    div <--- dv/dy + dw/dz
  	!----------------------------------------
- 	if( z_periodic ) then
- 		Qval = 0
- 	else	
- 		Qval = Q
- 	endif
  	
   	call yblock_2_zblock(w(1,1,1),tmpZ(1,1,1,1))   	
-  	call ddz( tmpZ(1,1,1,1), tmpZ(1,1,1,2), order, Qval )   ! ==> dw/dz in ZBLOCK format  	
+  	call ddz( tmpZ(1,1,1,1), tmpZ(1,1,1,2), order, fids(3) )   ! ==> dw/dz in ZBLOCK format  	
   	call zblock_2_yblock(tmpZ(1,1,1,2),tmpY(1,1,1,6))       ! ==> dw/dz in YBLOCK format
   	
   	div(:,:,:) = div(:,:,:) + tmpY(:,:,:,6)
@@ -197,14 +221,9 @@ subroutine divergence(u,v,w,div)
  	!----------------------------------------
  	!    div <--- dv/dy + dw/dz + dudx
  	!----------------------------------------
- 	if( x_periodic ) then
- 		Qval = 0
- 	else	
- 		Qval = Q
- 	endif
  	
   	call yblock_2_xblock(u,tmpX) 		
-  	call ddx( tmpX, tmpX(1,1,1,2), order, Qval )           ! ==> du/dx in XBLOCK format 		
+  	call ddx( tmpX, tmpX(1,1,1,2), order, fids(1) )           ! ==> du/dx in XBLOCK format 		
   	call xblock_2_yblock(tmpX(1,1,1,2),tmpY(1,1,1,6))      ! ==> du/dx in YBLOCK format
   	
   	div(:,:,:) = div(:,:,:) + tmpY(:,:,:,6)
@@ -226,7 +245,7 @@ subroutine test_divergence
 	use etc
 	implicit none
 	real(kind=8), allocatable      :: x(:),y(:),z(:) ! local portions
-	integer                        :: i,j,k,locnx,ny,locnz,nmin=64
+	integer                        :: i,j,k,locnx,ny,locnz,nmin=64,fids(3)
 	real(kind=8)                   :: ans,pi,kval,diff,tol=1.d-9
 	
 	
@@ -267,7 +286,8 @@ subroutine test_divergence
 	!---------------------------------------------------------------------------
 	!  compute the divergence, store result in array 4
 	!---------------------------------------------------------------------------
-	call divergence(tmpY(1,1,1,1),tmpY(1,1,1,2),tmpY(1,1,1,3),tmpY(1,1,1,4))
+	fids(:)=999
+	call divergence(tmpY(1,1,1,1),tmpY(1,1,1,2),tmpY(1,1,1,3),tmpY(1,1,1,4),fids)
 	
 	!---------------------------------------------------------------------------
 	!  compare computed divergence to exact values
@@ -293,7 +313,7 @@ subroutine test_divergence
 end subroutine test_divergence
 
 
-subroutine gradient(f,fx,fy,fz,Q0)
+subroutine gradient(f,fx,fy,fz,fid)
 	!------------------------------------------------------------
 	!  Compute spatial gradient of f using Bernoulli/Cos method.
 	!  Input and output data arrays arranged in YBLOCK format.
@@ -305,7 +325,7 @@ subroutine gradient(f,fx,fy,fz,Q0)
 	use independent_variables
 	implicit none
 	integer                       ::   order=1
-	integer                       ::   Q0,Qval
+	integer                       ::   fid
 	real(kind=8)                  ::   f( array_size(IDIM,YBLOCK,myid),   &
                                           array_size(JDIM,YBLOCK,myid),   &
                                           array_size(KDIM,YBLOCK,myid)  )
@@ -322,43 +342,25 @@ subroutine gradient(f,fx,fy,fz,Q0)
                                           array_size(JDIM,YBLOCK,myid),   &
                                           array_size(KDIM,YBLOCK,myid)  )    
 
- 	if( array_size(IDIM,YBLOCK,myid) > 1 ) then
- 		if( y_periodic ) then
- 			Qval = 0
- 		else	
- 			Qval = Q0
- 		endif
- 	
-  		call ddy( f, fy, order, Qval )
+ 	if( array_size(IDIM,YBLOCK,myid) > 1 ) then 	
+  		call ddy( f, fy, order, fid )
  	else
   		fy = 0.d0
  	endif
  	
 
- 	if( nz > 1 ) then
- 		if( z_periodic ) then
- 			Qval = 0
- 		else	
- 			Qval = Q0
- 		endif
- 		
+ 	if( nz > 1 ) then 		
   		call yblock_2_zblock(f,tmpZ)  
-  		call ddz( tmpZ, tmpZ(1,1,1,2), order, Qval )
+  		call ddz( tmpZ, tmpZ(1,1,1,2), order, fid )
   		call zblock_2_yblock(tmpZ(1,1,1,2),fz)
  	else
   		fz = 0.d0
  	endif
 
 
- 	if( nx > 1 ) then
- 		if( x_periodic ) then
- 			Qval = 0
- 		else	
- 			Qval = Q0
- 		endif
- 		
+ 	if( nx > 1 ) then 		
   		call yblock_2_xblock(f,tmpX)
-  		call ddx( tmpX, tmpX(1,1,1,2), order, Qval )
+  		call ddx( tmpX, tmpX(1,1,1,2), order, fid )
   		call xblock_2_yblock(tmpX(1,1,1,2),fx)
  	else
   		fx = 0.d0
@@ -378,10 +380,9 @@ subroutine test_gradient
 	use independent_variables,   only: Lx,Ly,Lz,nx,nz
 	use intermediate_variables,  only: tmpY,tmpX,tmpZ
 	use decomposition_params
-	use differentiation_params,  only: Q
 	use etc
 	implicit none
-	integer                        :: i,j,k,nmin=64
+	integer                        :: i,j,k,nmin=64,fid
 	real(kind=8),allocatable,save  :: x(:),y(:),z(:) ! local portions
 	integer, save                  :: locnx,ny,locnz
 	real(kind=8)                   :: ans,diff,tol=1.d-8
@@ -424,7 +425,8 @@ subroutine test_gradient
 	!-------------------------------------------------------------------------
 	!  compute the gradient, put components of the answer in tmpY(:,:,:,1-3)
 	!-------------------------------------------------------------------------
-	call gradient(tmpY(1,1,1,4),tmpY(1,1,1,1),tmpY(1,1,1,2),tmpY(1,1,1,3),Q)
+	fid = 999    ! special value triggering Bernoulli Cosine independent of other BC flags
+	call gradient(tmpY(1,1,1,4),tmpY(1,1,1,1),tmpY(1,1,1,2),tmpY(1,1,1,3),fid)
 	
 	!-------------------------------------------------------------------------
 	!  compare computed gradient to exact values
@@ -461,16 +463,17 @@ end subroutine test_gradient
 
 
 
-subroutine udotgradf(u,v,w,f,ans)
+subroutine mudotgradf(u,v,w,f,ans,fid)
 	!---------------------------------------------------
+	! mudotgradf = minus u dot grad f
 	! Assume input and output arrays in YBLOCK format
 	!   uses tmpY(:,:,:,1-3) to hold f_x, f_y and f_z
 	!---------------------------------------------------
 	use mpi_params,             only: myid
  	use decomposition_params
  	use intermediate_variables, only: tmpY
- 	use differentiation_params, only: Q
  	implicit none
+ 	integer,intent(in)        :: fid   ! (the variable id of f)
  	logical                   :: debug=.TRUE.
 	real(kind=8)              :: ans(array_size(IDIM,YBLOCK,myid),     &
                                      array_size(JDIM,YBLOCK,myid),     &
@@ -495,17 +498,17 @@ subroutine udotgradf(u,v,w,f,ans)
 	!---------------------------------------------------
 	! compute grad f, store results in tmpY 1,2 and 3
 	!---------------------------------------------------
- 	call gradient(f,tmpY(1,1,1,1),tmpY(1,1,1,2),tmpY(1,1,1,3),Q)
+ 	call gradient(f,tmpY(1,1,1,1),tmpY(1,1,1,2),tmpY(1,1,1,3),fid)
 
 	!---------------------------------------------------
 	! do the dot product
 	!---------------------------------------------------
- 	ans(:,:,:) = u(:,:,:)*tmpY(:,:,:,1) + v(:,:,:)*tmpY(:,:,:,2) + w(:,:,:)*tmpY(:,:,:,3)
+ 	ans(:,:,:) = -u(:,:,:)*tmpY(:,:,:,1) - v(:,:,:)*tmpY(:,:,:,2) - w(:,:,:)*tmpY(:,:,:,3)
 
  return
-end subroutine udotgradf
+end subroutine mudotgradf
 
-subroutine test_udotgradf
+subroutine test_mudotgradf
 !---------------------------------------------------------------
 ! Simple routine to test the udotgradf routine
 !  to pass the test, the transpose and the differentiation
@@ -520,7 +523,7 @@ subroutine test_udotgradf
 	use etc
 	implicit none
 	real(kind=8), allocatable      :: x(:),y(:),z(:) ! local portions
-	integer                        :: i,j,k,locnx,ny,locnz,nmin=64
+	integer                        :: i,j,k,locnx,ny,locnz,nmin=64,fid
 	real(kind=8)                   :: ans,diff,tol=1.d-8
 	logical, save                  :: first_entry=.TRUE.
 	
@@ -562,7 +565,8 @@ subroutine test_udotgradf
 	! after computing them, here to avoid these arrays use u=v=w=3.d0,  
 	! compute u dot grad f and store answer in tmpY(1,1,1,6)
 	!----------------------------------------------------------------
-	call udotgradf(tmpY(1,1,1,5),tmpY(1,1,1,5),tmpY(1,1,1,5),tmpY(1,1,1,4),tmpY(1,1,1,6))
+	fid=999   ! used for test functions independent of actual BCs
+	call mudotgradf(tmpY(1,1,1,5),tmpY(1,1,1,5),tmpY(1,1,1,5),tmpY(1,1,1,4),tmpY(1,1,1,6),fid)
 		
 	!  compare computed to exact values
 	do k=1,locnz
@@ -571,9 +575,9 @@ subroutine test_udotgradf
 				ans = 3.d0*( 2.d0*( x(i)/Lx**2  ) ) &
 				    + 3.d0*( 2.d0*( y(j)/Ly**2  ) ) & 
 				    + 3.d0*( 2.d0*( z(k)/Lz**2  ) )		
-				diff = abs(ans - tmpY(j,i,k,6))	
+				diff = abs(-ans - tmpY(j,i,k,6))	
 				if(j==0 .and. k==0 ) write(0,*) j,i,k,ans,tmpY(j,i,k,6)	    
-				if( abs( ans - tmpY(j,i,k,6) ) > tol ) stop '    test of udotgradf routine failed with tol=1.d-10'
+				if( diff > tol ) stop '    test of udotgradf routine failed with tol=1.d-10'
 			enddo
 		enddo
 	enddo
@@ -585,28 +589,8 @@ subroutine test_udotgradf
  	endif
 	
  return
-end subroutine test_udotgradf
+end subroutine test_mudotgradf
 
-
-subroutine divgradf(f,g2f)
-	use mpi_params,             only: myid
- 	use decomposition_params
-	use intermediate_variables, only: tmpY
- 	use differentiation_params, only: Q
- 	implicit none
- 	real(kind=8)              ::   f(array_size(IDIM,YBLOCK,myid),     &
-                                     array_size(JDIM,YBLOCK,myid),     &
-                                     array_size(KDIM,YBLOCK,myid) )
-    real(kind=8)              :: g2f(array_size(IDIM,YBLOCK,myid),     &
-                                     array_size(JDIM,YBLOCK,myid),     &
-                                     array_size(KDIM,YBLOCK,myid) )
-
-	! compute gradient of f, store in tmpY 1,2 & 3
-	call gradient(f,tmpY(1,1,1,1),tmpY(1,1,1,2),tmpY(1,1,1,3),Q) 
-	
-	! compute div of grad f 
-	call divergence(tmpY(1,1,1,1),tmpY(1,1,1,2),tmpY(1,1,1,3),g2f) 	
-end subroutine divgradf
 
 
 
