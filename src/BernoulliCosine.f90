@@ -63,11 +63,24 @@ SUBROUTINE deriv_BC(f,df,n,dir,method,debug)
 	!-----------------------------------------------------------
 	!  straight Fourier method, 'fourier', 'cos' or 'sin'
 	!-----------------------------------------------------------	
-	if( method=='fourier' .or. method=='cos' .or. method=='sin' ) then
+	if( method=='fourier' .or. method=='cos' .or. method=='sin') then
 		call differentiate_fcs(f,df,n,dir,method,order)
 		return	
 	endif
 	
+	!-----------------------------------------------------------
+	!  straight cos method, 'BC' with Q=0
+	!-----------------------------------------------------------	
+	if( method=='BC' .and. Q==0 ) then
+		BCmethod = 'cos'
+		call differentiate_fcs(f,df,n,dir,BCmethod,order)
+		return	
+	endif
+	
+	!-----------------------------------------------------------
+	!  otherwise, use the Bernoulli Cosine method
+	!-----------------------------------------------------------
+		
 	if( dir==3 .and. debug .and. myid==0 ) then
 		write(0,*) '                                    debug ON for deriv_BC dir, n: ',dir,n
 	endif
