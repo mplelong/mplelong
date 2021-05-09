@@ -57,7 +57,7 @@
 		logical                         :: z_periodic
 		logical                         :: FS_XY_PERIODIC = .FALSE.
 		logical                         :: z_FSRL = .FALSE.
-		character(len=80)               :: s1_z_BC = 'HOMOGENEOUS_NEUMANN' ! HOMOGENEOUS_DIRICHLET  
+		character(len=80)               :: s1_z_BC = 'HOMOGENEOUS_DIRICHLET'  !  'HOMOGENEOUS_NEUMANN' !   
 	contains
 		subroutine initialize_coord(x,nx,Lx,periodic)
 			use mpi_params, only: myid
