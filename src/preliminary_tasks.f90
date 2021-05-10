@@ -102,6 +102,9 @@ subroutine preliminary_tasks
 		y_periodic = .TRUE.
 		z_periodic = .FALSE.
 		z_FSRL = .TRUE.
+		Q = 0
+		user_bcs = .FALSE.
+		endpoint_smoothing = .FALSE.
 	endif
 	
 	!-----------------------------------------------
