@@ -659,7 +659,7 @@ subroutine test_poisson_solver
 !          grad^2 phi = -(k^2+l^2+m^2)*cos(kx)*cos(ly)*cos(mz)
 !-------------------------------------------------------------------------
 	use mpi_params,              only: myid,comm,ierr
-	use independent_variables,   only: Lx,Ly,Lz,dt,x_periodic,y_periodic,z_periodic
+	use independent_variables,   only: Lx,Ly,Lz,dt,x_periodic,y_periodic,z_periodic,z_FSRL
 	use intermediate_variables,  only: tmpY,div_u,phi
 	use decomposition_params
 	use etc
@@ -683,8 +683,8 @@ subroutine test_poisson_solver
 		call get_my_zvals(z,YBLOCK,myid)
 		
 		pi = 4.d0*atan(1.d0)
-		kk = 6.d0 * pi/Lx
-		ll = 0.d0 * pi/Ly
+		kk = 0.d0 * pi/Lx
+		ll = 6.d0 * pi/Ly
 		mm = 1.d0 * pi/Lz
 		
 		! make sure test is periodic if problem is periodic
@@ -716,7 +716,7 @@ subroutine test_poisson_solver
 		do i=1,locnx
 			do j=1,ny
 				diff = abs( phi(j,i,k) - tmpY(j,i,k,3) )
-				!if( myid==0 .and. j==1 .and. k==1 ) write(0,*) z(k),phi(j,i,k),tmpY(j,i,k,3),diff 
+				!if( myid==0 .and. i==1 .and. k==1 ) write(0,*) y(j),phi(j,i,k),tmpY(j,i,k,3),diff 
 				if( diff > tol ) stop ' test of poisson_solver failed '
 			enddo
 		enddo
@@ -730,7 +730,6 @@ subroutine test_poisson_solver
  	
  	div_u = 0.d0
  	phi = 0.d0
-
 
  return
 end subroutine test_poisson_solver
