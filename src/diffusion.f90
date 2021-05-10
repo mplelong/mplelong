@@ -35,13 +35,13 @@ subroutine diffusion_coeffs
 		! these time scales not actually used, just calculated to be able to write the values during initialization
 		T_diff(:) = 1.d23   ! ~ infinite
 		if( nx > 1 ) then
-			T_diff(1) = 1.d0/(kx(nx)**(2*p(1))*nu_star(1))    ! calculate time scale for momentum diffusion at x nyquist scale
+			T_diff(1) = 1.d0/(MAXVAL(kx)**(2*p(1))*nu_star(1))    ! calculate time scale for momentum diffusion at x nyquist scale
 		endif
 		if( ny > 1 ) then
-			T_diff(2) = 1.d0/(ky(ny)**(2*p(2))*nu_star(2))    ! calculate time scale for momentum diffusion at x nyquist scale
+			T_diff(2) = 1.d0/(MAXVAL(ky)**(2*p(2))*nu_star(2))    ! calculate time scale for momentum diffusion at x nyquist scale
 		endif
 		if( nz > 1 ) then
-			T_diff(3) = 1.d0/(kz(nz)**(2*p(3))*nu_star(3))    ! calculate time scale for momentum diffusion at x nyquist scale
+			T_diff(3) = 1.d0/(MAXVAL(kz)**(2*p(3))*nu_star(3))    ! calculate time scale for momentum diffusion at x nyquist scale
 		endif
 		
 	elseif( high_order_operators) then
@@ -52,19 +52,19 @@ subroutine diffusion_coeffs
 		! choose nu* such that T_diff = 1./(k_max^(2p) * nu*)
 		idir = 1
 		if( nx > 1 ) then
-			denom = kx(nx)**(2*p(idir)) * T_diff(idir)
+			denom = MAXVAL(kx)**(2*p(idir)) * T_diff(idir)
 			nu_star(idir) = 1.d0/denom
 		endif
 	
 		idir = 2
 		if( ny > 1 ) then
-			denom = ky(ny)**(2*p(idir)) * T_diff(idir)
+			denom = MAXVAL(ky)**(2*p(idir)) * T_diff(idir)
 			nu_star(idir) = 1.d0/denom
 		endif
 	
 		idir = 3
 		if( nz > 1 ) then
-			denom = kz(nz)**(2*p(idir)) * T_diff(idir)
+			denom = MAXVAL(kz)**(2*p(idir)) * T_diff(idir)
 			nu_star(idir) = 1.d0/denom
 		endif
 	
@@ -78,14 +78,15 @@ subroutine diffusion_coeffs
 		
 	endif	
 	
+	
 	if( myid==0 ) then
 		open(1,file='output/debug_data/diffusion_coeffs')
 			idir=1
-			write(1,*) kx(nx), T_diff(idir), p(idir), nu_star(idir), kappa_star(idir,1)
+			write(1,*) MAXVAL(kx), T_diff(idir), p(idir), nu_star(idir), kappa_star(idir,1)
 			idir=2
-			write(1,*) ky(ny), T_diff(idir), p(idir), nu_star(idir), kappa_star(idir,1)
+			write(1,*) MAXVAL(ky), T_diff(idir), p(idir), nu_star(idir), kappa_star(idir,1)
 			idir=3
-			write(1,*) kz(nz), T_diff(idir), p(idir), nu_star(idir), kappa_star(idir,1)
+			write(1,*) MAXVAL(kz), T_diff(idir), p(idir), nu_star(idir), kappa_star(idir,1)
 		close(1)
 	endif
 	
@@ -145,6 +146,7 @@ subroutine diffuse
 		locnx = array_size(JDIM,YBLOCK,myid)
 		locnz = array_size(KDIM,YBLOCK,myid)
 		allocate( diff_factor(ny,locnx,3) )
+		
 		
 		do i=1,locnx
 			ig = global_x_indices(START,YBLOCK,myid) + i - 1
@@ -411,8 +413,8 @@ subroutine test_z_diffusion
 	! check the solution
 	do k=1,nz
 		error = abs( phi_computed(k) - phi_exact(k) )
-		write(0,*) phi_computed(k),phi_exact(k),error
-		!if( myid==0 .and. error > tol ) stop ' test of z_diffusion failed, tol=1.d-12 '
+		!write(0,*) phi_computed(k),phi_exact(k),error
+		if( myid==0 .and. error > tol ) stop ' test of z_diffusion failed, tol=1.d-12 '
 	enddo
 	
 	!  replace original values
