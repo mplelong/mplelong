@@ -272,6 +272,7 @@ SUBROUTINE fourier_init(exp_type,n,Lx,kx,kfilter,plan_f,plan_i)
   
 		dk = 2.d0*pi/Lx   
     	kmax = (n/2+1.d0)*dk
+    	gamma = filter_fraction*n*dk
 		do i=1,n/2+1       
 			kx(i) = (i-1.)*dk
     		if( filter_fraction > 0.d0 ) then
