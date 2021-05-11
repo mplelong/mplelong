@@ -7,7 +7,7 @@ echo run.sh now running on "$HOSTNAME"
 
 source set_env_variables.sh
 
-do_run=False
+do_run=True
 
 #-------------------------------------------------
 # prepare things for UBC stability problem test
