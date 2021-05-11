@@ -1,0 +1,54 @@
+UBC_Stability_test   ! runlabel  
+.FALSE.              ! Restart flag. Read initial conditions from saved netcdf files?
+.FALSE.              ! Compute evolution a second scalar field?
+4                    ! Order of explicit Adams-Bashforth time stepping, must be <= 4
+1                    ! MPI decomposition parameter p1, splits (nx)   
+4                    ! MPI decomposition parameter p2, splits (ny,nz)  p1*p2=numprocs=np
+1                    ! nx    split by (p1)
+256                  ! ny    split by (p1,p2)   
+257                  ! nz    split by (p2)     
+0.01d0               ! dt       (s)    
+0.d0                 ! t_start  (s)    
+500.0d0              ! t_end    (s)    
+0.10d0               ! Lx       (m)      
+0.86d0               ! Ly       (m)       
+1.00d0               ! Lz       (m)     
+.TRUE.               ! x coordinate periodic?
+.TRUE.               ! y coordinate periodic?
+.FALSE.              ! z coordinate periodic?
+r                    ! defn of scalar s1 ( t = temp in deg C, r = Boussinesq density, i.e. rho )
+p                    ! defn of scalar s2 ( p =  passive tracer )
+.FALSE.              ! Call user forcing routine?         
+1027.d0              ! rho_0  constant reference density  (kg/m3)
+9.81d0               ! g  gravity                         (m/s2)
+0.d-4                ! f0 Coriolis parameter at Lx/2 Ly/2 (1/s)
+1.d-6                ! nu     viscosity                   (m2/s)  
+5.d-7                ! kappa  diffusivity for s1          (m2/s)
+1.d-4                ! kappa  diffusivity for s2          (m2/s)
+.FALSE.              ! high_order_operators,  Use high order diffusion operators? 
+4                    ! half order of high order diffusion operators, x direction    (only read and used if TRUE)
+4                    ! half order of high order diffusion operators, y direction    (only read and used if TRUE)
+4                    ! half order of high order diffusion operators, z direction    (only read and used if TRUE)
+0.25d0               ! diffusive time scale at x nyquist wavenumber (s)  (only read and used if TRUE)
+0.25d0               ! diffusive time scale at y nyquist wavenumber (s)  (only read and used if TRUE)
+0.25d0               ! diffusive time scale at z nyquist wavenumber (s)  (only read and used if TRUE)
+----------------------------------------------------------------------------------------------------
+you can keep notes below here...
+----------------------------------------------------------------------------------------------------
+
+This is a simple initial value problem for a stratified shear flow in which the shear 
+and stratification profiles have unequal and vertically offset characteristic thicknesses. 
+It is motivated by the work of Greg Lawrence, Neil Balmforth and their students at UBC.
+
+Parameters defining velocity and density profiles are specified in user_params_module.f90
+
+The "test setup" is configured for a 2d flow in the yz plane and uses 4 processors. 
+
+The flow is periodic in y (and x) with free-slip rigid lids in z.
+
+The initial conditions are unstable and an initial perturbation grows to finite amplitude. 
+The instability is vertically asymmetric and has a finite horizontal phase speed.
+
+
+Will execute by setting FS_XY_PERIODIC to true and s1_z_BC = 'HOMOGENEOUS_NEUMANN'
+in user_params/change_defaults.
