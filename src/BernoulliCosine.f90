@@ -226,6 +226,8 @@ SUBROUTINE evaluate_basis_functions
 	integer                           :: M,i,j,n
 	real(kind=8)                      :: a,b,P
 	
+	if(Q==0) return   ! we won't need Bernoulli polynomials if Q=0
+	
 	M = (Q+1)/2     ! number of terms in the series expansions
 	allocate( U_x(nx,M,2), dU_x(nx,M,2) )
 	allocate( U_y(ny,M,2), dU_y(ny,M,2) )
@@ -442,6 +444,8 @@ SUBROUTINE setup_factor_B_matrices
 	integer                                  :: npts,info,K,istart,i,j,n
 	real(kind=8)                             :: a,L,P,xval,yval,zval
 	real(kind=8), external                   :: U_n
+	
+	if(Q==0) return   ! we won't need Bernoulli polynomials if Q=0
 	
 	npts = (Q+1)/2                        ! number of terms in expansion, values to match near each endpoint
 	allocate( LU_x(npts,npts,2), LU_y(npts,npts,2), LU_z(npts,npts,2) )
@@ -879,7 +883,7 @@ integer recursive function factorial(m) result (fac)
 subroutine verify_deriv_BC
 	use mpi_params,                       only: myid
 	use differentiation_params,           only: Q
-	use independent_variables,            only: x,y,z,Lx,Ly,Lz,nx,ny,nz,x_periodic,y_periodic,z_periodic
+	use independent_variables,            only: x,y,z,Lx,Ly,Lz,nx,ny,nz,x_periodic,y_periodic,z_periodic,z_FSRL
 	implicit none 
 	real(kind=8), allocatable                :: in(:),out(:)
 	real(kind=8)                             :: pi, tol=1.e-8, diff
@@ -936,7 +940,7 @@ subroutine verify_deriv_BC
  		deallocate( in,out )
  	endif
  	
- 	if( .not. z_periodic ) then
+ 	if( .not. z_periodic .and. .not. z_FSRL ) then
  		allocate( in(nz),out(nz) )
  		debug = .TRUE.
 		in=0.d0 ; out=0.d0
