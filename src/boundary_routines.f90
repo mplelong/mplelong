@@ -8,7 +8,7 @@ subroutine apply_bcs
 	use mpi_params,                           only: myid
 	use dependent_variables,                  only: u,v,w,s1,s2
 	use independent_variables,                only: Lx,Ly,Lz,tnp1
-	use methods_params,                       only: do_second_scalar
+	use methods_params,                       only: do_second_scalar,user_bcs
 	use etc,                                  only: istep,istart
 	use decomposition_params 
 	implicit none
@@ -18,6 +18,8 @@ subroutine apply_bcs
 	character(len=80)                            :: dir='xyz'
 	logical,save                                 :: first_entry=.TRUE.
  
+ 	if( .NOT. user_bcs ) return    ! some configurations never need bc info
+ 	
 	if( first_entry ) then			
 		locnx = array_size(JDIM,YBLOCK,myid)
 		ny    = array_size(IDIM,YBLOCK,myid)
@@ -592,7 +594,7 @@ subroutine fill_boundary_arrays
 	use decomposition_params
 	use boundary_data
 	use independent_variables,   only: Lx,Ly,Lz,tnp1,x_periodic,y_periodic,z_periodic
-	use methods_params,          only: do_second_scalar
+	use methods_params,          only: do_second_scalar,user_bcs
 	implicit none
 	integer                         :: id
 	integer,save                    :: locnx,ny,locnz,nvars=4
@@ -600,6 +602,8 @@ subroutine fill_boundary_arrays
 	real(kind=8)                    :: XVAL,YVAL,ZVAL,tval
 	character(len=80)               :: dir,side
 	logical,save                    :: first_entry=.TRUE.
+	
+	if( .NOT. user_bcs ) return
 	
 	if( first_entry ) then
 	
@@ -668,6 +672,7 @@ subroutine boundary_smooth(f,dir,npts)
 	use mpi_params,                  only: myid
 	use decomposition_params
 	use independent_variables,       only: x,y,z,x_periodic,y_periodic,z_periodic,z_FSRL
+	use methods_params,              only: endpoint_smoothing
 	implicit none
 	integer, intent(in)                 :: npts(3)  ! x,y,z dirs respectively
 	real(kind=8), intent(inout)         :: f(array_size(IDIM,YBLOCK,myid),     &
@@ -680,6 +685,8 @@ subroutine boundary_smooth(f,dir,npts)
 	integer, save                       :: locnx, locnz, ny
 	integer                             :: i,j,k
 	logical, save                       :: first_entry=.TRUE.
+	
+	if( .NOT. endpoint_smoothing ) return
 	
 	if( first_entry ) then
 		locnx = array_size(JDIM,YBLOCK,myid)              ! sizes, loop endpoints
