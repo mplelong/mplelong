@@ -35,13 +35,13 @@ subroutine diffusion_coeffs
 		! these time scales not actually used, just calculated to be able to write the values during initialization
 		T_diff(:) = 1.d23   ! ~ infinite
 		if( nx > 1 ) then
-			T_diff(1) = 1.d0/(MAXVAL(kx)**(2*p(1))*nu_star(1))    ! calculate time scale for momentum diffusion at x nyquist scale
+			T_diff(1) = 1.d0/(MAXVAL(kx)**(2*p(1))*nu_star(1))    ! calculate time scale at x nyquist scale
 		endif
 		if( ny > 1 ) then
-			T_diff(2) = 1.d0/(MAXVAL(ky)**(2*p(2))*nu_star(2))    ! calculate time scale for momentum diffusion at x nyquist scale
+			T_diff(2) = 1.d0/(MAXVAL(ky)**(2*p(2))*nu_star(2))    ! calculate time scale at x nyquist scale
 		endif
 		if( nz > 1 ) then
-			T_diff(3) = 1.d0/(MAXVAL(kz)**(2*p(3))*nu_star(3))    ! calculate time scale for momentum diffusion at x nyquist scale
+			T_diff(3) = 1.d0/(MAXVAL(kz)**(2*p(3))*nu_star(3))    ! calculate time scale at x nyquist scale
 		endif
 		
 	elseif( high_order_operators) then
@@ -146,6 +146,7 @@ subroutine diffuse
 		locnx = array_size(JDIM,YBLOCK,myid)
 		locnz = array_size(KDIM,YBLOCK,myid)
 		allocate( diff_factor(ny,locnx,3) )
+		diff_factor = 0.d0
 		
 		
 		do i=1,locnx
@@ -155,11 +156,13 @@ subroutine diffuse
 				xx = nu_star(1)*kx(ig)**(2*p(1))
 				yy = nu_star(2)*ky(j)**(2*p(2))
 				diff_factor(j,i,1) = myexp(-(xx+yy)*dt)      ! for u,v,w
+
 				
 				id=1  ! scalar 1
 				xx = kappa_star(1,id)*kx(ig)**(2*p(1))
 				yy = kappa_star(2,id)*ky(j)**(2*p(2))
 				diff_factor(j,i,2) = myexp(-(xx+yy)*dt)      ! for s1
+				
 				
 				if( do_second_scalar ) then
 					id=2  ! scalar 2
@@ -312,9 +315,8 @@ subroutine z_diffusion(f,ans,nz,id)
 			diff_factor(k,3) = myexp(-zz*dt)        ! for s2
 			
 			! apply wavenumber filtering to high wavenumbers
-			diff_factor(k,:) = diff_factor(k,:)*kzfilter(k)
-		enddo
-				
+			diff_factor(k,:) = diff_factor(k,:)*kzfilter(k)			
+		enddo				
 		first_entry=.FALSE.
 	endif
 	
@@ -357,6 +359,10 @@ subroutine z_diffusion(f,ans,nz,id)
 end subroutine z_diffusion
 
 subroutine test_z_diffusion
+	!---------------------------------------------------
+	! not to be used at startup...this nu will be
+	! absorbed in diffusion_factor and retained
+	!---------------------------------------------------
 	use mpi_params,                   only: myid
 	use independent_variables,        only: z,nz,Lz,dt,z_periodic
 	use dimensionless_params,         only: p           ! 1/2 order of diffusion operators, x,y,z
