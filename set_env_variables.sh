@@ -6,4 +6,4 @@
 FLOW_SOLVE_ROOT="$PWD"
 PYTHON="/usr/local/bin/python3"
 MPIRUN="/usr/local/bin/mpirun"
-
+NCVIEW="/usr/local/bin/ncview"
