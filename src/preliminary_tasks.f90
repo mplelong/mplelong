@@ -191,7 +191,6 @@ subroutine preliminary_tasks
 	call test_mudotgradf
  	call test_transform_xy
  	call test_poisson_solver
- 	call test_z_diffusion
  
 	
 	if(myid==0) then
@@ -204,6 +203,6 @@ subroutine preliminary_tasks
 		call LogMessage(message,logfile)
 	endif 
 
-	call mpi_barrier(comm,ierr)
+	call mpi_barrier(comm,ierr) 
  return	
 end subroutine preliminary_tasks
