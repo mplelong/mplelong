@@ -36,14 +36,11 @@ subroutine ddx(f,df,order,fid)
  		return
 	endif
 	
-	if( x_periodic .or. FS_XY_PERIODIC ) then
-		method = 'fourier'     ! Fourier
-	elseif( fid == 6 ) then
-		method = 'cos'         ! pressure, x not periodic 
-	else
-		method = 'BC'          ! Bernoulli-cosine method
-	endif
-	if(fid==999) method = 'BC' ! used for testing
+	method = 'BC'
+	if( x_periodic .or. FS_XY_PERIODIC ) method = 'fourier'
+	if( fid==6 .and. .NOT. x_periodic )  method = 'cos'
+	if(fid==999) method = 'BC' ! used for testing, even if x_periodic
+	
 
 	!--------------------------------------------------------------------------
 	! loop through 2nd & 3rd array indices, perform stride 1
@@ -88,14 +85,11 @@ subroutine ddy(f,df,order,fid)
  		return
 	endif
 	
-	if( y_periodic .or. FS_XY_PERIODIC ) then
-		method = 'fourier'     ! Fourier 
-	elseif( fid == 6 ) then
-		method = 'cos'         ! pressure, y not periodic
-	else
-		method = 'BC'          ! Bernoulli-cosine method
-	endif
-	if(fid==999) method = 'BC' ! used for testing
+	method = 'BC'
+	if( y_periodic .or. FS_XY_PERIODIC ) method = 'fourier'
+	if( fid==6 .and. .NOT. y_periodic )  method = 'cos'
+	if(fid==999) method = 'BC' ! used for testing, even if y_periodic
+	
  	
 	!--------------------------------------------------------------------------
 	! loop through x and z array indices, perform stride 1
@@ -141,19 +135,17 @@ subroutine ddz(f,df,order,fid)
  		return
 	endif
 	
-	if( z_periodic ) then
-		method = 'fourier'     ! Fourier 
-	elseif( z_FSRL .and. fid < 3 ) then
-		method = 'cos'         ! u,v straight cos expansions in z
-	elseif( z_FSRL .and. fid == 3 )then
-		method = 'cos'         ! w straight sin expansions in z
-	elseif( z_FSRL .and. fid == 4 ) then
+	! set default method to be Bernoulli-Cosine
+	method = 'BC'
+	if( z_periodic ) method = 'fourier'
+	if( z_FSRL .and. fid < 3 ) method = 'cos'   ! u,v for free-slip rigid lids
+	if( z_FSRL .and. fid == 4 ) then
 		if(s1_z_BC=='HOMOGENEOUS_NEUMANN')   method='cos'   ! s1 cos expanded in z
 		if(s1_z_BC=='HOMOGENEOUS_DIRICHLET') method='sin'   ! s1 cos expanded in z
-	elseif( fid == 6 ) then
-		method = 'cos'          ! pressure, z not periodic
-	endif
-	if(fid==999) method = 'BC'  ! used for testing
+	endif	
+	if( fid==6 .and. .NOT. z_periodic ) method = 'cos'
+	if(fid==999) method = 'BC' ! used for testing, even if x_periodic
+		
 
 	!--------------------------------------------------------------------------
 	! loop through 2nd & 3rd array indices, perform stride 1
