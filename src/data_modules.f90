@@ -32,8 +32,8 @@
 		logical                         :: forcing_key(5)=.TRUE.
 		logical                         :: restart=.FALSE.
 		logical                         :: ambient_profile(2)=.FALSE.
-		logical                         :: user_bcs
-		logical                         :: endpoint_smoothing
+		logical                         :: user_bcs=.TRUE.
+		logical                         :: endpoint_smoothing=.TRUE.
 		logical                         :: do_sponging = .FALSE.
 	end module methods_params
 
