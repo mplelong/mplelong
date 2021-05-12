@@ -29,8 +29,9 @@
 !                                                             !
 !    Useful software for data processing etc                  !
 !     NCO               (netcdf operators)                    !
-!     python            (mpi4py,netCDF4)                      !
-!     ncview                                                  !
+!     python            (mpi4py,netCDF4,scipy,matplotlib)     !
+!     perl              (w/ nco for manipulating .nc files)   !
+!     ncview            (quick viewing of .nc files)          !
 !                                                             !
 !    Kraig Winters                                            !
 !    Scripps Institution of Oceanography                      !
