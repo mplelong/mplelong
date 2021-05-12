@@ -336,7 +336,6 @@ subroutine extrapolate_from_boundaries
 			enddo
 		endif
 	endif
-		
  return	
 end subroutine extrapolate_from_boundaries
 
@@ -583,7 +582,7 @@ subroutine extrapolate_to_boundaries
 			enddo
 		endif
 	endif
-		
+	
  return	
 end subroutine extrapolate_to_boundaries
 
@@ -739,7 +738,6 @@ subroutine boundary_smooth(f,dir,npts)
 			enddo
 		endif
 	endif
-	
  return
 end subroutine boundary_smooth
 
