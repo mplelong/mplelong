@@ -34,14 +34,14 @@ ifeq ($(VENDOR), gcc_debug)
 	LDFLAGS =
 	FOPTFLAGS   = -g -O3 -cpp -ffree-form -ffree-line-length-none -fallow-argument-mismatch -fbounds-check -ffpe-trap=zero,overflow,underflow -fbacktrace
 	F77OPTFLAGS = -g -O3 -cpp -ffixed-form -ffixed-line-length-none -fallow-argument-mismatch -fbounds-check -ffpe-trap=zero,overflow,underflow -fbacktrace
-	BLAS_LIB =  -L/usr/local/opt/openblas/lib -lblas                #openblas
+	BLAS_LIB =  -L/usr/local/opt/openblas/lib -lblas                #openblas has lapack routines too
 endif
 
 ifeq ($(VENDOR), gcc)
 	LDFLAGS =
 	FOPTFLAGS   = -g -O3 -cpp -ffree-form -ffree-line-length-none -fallow-argument-mismatch 
 	F77OPTFLAGS = -g -O3 -cpp -ffixed-form -ffixed-line-length-none -fallow-argument-mismatch 
-	BLAS_LIB =  -L/usr/local/opt/openblas/lib -lblas                #openblas
+	BLAS_LIB =  -L/usr/local/opt/openblas/lib -lblas                #openblas has lapack routines too
 endif
 
 
