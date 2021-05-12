@@ -130,6 +130,7 @@ subroutine diffuse
  	real(kind=8),allocatable,save        :: diff_factor(:,:,:)
  	character(len=80),save               :: exp_type(2)
  	real(kind=8), external               :: myexp
+ 	logical                              :: debug=.FALSE.
  	logical, save                        :: first_entry=.TRUE.
 	
 	if( first_entry) then
@@ -201,6 +202,30 @@ subroutine diffuse
 			call transform_xy(s2,tmpY,dir,exp_type)
 			fid = 3
 		endif
+		
+		
+		
+		if(id==1 .and. debug ) then		
+			open(1,file='output/debug_data/x_diffusion')
+				j=1 ; k=(nz-1)/2
+				do i=1,locnx
+					ig = global_x_indices(START,YBLOCK,myid) + i - 1
+					write(1,*) ig,kx(ig),kxfilter(ig),diff_factor(j,ig,1),tmpY(j,ig,k,1)
+				enddo
+			close(1)
+			
+			open(1,file='output/debug_data/y_diffusion')
+				i=1 ; k=(nz-1)/2
+				ig = global_x_indices(START,YBLOCK,myid) + i - 1
+				do j=1,ny
+					write(1,*) j,ky(j),kyfilter(j),diff_factor(j,ig,1),tmpY(j,ig,k,1)
+				enddo
+			close(1)			
+						
+			write(0,*) 'nu_star(2),dt,p',nu_star(2),dt,p
+		endif
+		
+		
 	
 		!------------------------------------------------------------------------
 		!  multiply by exp(-nu_* (kx^2p + ky^2p)*dt), correct version from fid
@@ -212,6 +237,9 @@ subroutine diffuse
 				enddo
 			enddo
 		enddo
+		
+		
+ 
 		
 	
 		!------------------------------------------------------------------------
@@ -282,6 +310,7 @@ subroutine z_diffusion(f,ans,nz,id)
  	integer, save                  :: kz_nyq
  	real(kind=8)                   :: zz
  	real(kind=8), external         :: myexp
+ 	logical                        :: debug=.FALSE.
  	logical,save                   :: first_entry=.TRUE.
  
 	if( first_entry ) then
@@ -335,6 +364,15 @@ subroutine z_diffusion(f,ans,nz,id)
 	!        wrk <-- f_hat(kz)
 	!----------------------------------------------
 	call dfftw_execute_r2r(plans(1),f(kk),wrk(kk)) 
+	
+	if( debug ) then
+		open(1,file='output/debug_data/z_diffusion')
+			do k=1,nz
+				write(1,*) k,kz(k),kzfilter(k),diff_factor(k,1),wrk(k)
+			enddo
+		close(1)
+		stop ' stop in z_diffusion'
+	endif
 
 	!----------------------------------------------
 	!  multiply by the damping factor and
