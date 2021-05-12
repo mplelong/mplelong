@@ -117,7 +117,7 @@ subroutine ReadUserData
   		call mpi_bcast(p(1),1,MPI_INTEGER,0,comm,ierr)
   		if(myid==0) read(1,*) p(2)
   		call mpi_bcast(p(2),1,MPI_INTEGER,0,comm,ierr)
-  		if(myid==0) read(1,*) p(2)
+  		if(myid==0) read(1,*) p(3)
   		call mpi_bcast(p(3),1,MPI_INTEGER,0,comm,ierr)
   		
   		if(myid==0) read(1,*) T_diff(1)
