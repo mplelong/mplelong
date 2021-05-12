@@ -687,6 +687,11 @@ subroutine test_poisson_solver
 		ll = 6.d0 * pi/Ly
 		mm = 1.d0 * pi/Lz
 		
+		if( ny==1 ) then
+			ll = 0.d0 * pi/Lx
+			kk = 6.d0 * pi/Ly
+		endif
+		
 		! make sure test is periodic if problem is periodic
 		if( z_periodic ) mm = 2.d0 * pi/Lz
 				
