@@ -5,8 +5,8 @@ append       !!===>  append w/ each write or create new file
 1            !!===>  istart
 129          !!===>  iend
 1            !!===>  i inc
-17           !!===>  jstart
-17           !!===>  jend
+5            !!===>  jstart
+5            !!===>  jend
 1            !!===>  j inc
 1            !!===>  kstart
 129          !!===>  kend 
@@ -23,7 +23,7 @@ append       !!===>  append w/ each write or create new file
 65           !!===>  iend
 1            !!===>  i inc
 1            !!===>  jstart
-32           !!===>  jend
+8            !!===>  jend
 1            !!===>  j inc
 1            !!===>  kstart
 129          !!===>  kend 
@@ -40,7 +40,7 @@ append       !!===>  append w/ each write or create new file
 129          !!===>  iend
 1            !!===>  i inc
 1            !!===>  jstart
-32           !!===>  jend
+8            !!===>  jend
 1            !!===>  j inc
 65           !!===>  kstart
 65           !!===>  kend 
@@ -57,7 +57,7 @@ new          !!===>  append w/ each write or create new file
 129          !!===>  iend
 1            !!===>  i inc
 1            !!===>  jstart
-32           !!===>  jend
+8            !!===>  jend
 1            !!===>  j inc
 1            !!===>  kstart
 129          !!===>  kend 

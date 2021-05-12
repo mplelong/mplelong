@@ -9,8 +9,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 
-data_dir = '../../output/debug_data/'
-Q = 5  ; M=(Q+1)/2 ; filter_fraction=0.05
+data_dir = '/Users/kraig/flow_solve_BC/output/debug_data/'
+Q = 9  ; M=(Q+1)/2 ; filter_fraction=0.00
 Lx =100.e3 ; Ly = 30.e3 ; Lz = 600
 
 #----------------------------------------------------------------------

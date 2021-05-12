@@ -15,6 +15,7 @@ from data_processing_utilities import parse_problem_params
 #-----------------------------------------------------------------------------------------
 
 root_dir = sys.argv[1]
+root_dir = root_dir + '/'
 print(root_dir)
 tscale = sys.argv[2]
 print(tscale)
@@ -38,7 +39,7 @@ kappa1,kappa2,high_order_flag,p,T_diff] = problem_params
 
 data_file = root_dir + 'output/cfl.dat'     # t, cfl_x, cfl_y, cfl_z
 plot_dir  = root_dir + 'output/figures/'
-plot_file = plot_dir + 'cfl.eps'
+plot_file = plot_dir + 'cfl.pdf'
 
 if not os.path.exists(plot_dir):
 	cmd = 'mkdir -p ' + plot_dir
@@ -81,4 +82,4 @@ title_string = "maximum cfl values vs time:          dt=%.4f  [s] " %(dt)
 axes.set_title(title_string,fontsize=12)
 
 
-plt.savefig(plot_file,dpi=300,bb_inches='tight')      # save plot file
+plt.savefig(plot_file,dpi=300)      # save plot file

@@ -1,6 +1,6 @@
 """
-Script to read in time slices from a global 2d netcdf file and make
-plots of the flow_solve solution embedded within the outer domain
+Script to read in time slices from a global, time-concatenated 2d netcdf file 
+and make plots of the flow_solve solution embedded within the outer domain
 """
 import os,math,sys              
 import numpy as np
@@ -11,8 +11,11 @@ from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 
 from netcdf_stuff import read_netcdf_2d_coords,read_netcdf_2d_var
 
-data_dir = '../../output/2D/'
-plot_dir = '../../output/movie_frames/'
+root_dir = sys.argv[1]
+root_dir = root_dir + '/'
+
+data_dir = root_dir + 'output/slices/2D/'
+plot_dir = root_dir + 'output/movie_frames/'
 do_print_eps = False
 do_print_png = True
 
@@ -36,7 +39,7 @@ m_iw = 1.*pi/H            # [1/m]         vertical wavenumber of internal wave
 omega2 = (k_iw**2 * N2 + m_iw**2 * f2)/(k_iw**2 + m_iw**2)
 omega = np.sqrt(omega2)   # [1/s]         internal wave frequency
 IWPER = (2.*pi/omega)     # [s]
-A = 0.01                  # [m/s]         amplitude of U
+A = 0.05                  # [m/s]         amplitude of U
 phase = pi/4.             # [1]           initial phase shift of wave mode
 
 NX=64 ; DX= L/NX; X=np.linspace(0,L-DX,NX)     # open interval   [0,L)
@@ -62,7 +65,7 @@ def parent_soln(X,Z,t,id):
 
 
 
-filename = data_dir + 'XZ_0.nc'
+filename = data_dir + 'XZ.nc'
 #------------------------------------------------------------------
 #  get the nested domain coordinate data
 #------------------------------------------------------------------
@@ -113,7 +116,7 @@ for islice in range(nt):
 	YmajorFormatter = FormatStrFormatter('%d')
 	YminorLocator   = MultipleLocator(250)
 
-	v_min=-0.01; v_max=0.01
+	v_min=-A; v_max=A
 	CMAP = plt.get_cmap('bwr')    # bwr     
 	ncontours = 32 ; levels = np.linspace(v_min,v_max,ncontours)
 	plt.contour(X/1000.,Z,U,levels,cmap=CMAP,extend='both',zorder=1,linewidths=0.75) 

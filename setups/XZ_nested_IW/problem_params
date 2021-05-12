@@ -5,7 +5,7 @@ BC_XZ_test           ! runlabel
 2                    ! MPI decomposition parameter p1, splits (nx)   
 2                    ! MPI decomposition parameter p2, splits (ny,nz)  p1*p2=numprocs=np
 129                  ! nx    split by (p1)
-32                   ! ny    split by (p1,p2)   
+8                    ! ny    split by (p1,p2)  32 
 129                  ! nz    split by (p2)     
 47.95215d0           ! dt       (s)    
 0.d0                 ! t_start  (s)    
@@ -22,25 +22,24 @@ p                    ! defn of scalar s2 ( p =  passive tracer )
 1027.d0              ! rho_0  constant reference density  (kg/m3)
 9.81d0               ! g  gravity                         (m/s2)
 1.d-4                ! f0 Coriolis parameter at Lx/2 Ly/2 (1/s)
-1.d44                ! nu     viscosity                   (m2/s)  
-1.d44                ! kappa  diffusivity for s1          (m2/s)
-1.d44                ! kappa  diffusivity for s2          (m2/s)
-.TRUE.               ! high_order_operators,  Use high order diffusion operators? 
-4                    ! half order of high order diffusion operators, x direction    (only read and used if TRUE)
-4                    ! half order of high order diffusion operators, y direction    (only read and used if TRUE)
-4                    ! half order of high order diffusion operators, z direction    (only read and used if TRUE)
-3478586.d0           ! diffusive time scale at x nyquist wavenumber (s)  (only read and used if TRUE)
-500.d0               ! diffusive time scale at y nyquist wavenumber (s)  (only read and used if TRUE)
-5566.d0              ! diffusive time scale at z nyquist wavenumber (s)  (only read and used if TRUE)
+1.d-6                ! nu     viscosity                   (m2/s)  
+1.d-6                ! kappa  diffusivity for s1          (m2/s)
+1.d-6                ! kappa  diffusivity for s2          (m2/s)
+.FALSE.              ! high_order_operators,  Use high order diffusion operators? 
+2                    ! half order of high order diffusion operators, x direction    (only read and used if TRUE)
+2                    ! half order of high order diffusion operators, y direction    (only read and used if TRUE)
+2                    ! half order of high order diffusion operators, z direction    (only read and used if TRUE)
+55657388.d0          ! diffusive time scale at x nyquist wavenumber (s)  (only read and used if TRUE)
+55657388.d0          ! diffusive time scale at y nyquist wavenumber (s)  (only read and used if TRUE)
+22262.d0             ! diffusive time scale at z nyquist wavenumber (s)  (only read and used if TRUE)
 ----------------------------------------------------------------------------------------------------
 you can keep notes below here...
 ----------------------------------------------------------------------------------------------------
 
 Diffusion:
-p=1 and the given diffusion times at Nyquist correspond to Laplacian diffusion 
-with nu=kappa=1.e-4 m2/s nx=513,nz=257 Lx=30km Lz=600m
-i.e. results should be (and are) identical using the high_order_operator logic & code
-keeping the same diffusion times, I get good solutions for p=1,2,3,4,5 (didn't try higher orders)
+Laplacian diffusion works from nu=kappa= 1.d-1 --> 1.d-19 and with diffusion not called at all
+high order with p=4 is now giving me problems, I'm not sure why, but the appear as E/W bdry errors in w
+
 
 3D:
 2d problem (ky=0) with 257x33x129:  solns look fine for at least 150 steps, but slow (p1=p2=1)
@@ -49,5 +48,6 @@ keeping the same diffusion times, I get good solutions for p=1,2,3,4,5 (didn't t
 
 p1>1 with p2=1 is not configured, primary decomposition is in y & z via p2 with additional available via p1
 
-
+NB  too much high order diffusion causes bad errors that can easily be mistaken for problems
+in the EW boundary treatment
 

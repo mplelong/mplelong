@@ -3,27 +3,49 @@
 # Script to compile flow_solve, create a clean output area, run the codes
 # and do some basic data management tasks
 #-------------------------------------------------------------------------
-echo run.sh now running on lacosta
+echo run.sh now running on "$HOSTNAME"
 
-#------------------
-# prepare things
-#------------------
-make clean
-make flow.x
-make outdirs
+source set_env_variables.sh
 
-#------------------
-# do the run
-#------------------
-mpirun -np 4 ./flow.x
+do_run=True
 
-#---------------------------------------------------------
+#------------------------------------------------------------
+# prepare things for the nested XZ IW test
+#------------------------------------------------------------
+if( "$do_run" ) then
+	rm -f input
+	ln -s setups/XZ_nested_IW input
+	make clean
+	make flow.x
+	make outdirs
+
+	#---------------------------------------------------
+	# do the run (it's set up for a 4x1 processor grid)
+	#---------------------------------------------------
+	"$MPIRUN" -np 4 ./flow.x
+fi
+
+#---------------------------------------------------------------
 # when run is complete, stitch together the output files
 # make a simple plot of the cfl history
-#---------------------------------------------------------
+# 2nd arg for plot_cfl.py is s, hrs or days for plot time scale
+#---------------------------------------------------------------
 cd input/data_tools
-python concatenate_results.py
-python python_scripts/plot_cfl.py /Users/kraig/flow_solve_BC/ hrs    # plot the time scale in hours
+"$PYTHON" concatenate_results.py "$FLOW_SOLVE_ROOT"
+"$PYTHON" python_scripts/plot_cfl.py "$FLOW_SOLVE_ROOT"  s    # plot the time scale seconds
+open -a Preview output/figures/cfl.pdf
 
-cd /Users/kraig/flow_solve_BC/
-open -a Preview output/figures/cfl.eps
+cd "$FLOW_SOLVE_ROOT"
+ncrcat -O output/slices/2D/XZ* output/slices/2D/XZ.nc
+"$NCVIEW" output/slices/2D/XZ.nc &
+
+cd input/data_tools
+"$PYTHON" python_scripts/make_movie_frames.py "$FLOW_SOLVE_ROOT"
+
+cd "$FLOW_SOLVE_ROOT"
+ffmpeg -framerate 10 -pattern_type glob -i 'output/movie_frames/U*.png' -c:v libx264 -vf "fps=10,format=yuv422p" output/XZ_U_nested.avi
+
+
+
+
+

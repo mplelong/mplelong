@@ -59,8 +59,8 @@ comm.Barrier()
 #   each mpi task makes its own list of slices: my_slices
 #-----------------------------------------------------------------------------------------
 last_slice=slices[-1]
-len = np.float( len(slices) )                             # length of global slice list, as float
-local_len = np.int(np.ceil(len/numprocs))                 # nominal length of slice list on each processor
+len = float( len(slices) )                             # length of global slice list, as float
+local_len = int(np.ceil(len/numprocs))                 # nominal length of slice list on each processor
 i0 = myid*local_len                                       # starting index for this processors slices
 i1 = i0 + local_len                                       # (noninclusive) ending index
 i1 = min(i1,last_slice+1)                                 # keep last list(s) from overshooting the end
