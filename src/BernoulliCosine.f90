@@ -40,7 +40,17 @@ SUBROUTINE deriv_BC(f,df,n,dir,method,debug)
 	integer, allocatable, save                  :: ipiv_0(:), ipiv_L(:)
 	real(kind=8), allocatable, save             :: U(:,:,:), dU(:,:,:)
 	logical, save                               :: first_entry=.TRUE.
+	
 		
+	if( n==1 ) then
+		df=0.d0
+		return
+	endif
+
+	if( dir==3 .and. debug .and. myid==0 ) then
+		write(0,*) '                                    debug ON for deriv_BC dir, n: ',dir,n
+	endif
+	
 	if(first_entry) then
 		M = (Q+1)/2
 		allocate( LU_0(M,M), LU_L(M,M), ipiv_0(M), ipiv_L(M), rhs(M), A(M), B(M) )
@@ -55,10 +65,6 @@ SUBROUTINE deriv_BC(f,df,n,dir,method,debug)
 	endif
 	
 		
-	if( n==1 ) then
-		df=0.d0
-		return
-	endif
 	
 	!-----------------------------------------------------------
 	!  straight Fourier method, 'fourier', 'cos' or 'sin'
@@ -81,9 +87,7 @@ SUBROUTINE deriv_BC(f,df,n,dir,method,debug)
 	!  otherwise, use the Bernoulli Cosine method
 	!-----------------------------------------------------------
 		
-	if( dir==3 .and. debug .and. myid==0 ) then
-		write(0,*) '                                    debug ON for deriv_BC dir, n: ',dir,n
-	endif
+	
 	
 	!-----------------------------------------------------------
 	!  for Bernoulli-Cosine, get stuff for correct dir
@@ -135,6 +139,7 @@ SUBROUTINE deriv_BC(f,df,n,dir,method,debug)
 	endif
 	
 	
+	
 	!---------------------------------------------------------------
 	!  construct the 2 series for x in [0,L], add them to get f_s(x)
 	!  also differentiate this series
@@ -154,8 +159,7 @@ SUBROUTINE deriv_BC(f,df,n,dir,method,debug)
 			write(1,*) z(j),tmp(j,1),tmp(j,2),tmp(j,3),tmp(j,4)
 		enddo
 		close(1)
-	endif
-	
+	endif	
 	
 	 	
 	! combine the A/0 and B/L series;  store in tmp arrays
@@ -169,6 +173,7 @@ SUBROUTINE deriv_BC(f,df,n,dir,method,debug)
 		close(1)
 	endif
 
+
 	! extract the smooth, even extendable part that is well approximated by a cosine series
 	tmp(1:n,1) = f(1:n) - tmp(1:n,1)  ! i.e. f_Q = f - f_s  should be Q times differentiable when even expanded 
 	if( dir==3 .and. debug .and. myid==0 ) then
@@ -179,13 +184,14 @@ SUBROUTINE deriv_BC(f,df,n,dir,method,debug)
 		close(1)
 	endif
 	
+	
 		
 	!---------------------------------------------------------------
 	!  use standard cosine transform to differentiate f_Q
 	!  store result in tmp(:,3) use tmp(:,4) as work space
 	!---------------------------------------------------------------
 	BCmethod='cos'
-	call differentiate_fcs(tmp(1,1),tmp(1,3),n,dir,method,order)
+	call differentiate_fcs(tmp(1,1),tmp(1,3),n,dir,BCmethod,order)
 	
 	
 		
@@ -910,12 +916,12 @@ subroutine verify_deriv_BC
  		if(myid==0 .and. nx>nmin) then
  			do j=1,nx
  				diff = abs(out(j) - (pi/Lx)*cos( pi*x(j)/Lx ))
- 				!write(0,*) x(j), in(j), out(j), (pi/Lx)*cos( pi*x(j)/Lx )
+ 				!if(myid==0) write(0,*) x(j), in(j), out(j), (pi/Lx)*cos( pi*x(j)/Lx )
  				if( diff  > tol ) stop ' problem verifying x Bernoulli-cosine differentiation in preliminary_tasks '
  			enddo
  		endif
  		write(0,*) '                         ....................... d/dx using Bernoulli-cosine method looks fine, tol=',tol
- 		deallocate( in,out )
+ 		deallocate( in,out ) 
  	endif
  	
  	if( .not. y_periodic ) then
