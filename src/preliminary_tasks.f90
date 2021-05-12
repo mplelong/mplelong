@@ -187,7 +187,7 @@ subroutine preliminary_tasks
 	! test some essential higher order routines
 	!-------------------------------------------
 	call test_divergence
-	call test_gradient  
+	call test_gradient
 	call test_mudotgradf
  	call test_transform_xy
  	call test_poisson_solver
