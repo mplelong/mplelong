@@ -25,10 +25,10 @@ p                    ! defn of scalar s2 ( p =  passive tracer )
 1.d-6                ! nu     viscosity                   (m2/s)  
 1.d-6                ! kappa  diffusivity for s1          (m2/s)
 1.d-6                ! kappa  diffusivity for s2          (m2/s)
-.FALSE.              ! high_order_operators,  Use high order diffusion operators? 
-2                    ! half order of high order diffusion operators, x direction    (only read and used if TRUE)
-2                    ! half order of high order diffusion operators, y direction    (only read and used if TRUE)
-2                    ! half order of high order diffusion operators, z direction    (only read and used if TRUE)
+.TRUE.               ! high_order_operators,  Use high order diffusion operators? 
+4                    ! half order of high order diffusion operators, x direction    (only read and used if TRUE)
+4                    ! half order of high order diffusion operators, y direction    (only read and used if TRUE)
+4                    ! half order of high order diffusion operators, z direction    (only read and used if TRUE)
 55657388.d0          ! diffusive time scale at x nyquist wavenumber (s)  (only read and used if TRUE)
 55657388.d0          ! diffusive time scale at y nyquist wavenumber (s)  (only read and used if TRUE)
 22262.d0             ! diffusive time scale at z nyquist wavenumber (s)  (only read and used if TRUE)
@@ -38,16 +38,8 @@ you can keep notes below here...
 
 Diffusion:
 Laplacian diffusion works from nu=kappa= 1.d-1 --> 1.d-19 and with diffusion not called at all
-high order with p=4 is now giving me problems, I'm not sure why, but the appear as E/W bdry errors in w
-
-
-3D:
-2d problem (ky=0) with 257x33x129:  solns look fine for at least 150 steps, but slow (p1=p2=1)
-2d problem (ky=0) with 129x33x129:  solns look fine for at least 650 steps
-2d problem (ky=0) with 129x33x129:  p1=1,p2=2   all good for 1 period integration, much faster as expected
+higher order diffusion also works
 
 p1>1 with p2=1 is not configured, primary decomposition is in y & z via p2 with additional available via p1
 
-NB  too much high order diffusion causes bad errors that can easily be mistaken for problems
-in the EW boundary treatment
 
