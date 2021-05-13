@@ -57,7 +57,7 @@ fi
 #---------------------------------------------------------------
 
 if( "$make_restart_files" ) then
- 	"$PYTHON" "$FLOW_SOLVE_ROOT"/input/data_tools/python_scripts/XYZ_to_p1p2_restart.py "$FLOW_SOLVE_ROOT" 2 2 768
+ 	"$PYTHON" "$FLOW_SOLVE_ROOT"/input/data_tools/python_scripts/XYZ_to_p1p2_restart.py "$FLOW_SOLVE_ROOT" 2 2 XYZ_000768.nc
 fi
 
 

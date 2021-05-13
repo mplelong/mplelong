@@ -1,0 +1,68 @@
+RESTART NOTES
+----------------------
+
+Clean up and document the approach as I reinstate this capability. Simplify
+user input to trigger this; i.e. don't do the actual reading in a user routine, make
+a new routine and just use the minimum user info necessary.
+
+User tasks for doing a restart:
+(1) create the restart files from a saved full 3d output point. See below.
+(2) set the restart flag to .TRUE. in problem_params
+(3) set rs_basename etc in user_param_module.f90 subroutine change_default_values
+	typical values are:
+	 
+	(a) RESTART/XYZ_000768_  if using a set of 3d output files from similar flow_solve run
+	
+	(b) RESTART/restart_     if XYZ_to_p1p2_interpolated_restart.py or XYZ_to_p1p2_restart was used
+		RESTART directory is in (or has a symbolic link) the $FLOW_SOLVE_ROOT directory
+		
+	(c) set add_restart_time=.TRUE. if you want to just set t0=0 in problem_params, in this case
+		both t0 and tf will be incremented by the value of time written to the restart files
+		i.e. t-=0 tf=X  could be used over and over for similar restarts with the time incremented automatically
+		(I was often forgetting to reset the initial time and having to recalculate the final time etc)
+		
+	(d) reset istart if you want the time step index to start at something other than zero
+		typically this is used to give continuity for output file names that have time indices in them
+
+
+
+
+
+(1) Run the XZ_nested_IW test case to create some distributed XYZ .nc files. We'll
+first restart using the XYZ files written by flow_solve. (done and tested)
+
+(2) Then we'll create a global XYZ file. Starting with this file and specifying
+p1,p2 for the new run, create a set of distributed restart files.
+
+	For example,
+	$PYTHON $FLOW_SOLVE_ROOT/input/data_tools/python_scripts/XYZ_to_p1p2_restart.py $FLOW_SOLVE_ROOT 2 2 XYZ_000768.nc
+	creates a set of $FLOW_SOLVE_ROOT/RESTART/restart_xxx files from output/slices/3D/XYZ_000768.nc for a p1=p2=2 restart.
+	Now restart from these files.
+	(done and tested)
+
+(3) Now take a new set of nx,ny,nz,p1,p2 values and interpolate to create a 
+new global XYZ netcdf  before creating the distributed files. This takes a few
+steps:
+
+	(a) from a successful run, create a global XYZ.nc file (use concat_XYZ_mpi.py)
+		see data_tools/concatenate_results.py for calling syntax
+		
+	(b)	interpolate in XY using python_scripts/interp_H.py
+		$PYTHON interp_H.py $FLOW_SOLVE_ROOT XYZ_000768.nc 79 79 cubic
+		this command will start w/ output/slices/3D/XYZ_000768.nc and interpolate to a
+		new horizontal resolution of 79x97 using scipy's cubic interpolation scheme
+		the output file is output/slices/3D/horiz_interp.nc
+		
+	(c)	interpolate in Z using python_scripts/interp_V.py
+		$PYTHON interp_V.py $FLOW_SOLVE_ROOT horiz_interp.nc XYZ_int.nc 79 linear
+		will do this and create a new 79x79x79 XYZ file output/slices/3D/XYZ_int.nc
+		
+	(d) Now use data_tools/python_scripts/XYZ_to_p1p2_restart.py to create the distributed restart files
+
+(4) I created a new wrapper script XYZ_to_p1p2_interpolated_restart.py that handles the 
+interpolation and decomposition into restart files. An example execution command is:
+
+$PYTHON $FLOW_SOLVE_ROOT/input/data_tools/python_scripts/XYZ_to_p1p2_interpolated_restart.py $FLOW_SOLVE_ROOT XYZ_000768.nc 129 129 129 2 2 cubic
+
+This starts with output/slices/3D/XYZ_000768.nc, interpolates to a new resolution of 129^3 and then writes the restart files to $FLOW_SOLVE_ROOT/RESTART.
+It also cleans up after itself by removing the global 3d files created during the interpolation.

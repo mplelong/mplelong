@@ -30,8 +30,8 @@ restart_dir = top_dir + 'RESTART/'           # where the p1xp2 restart files wil
 slice_dir = top_dir + 'output/slices/3D/'    # where the global 3d file lives
 
 # decomposition parameters to be used in restarted flow_solve run
-p1 = flow_solve_root = int(sys.argv[2]) 
-p2 = flow_solve_root = int(sys.argv[3])
+p1 = int(sys.argv[2]) 
+p2 = int(sys.argv[3])
 
 # input file
 infile = sys.argv[4]
