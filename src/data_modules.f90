@@ -30,11 +30,16 @@
 		logical                         :: do_second_scalar
 		logical                         :: high_order_operators
 		logical                         :: forcing_key(5)=.TRUE.
-		logical                         :: restart=.FALSE.
 		logical                         :: ambient_profile(2)=.FALSE.
 		logical                         :: user_bcs=.TRUE.
 		logical                         :: endpoint_smoothing=.TRUE.
 		logical                         :: do_sponging = .FALSE.
+		logical                         :: restart=.FALSE.
+		character(len=80)               :: rs_basename='NOT_SPECIFIED'
+		logical                         :: subtract_s1_bar=.FALSE.
+		logical                         :: subtract_s2_bar=.FALSE.
+		logical                         :: add_restart_time=.FALSE.
+		
 	end module methods_params
 
 
@@ -128,7 +133,7 @@
 
 
 	module differentiation_params
-		integer                         :: Q=5                                         ! (Q+1)/2 term expansion in Bernoulli
+		integer                         :: Q=9                                         ! (Q+1)/2 term expansion in Bernoulli
 		real(kind=8)                    :: filter_fraction=0.05                        ! can be 0, neg. value invokes 2/3 rule
 		real(kind=8),allocatable,target :: LU_x(:,:,:), LU_y(:,:,:), LU_z(:,:,:)       ! original & factored B matrices
 		integer,allocatable,target      :: ipiv_x(:,:), ipiv_y(:,:), ipiv_z(:,:)       ! corresponding pivot matrices
@@ -151,8 +156,8 @@
 		character(len=80)               :: memoryfile='output/memlog'
 		character(len=80)               :: message
 		character(len=80)               :: step_flag='euler'
-		integer                         :: istep
-		integer                         :: istart
+		integer                         :: istep=0
+		integer                         :: istart=0
 		integer                         :: iend
 		integer                         :: MM0=1,MM1=2,MM2=3,MM3=4  !! for AB timestepping
 		integer                         :: N=1,NM1=2                !! for AM timestepping

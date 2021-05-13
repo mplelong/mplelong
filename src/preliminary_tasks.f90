@@ -12,6 +12,7 @@ subroutine preliminary_tasks
 	use fourier_differentiation_tools
 	use methods_params
 	use etc
+	use user_params, only: change_default_values
 	implicit none
 	
 	
@@ -32,11 +33,10 @@ subroutine preliminary_tasks
  	endif
  	call ReadUserData
  	
- 	!--------------------------
-	!  set some initial values
-	!--------------------------
-	tn = t0
-	tnp1 = tn + dt
+ 	!------------------------------------------------------------
+ 	! Change any default values specified in user_params_module
+ 	!------------------------------------------------------------
+  	call change_default_values
 
  	
  	!---------------------------------------
@@ -93,6 +93,14 @@ subroutine preliminary_tasks
  	endif 	
 	call InitialConditions
 	
+	!--------------------------
+	!  set some initial values
+	!--------------------------
+	t_secs = t0
+	tn = t0
+	tnp1 = tn + dt
+	istep = istart
+	
 	!-----------------------------------------------
 	! user may have called "change_default_values"
 	! check for FS rigid lid xy periodic
@@ -120,10 +128,10 @@ subroutine preliminary_tasks
 	
 	
 	!-----------------------------------------------
-	! get t=0 boundary conditions and apply
+	! get t=t0 boundary conditions and apply
 	! them to the initial conditions as a test
 	!-----------------------------------------------
- 	tnp1 = tn	!  set to 0 temporarily for testing
+ 	tnp1 = tn	!  set to tn temporarily for testing
  	call fill_boundary_arrays
  	call apply_bcs		
  	tnp1 = tn + dt    !  reset to proper value

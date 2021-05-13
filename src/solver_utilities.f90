@@ -899,7 +899,7 @@ subroutine toggle
  	endif
  	
  	if( first_entry ) then
- 		iend = (tf-t0)/dt + 1
+ 		iend = istart + (tf-t0)/dt + 1
  		first_entry=.FALSE.
  	endif
 
