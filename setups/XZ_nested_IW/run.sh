@@ -7,7 +7,9 @@ echo run.sh now running on "$HOSTNAME"
 
 source set_env_variables.sh
 
-do_run=True
+do_run=False
+do_movie_frames=False
+make_restart_files=True
 
 #------------------------------------------------------------
 # prepare things for the nested XZ IW test
@@ -32,20 +34,31 @@ fi
 #---------------------------------------------------------------
 cd input/data_tools
 "$PYTHON" concatenate_results.py "$FLOW_SOLVE_ROOT"
-"$PYTHON" python_scripts/plot_cfl.py "$FLOW_SOLVE_ROOT"  s    # plot the time scale seconds
+"$PYTHON" python_scripts/plot_cfl.py "$FLOW_SOLVE_ROOT"  s  # plot the time scale seconds
+
+cd "$FLOW_SOLVE_ROOT"
 open -a Preview output/figures/cfl.pdf
 
 cd "$FLOW_SOLVE_ROOT"
 ncrcat -O output/slices/2D/XZ* output/slices/2D/XZ.nc
 "$NCVIEW" output/slices/2D/XZ.nc &
 
-cd input/data_tools
-"$PYTHON" python_scripts/make_movie_frames.py "$FLOW_SOLVE_ROOT"
+if( "$do_movie_frames" ) then
+	cd input/data_tools/python_scripts
+	"$PYTHON" make_movie_frames.py "$FLOW_SOLVE_ROOT"
 
-cd "$FLOW_SOLVE_ROOT"
-ffmpeg -framerate 10 -pattern_type glob -i 'output/movie_frames/U*.png' -c:v libx264 -vf "fps=10,format=yuv422p" output/XZ_U_nested.avi
+	cd "$FLOW_SOLVE_ROOT"
+	ffmpeg -framerate 10 -pattern_type glob -i 'output/movie_frames/U*.png' -c:v libx264 -vf "fps=10,format=yuv422p" output/XZ_U_nested.avi
+fi
 
+#---------------------------------------------------------------
+# make a 2x2 set of restart files from global file
+# output/slices/3D/XYZ_000768.nc
+#---------------------------------------------------------------
 
+if( "$make_restart_files" ) then
+ 	"$PYTHON" "$FLOW_SOLVE_ROOT"/input/data_tools/python_scripts/XYZ_to_p1p2_restart.py "$FLOW_SOLVE_ROOT" 2 2 768
+fi
 
 
 
