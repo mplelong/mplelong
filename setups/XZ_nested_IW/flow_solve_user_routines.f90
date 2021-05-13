@@ -101,10 +101,6 @@ subroutine user_ics(x,y,z,F,id,nx,ny,nz)
  	real(kind=8)              :: pi,urv
  	real(kind=8)              :: XVAL,YVAL,ZVAL,t0=0.d0
   	
-  	
-  	! Change any default values specified in user_params_module
-  	call change_default_values
-  	
   	! If the run is a restart; return.
   	if( restart ) return           
 
