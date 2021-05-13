@@ -1,9 +1,12 @@
 #!python
 """
-    Script to read in a global XYZ_xxxxxx.nc file and interpolate in both
-    x and y, writing the results to a new global XYZ.nc file
+    Script to read in a global XYZ netcdf file and interpolate in both
+    x and y, writing the results to a new global XYZ netcdf file.
     Both input and output files have data layout (t,z,y,x) according to ncdump -h
-    this matches the layout of the  distributed 3d files written by flow_solve
+    this matches the layout of the  distributed 3d files written by flow_solve.
+    
+    Script assumes the input file lives in $FLOW_SOLVE_ROOT/output/slices/3D.
+    The output file is written to horiz_interp.nc in the same directory as the input file
 """
 
 #---------------------------------------------------------------------------------------
@@ -15,21 +18,39 @@ import scipy as sp
 from scipy.io import netcdf                 
 from scipy import interpolate
 
-#-----------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------- 
+# flow_solve root directory 
+# (below which the output directory containing the saved data files exists)
+#---------------------------------------------------------------------------
+root_dir = sys.argv[1]
+#  add / for convenience
+root_dir = root_dir + '/'
+
+infile = sys.argv[2]    # input XYZ netcdf filename e.g. XYZ_000768.nc
+infile_dir = root_dir + 'output/slices/3D/'
+
+NX = int(sys.argv[3])
+NY = int(sys.argv[4])
+interp_method = sys.argv[5]
+print('...     interp_H executing: root_dir, infile, requested NX and NY: ', root_dir,infile)
+print('...     do_second_scalar assumed FALSE, [s1]=[kg/m3] infile in ',infile_dir)
+print('...     all three coordinate dimension intervals assumed to be CLOSED ')
+print('...     output dir and filename: ',root_dir,'    output/slices/3D/horiz_interp.nc ')
+print('...     XY interpolation method:  ',interp_method,'   NX,NY = ',NX,NY)
+
 
 #---------------------------------------------------------------------------------------
 #  params pointing to global XYZ file at initial resolution
 #---------------------------------------------------------------------------------------
-top_dir = '/home/kucla/KBW/'
-slice_dir = top_dir + 'data_from_outer_run/' 
-fname1 = slice_dir + 'XYZ_subdomain.nc'       # original global XYZ file
+slice_dir = root_dir + 'output/slices/3D/' 
+fname1 = slice_dir + infile                   # original global XYZ file
 fname2 = slice_dir + 'horiz_interp.nc'        # output global XYZ file
 do_second_scalar=False                        # s2 stored in original file?
 
 #---------------------------------------------------------------------------------------
-#  read in independent variable data from the desired z-concatenated netcdf file
+#  read in independent variable data from input netcdf file
 #---------------------------------------------------------------------------------------
-ncf = netcdf.netcdf_file(fname1, 'r')
+ncf = netcdf.netcdf_file(fname1, 'r',version=2)
 T = ncf.variables['time'].data.copy()   # [s]
 Y = ncf.variables['y'].data.copy()      # [m]
 Z = ncf.variables['z'].data.copy()      # [m]
@@ -53,7 +74,6 @@ nx = X.size ; ny = Y.size; nz = Z.size
 #---------------------------------------------------------------------------------------
 # grid at new resolution  X is closed interval, Y is closed interval
 #---------------------------------------------------------------------------------------
-NX = 441   ;    NY = 441;
 XI = np.linspace(0, Lx, NX)  
 YI = np.linspace(0, Ly, NY)
 
@@ -96,7 +116,7 @@ y[0:NY] = YI[0:NY]
 z[0:nz] = Z[0:nz]
 
 for k in range(0, nz):
-   print('k =', k)   
+   if(np.mod(k,10)==0): print('k =', k)   
    U = ncf.variables['u'][0,k,0:ny,0:nx].copy()      # [m/s]   read kth xy plane
    V = ncf.variables['v'][0,k,0:ny,0:nx].copy()      # [m/s]
    W = ncf.variables['w'][0,k,0:ny,0:nx].copy()      # [m/s]
@@ -105,13 +125,13 @@ for k in range(0, nz):
    V = V.squeeze()
    W = W.squeeze()
    S1 = S1.squeeze()
-   g = interpolate.interp2d(X, Y, U,'cubic')   
+   g = interpolate.interp2d(X, Y, U,interp_method)   
    UI = g(XI, YI)   
-   g = interpolate.interp2d(X, Y, V,'cubic')
+   g = interpolate.interp2d(X, Y, V,interp_method)
    VI = g(XI, YI)
-   g = interpolate.interp2d(X, Y, W,'cubic')
+   g = interpolate.interp2d(X, Y, W,interp_method)
    WI = g(XI, YI)
-   g = interpolate.interp2d(X, Y, S1,'cubic')
+   g = interpolate.interp2d(X, Y, S1,interp_method)
    S1I = g(XI, YI)
    u[0,k,0:NY,0:NX]  =  UI[0:NY,0:NX]
    v[0,k,0:NY,0:NX]  =  VI[0:NY,0:NX]
@@ -122,7 +142,7 @@ for k in range(0, nz):
    if( do_second_scalar ):
    		S2 = ncf.variables['s2'][0,k,0:ny,0:nx].copy()    # 
    		S2 = S2.squeeze()
-   		g = interpolate.interp2d(X, Y, S2,'cubic')
+   		g = interpolate.interp2d(X, Y, S2,interp_method)
    		S2I = g(XI, YI)
    		s2[0,k,0:NY,0:NX] =  S2I[0:NY,0:NX]
    		

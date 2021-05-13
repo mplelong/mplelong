@@ -7,9 +7,9 @@ echo run.sh now running on "$HOSTNAME"
 
 source set_env_variables.sh
 
-do_run=False
+do_run=True
 do_movie_frames=False
-make_restart_files=True
+make_restart_files=False
 
 #------------------------------------------------------------
 # prepare things for the nested XZ IW test

@@ -13,7 +13,7 @@ def fourier_wavenumbers(dk,N):
 	import numpy as np
 	if N%2 == 0:     
 		k = dk * np.array([*range(int(N/2+1)),*range(int(-N/2+1),0,1)]) # Python 3
-		#k = dk * np.array(range(N/2+1) + range(-N/2+1,0,1))   # Python 2
+		# k = dk * np.array(range(N/2+1) + range(-N/2+1,0,1))   # Python 2
 	else:
 		print("fourier_wavenumbers:  N must be even  ",N )
 		exit()

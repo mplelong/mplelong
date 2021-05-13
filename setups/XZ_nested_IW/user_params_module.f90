@@ -38,15 +38,6 @@ module user_params
 	real(kind=8), parameter          :: sigma = f0/5.     !! [1/s] frequency of forcing
 	real(kind=8), parameter          :: A = 0.*f0         !! [m/s2] amplitude of acceleration term on rhs of u
 
-
-	!--------------------------------------------------------------------------------------
-	! restart parameters	 (only used if restart flag is .TRUE. in problem_params) 
-	!                         e.g. 'RESTART/restart_'    'RESTART/XYZ_087900_'
-	!--------------------------------------------------------------------------------------
-	character(len=80),parameter      :: rs_basename = 'RESTART/XYZ_000768_'   !! relative to $FLOW_SOLVE_ROOT directory
-	logical,parameter                :: subtract_s1_bar=.FALSE.               !! TRUE if s1_bar is added to s1 in restart files
-	logical,parameter                :: subtract_s2_bar=.FALSE.               !! TRUE if s2_bar is added to s2 in restart files
-
 	!-------------------------------------------------------------------------------------
 	! declare an allocatable array for storing x-averaged quantities on YZ planes
 	!-------------------------------------------------------------------------------------
