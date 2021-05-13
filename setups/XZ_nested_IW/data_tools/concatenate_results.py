@@ -168,7 +168,6 @@ if( do_XYZ ):
 	
 	cmd_base = MPIRUN + ' -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_XYZ_mpi.py '
 	command = cmd_base + root_dir + ' ' + str(p1) + ' ' + str(p2) + ' ' + str(start_slice) + ' ' + str(end_slice) + ' ' + str(inc) + ' ' + fnrs
-	print(command) ; exit()
 	os.system(command)
 	if( delete_XYZ ):
 		command = 'rm -f ' + root_dir + 'output/3D/' + fnrs + '_*.nc'
