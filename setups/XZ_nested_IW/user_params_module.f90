@@ -43,11 +43,9 @@ module user_params
 	! restart parameters	 (only used if restart flag is .TRUE. in problem_params) 
 	!                         e.g. 'RESTART/restart_'    'RESTART/XYZ_087900_'
 	!--------------------------------------------------------------------------------------
-	character(len=80),parameter      :: rs_basename = 'RESTART/restart_'      !! relative to $BASE directory
+	character(len=80),parameter      :: rs_basename = 'RESTART/XYZ_000768_'   !! relative to $FLOW_SOLVE_ROOT directory
 	logical,parameter                :: subtract_s1_bar=.FALSE.               !! TRUE if s1_bar is added to s1 in restart files
 	logical,parameter                :: subtract_s2_bar=.FALSE.               !! TRUE if s2_bar is added to s2 in restart files
-	logical,parameter                :: reset_dye=.FALSE.                     !! TRUE if s2 distribution reset in restart files
-
 
 	!-------------------------------------------------------------------------------------
 	! declare an allocatable array for storing x-averaged quantities on YZ planes
@@ -60,18 +58,34 @@ contains
 	subroutine change_default_values
 		use differentiation_params,   only: Q, filter_fraction
 		use io_params,                only: variable_key
+		use methods_params,           only: rs_basename,subtract_s1_bar,restart,add_restart_time
+		use etc,                      only: istart
 		implicit none
 		!--------------------------------------------------------------------------------------------
 		!  For example, can set values different than defaults for Bernoulli/Cosine differentiation
-		!  Default values  Q=5 (4 term expansions)  and filter_fraction = 0.05
+		!  Default values  Q=9 (5 term expansions)  and filter_fraction = 0.05
 		!  	filter_fraction = 0 ==> no spectral filtering;  filter_fraction < 0 ==> 2/3 rule
-		!  This is invoked by the "call reset_default_values" in user_ICS.
+		!  
+		!         EVEN IF EMPTY, THIS ROUTINE MUST BE PRESENT IN THIS module!
 		!--------------------------------------------------------------------------------------------
-		Q = 9                                ! gives best results for differentiation tests                      
 		filter_fraction = 0.000              ! .025 using 2/3 rule gives worse results near E/W boundaries
 		
 		variable_key(6,:)=1                  ! for debugging, output div_u*
 		variable_key(9:11,:) = 1             ! for debugging, output ustar,vstar and wstar
+		
+		!--------------------------------------------------------------------------------------
+		! restart parameters	 (only set if restart flag is .TRUE. in problem_params) 
+		!--------------------------------------------------------------------------------------
+		if( restart ) then
+			istart = 768      ! to start time step counter at some value > 0 for continuity of datafile names
+			!rs_basename = 'RESTART/XYZ_000768_'   ! relative to $FLOW_SOLVE_ROOT directory, note trailing underscore
+			rs_basename  = 'RESTART/restart_'
+			subtract_s1_bar=.FALSE.               ! TRUE if s1_bar is added to s1 in restart files
+			add_restart_time=.TRUE.               ! add time stored in restart file to t0,tf specified in problem_params
+		endif
+		
+		
+		
 		
 	end subroutine change_default_values
 
