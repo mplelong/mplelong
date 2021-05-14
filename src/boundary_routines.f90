@@ -1,8 +1,9 @@
 !-------------------------------------------------------------------------
-! Routines to deal with boundary conditions. Considered a "user" routine
-! because generally, the boundary information is obtained from an external
-! source provided by the user. This could be data from a parent simulation
-! or data evaluated from a user-defined set of functions.
+! Routines to deal with boundary conditions. All these routines operate
+! on boundary data already stored in arrays like east_vals(y,z,id) and 
+! east_derivs(y,z,id) etc. These routines need not know how the data got 
+! to those arrays. Filling these arrays at each time step is done in
+! user_bvals_EW user_bvals_NS and user_bvals_BT at the moment.
 !-------------------------------------------------------------------------
 subroutine apply_bcs
 	use mpi_params,                           only: myid
@@ -632,30 +633,64 @@ subroutine fill_boundary_arrays
 	endif
 	
 	tval = tnp1   ! during a time step, we need BVALSand normal DERIVS at the next time step
-	do id=1,nvars
 	
-		if(locnx>1 .and. .NOT. x_periodic) then
-			side='E'
-			call user_bvals_EW(x,y,z,tval,id,east_vals(1,1,id),east_derivs(1,1,id),locnx,ny,locnz,side,Lx)
-			side='W'
-			call user_bvals_EW(x,y,z,tval,id,west_vals(1,1,id),west_derivs(1,1,id),locnx,ny,locnz,side,Lx)
-		endif
+	
+	
+	if( boundary_data_source == 'datafiles' ) then
+			
+		do id=1,nvars
+	
+			if(locnx>1 .and. .NOT. x_periodic) then
+				side='E'
+				call bvals_EW(x,y,z,tval,id,east_vals(1,1,id),east_derivs(1,1,id),locnx,ny,locnz,side,Lx)
+				side='W'
+				call bvals_EW(x,y,z,tval,id,west_vals(1,1,id),west_derivs(1,1,id),locnx,ny,locnz,side,Lx)
+			endif
 		
-		if(ny>1 .and. .NOT. y_periodic) then
-			side='S'
-			call user_bvals_NS(x,y,z,tval,id,south_vals(1,1,id),south_derivs(1,1,id),locnx,ny,locnz,side,Ly)
-			side='N'
-			call user_bvals_NS(x,y,z,tval,id,north_vals(1,1,id),north_derivs(1,1,id),locnx,ny,locnz,side,Ly)
-		endif
+			if(ny>1 .and. .NOT. y_periodic) then
+				side='S'
+				call bvals_NS(x,y,z,tval,id,south_vals(1,1,id),south_derivs(1,1,id),locnx,ny,locnz,side,Ly)
+				side='N'
+				call bvals_NS(x,y,z,tval,id,north_vals(1,1,id),north_derivs(1,1,id),locnx,ny,locnz,side,Ly)
+			endif
 		
-		if(locnz>1 .and. .NOT. z_periodic) then
-			side='B'
-			call user_bvals_BT(x,y,z,tval,id,bottom_vals(1,1,id),bottom_derivs(1,1,id),locnx,ny,locnz,side,Lz)
-			side='T'
-			call user_bvals_BT(x,y,z,tval,id,top_vals(1,1,id),top_derivs(1,1,id),locnx,ny,locnz,side,Lz)
-		endif
+			if(locnz>1 .and. .NOT. z_periodic) then
+				side='B'
+				call bvals_BT(x,y,z,tval,id,bottom_vals(1,1,id),bottom_derivs(1,1,id),locnx,ny,locnz,side,Lz)
+				side='T'
+				call bvals_BT(x,y,z,tval,id,top_vals(1,1,id),top_derivs(1,1,id),locnx,ny,locnz,side,Lz)
+			endif
 		
-	enddo	
+		enddo
+			
+	elseif( boundary_data_source == 'user_functions' ) then
+			
+		do id=1,nvars
+	
+			if(locnx>1 .and. .NOT. x_periodic) then
+				side='E'
+				call user_bvals_EW(x,y,z,tval,id,east_vals(1,1,id),east_derivs(1,1,id),locnx,ny,locnz,side,Lx)
+				side='W'
+				call user_bvals_EW(x,y,z,tval,id,west_vals(1,1,id),west_derivs(1,1,id),locnx,ny,locnz,side,Lx)
+			endif
+		
+			if(ny>1 .and. .NOT. y_periodic) then
+				side='S'
+				call user_bvals_NS(x,y,z,tval,id,south_vals(1,1,id),south_derivs(1,1,id),locnx,ny,locnz,side,Ly)
+				side='N'
+				call user_bvals_NS(x,y,z,tval,id,north_vals(1,1,id),north_derivs(1,1,id),locnx,ny,locnz,side,Ly)
+			endif
+		
+			if(locnz>1 .and. .NOT. z_periodic) then
+				side='B'
+				call user_bvals_BT(x,y,z,tval,id,bottom_vals(1,1,id),bottom_derivs(1,1,id),locnx,ny,locnz,side,Lz)
+				side='T'
+				call user_bvals_BT(x,y,z,tval,id,top_vals(1,1,id),top_derivs(1,1,id),locnx,ny,locnz,side,Lz)
+			endif
+		
+		enddo
+		
+	endif	
 			
  return
 end subroutine fill_boundary_arrays
@@ -830,4 +865,221 @@ subroutine smooth_near_boundary(f,x,n,gamma,dir)
 	
  return
 end subroutine smooth_near_boundary
+
+subroutine bvals_EW(x,y,z,t,id,VALS,DERIVS,nx,ny,nz,side,Lx)
+	!--------------------------------------------------------------------------
+	! flow_solve routine to read the boundary data netcdf files and
+	! fill the arrays VALS(y,z,id) and DERIVS(y,z,id) 
+	! at the EAST and WEST boundaries x=0 and x=Lx at
+	! the y and z values requested at time t. All values in dimensional units.
+	! "side" is either 'E' for x=0 or 'W' for x=Lx requested values.
+	!
+	! x,y,z and nx,ny,nz are all local to the processor
+	!--------------------------------------------------------------------------
+	use mpi_params,             only: myid,comm,ierr
+	use decomposition_params,   only: IDIM,JDIM,KDIM,array_size,YBLOCK, &
+                                      proc_row,proc_col,p1,p2
+    use boundary_data		
+	implicit none
+	integer, intent(in)                    :: id                  ! 1,2,3,4,5 for u,v,w,s1,s2
+	integer, intent(in)                    :: nx,ny,nz            ! size of local portions of domain
+	real(kind=8), intent(in)               :: x(nx),y(ny),z(nz)   ! local values of y and z
+	real(kind=8), intent(out)              :: VALS(ny,nz)
+	real(kind=8), intent(out)              :: DERIVS(ny,nz)
+	real(kind=8), intent(in)               :: t,Lx                ! time in [s], global size Lx in [m]
+	character(len=80),intent(in)           :: side 
+	character(len=80),save                 :: dir='x'             ! return x derivs at E/W bdries 
+	integer                                :: j,k
+	real(kind=8)                           :: xval,yval,zval
+	logical                                :: do_east,do_west
+	
+	!------------------------------------------------------------
+ 	! filename stuff...
+ 	!------------------------------------------------------------
+	integer                         ::  ncid,varid,i_proc,j_proc
+	character(len=4)                ::  cid
+	character(len=3)                ::  iproc,jproc
+	character(len=80)               ::  ncfile
+	integer                         ::  start(4),count(4)
+	logical                         ::  debug=.FALSE., read_file=.FALSE.
+	include 'netcdf.inc'
+	
+	!-----------------------------------------------------------
+	! determine if this processor needs to fill tha data values
+	!-----------------------------------------------------------
+	do_east=.FALSE. ;  do_west=.FALSE.
+	if(side=='E' .and. x(1) == 0.d0 )   do_east = .TRUE.
+	if(side=='W' .and. x(nx) == Lx )	do_west = .TRUE.
+	
+	write(unit=iproc,fmt='(I3.3)') proc_row(YBLOCK,myid) ! 3 digit char string for iproc
+   	write(unit=jproc,fmt='(I3.3)') proc_col(YBLOCK,myid) ! 3 digit char string for jproc
+	
+	!-----------------------------------------------------------
+	! determine if a new data chunk needs to be read and if so
+	! read the new chunk of boundary data
+	!-----------------------------------------------------------
+	if( t >= t_end ) then
+   		
+   		if( do_east ) then
+   			ncfile='BVALS/east_'//iproc//'-'//jproc//'.nc'  ! i.e. east_000-013.nc
+   		endif
+   		
+   		if( do_west ) then
+   			ncfile='BVALS/west_'//iproc//'-'//jproc//'.nc'  ! i.e. east_000-013.nc
+   		endif
+     	
+   			
+	endif 
+	
+	
+	 	
+	if( do_east )  then
+		xval = x0
+		do k=1,nz
+			zval = z(k) + z0    
+			do j=1,ny
+				yval = y(j) + y0
+				VALS(j,k) = parent_soln(xval,yval,zval,t,id)
+				DERIVS(j,k) = parent_deriv(xval,yval,zval,t,id,dir)
+			enddo
+		enddo
+	endif
+	
+	if( do_west )  then
+		xval = x0 + Lx
+		do k=1,nz
+			zval = z(k) + z0    
+			do j=1,ny
+				yval = y(j) + y0
+				VALS(j,k) = parent_soln(xval,yval,zval,t,id)
+				DERIVS(j,k) = parent_deriv(xval,yval,zval,t,id,dir)
+			enddo
+		enddo
+	endif
+ return	          
+end subroutine bvals_EW
+
+subroutine bvals_NS(x,y,z,t,id,VALS,DERIVS,nx,ny,nz,side,Ly)
+	!--------------------------------------------------------------------------
+	! User routine to supply externally obtained boundary values and normal
+	! derivatives at the NORTH and SOUTH boundaries y=0 and y=Ly at
+	! the x and z values requested at time t. All values in dimensional units.
+	! "side" is either 'S' for y=0 or 'N' for y=Ly requested values.
+	!--------------------------------------------------------------------------
+	
+	!-----------------------------------------------------------------------------
+	!   These are user defined functions that return the actual boundary values.
+	!   Generally, the user will read and store boundary values coarser in
+	!   time than needed, and then interpolate to the desired time, returning the
+	!   requested values via a user defined function. Here we just evaluate an analytical
+	!   external solution directly at the locations and times requested by the
+	!   calling routine.
+	!-----------------------------------------------------------------------------
+	use user_params,                    only: parent_soln,parent_deriv,x0,y0,z0
+	!-----------------------------------------------------------------------------
+		
+	implicit none
+	integer, intent(in)                    :: id                  ! 1,2,3,4,5 for u,v,w,s1,s2
+	integer, intent(in)                    :: nx,ny,nz            ! size of local portions of domain
+	real(kind=8), intent(in)               :: x(nx),y(ny),z(nz)   ! local values of y and z
+	real(kind=8), intent(out)              :: VALS(nx,nz)
+	real(kind=8), intent(out)              :: DERIVS(nx,nz)
+	real(kind=8), intent(in)               :: t,Ly                ! time in [s], global size Ly in [m]
+	character(len=80),intent(in)           :: side 
+	character(len=80), save                :: dir='y'             ! return y derivs at N/S bdries 
+	integer                                :: i,k
+	real(kind=8)                           :: xval,yval,zval
+	logical                                :: do_south,do_north   
+
+	do_south=.FALSE. ;  do_north=.FALSE.
+	if(side=='S' .and. y(1) == 0.d0 )   do_south = .TRUE.
+	if(side=='N' .and. y(ny) == Ly )	do_north = .TRUE.
+		
+	if( do_south )  then
+		yval = y0
+		do k=1,nz
+			zval = z(k) + z0    
+			do i=1,nx
+				xval = x(i) + x0
+				VALS(i,k) = parent_soln(xval,yval,zval,t,id)
+				DERIVS(i,k) = parent_deriv(xval,yval,zval,t,id,dir)
+			enddo
+		enddo
+	endif
+	
+	if( do_north )  then
+		yval = y0 + Ly
+		do k=1,nz
+			zval = z(k) + z0    
+			do i=1,nx
+				xval = x(i) + x0
+				VALS(i,k) = parent_soln(xval,yval,zval,t,id)
+				DERIVS(i,k) = parent_deriv(xval,yval,zval,t,id,dir)
+			enddo
+		enddo
+	endif
+ return	          
+end subroutine bvals_NS
+
+subroutine bvals_BT(x,y,z,t,id,VALS,DERIVS,nx,ny,nz,side,Lz)
+	!--------------------------------------------------------------------------
+	! User routine to supply externally obtained boundary values and normal
+	! derivatives at the BOTTOM and TOP boundaries z=0 and z=Lz at
+	! the x and y values requested at time t. All values in dimensional units.
+	! "side" is either 'B' for z=0 or 'T' for z=Lz requested values.
+	!--------------------------------------------------------------------------
+	
+	!-----------------------------------------------------------------------------
+	!   These are user defined functions that return the actual boundary values.
+	!   Generally, the user will read and store boundary values coarser in
+	!   time than needed, and then interpolate to the desired time, returning the
+	!   requested values via a user defined function. Here we just evaluate an analytical
+	!   external solution directly at the locations and times requested by the
+	!   calling routine.
+	!-----------------------------------------------------------------------------
+	use user_params,                    only: parent_soln,parent_deriv,x0,y0,z0
+	!-----------------------------------------------------------------------------
+		
+	implicit none
+	integer, intent(in)                    :: id                  ! 1,2,3,4,5 for u,v,w,s1,s2
+	integer, intent(in)                    :: nx,ny,nz            ! size of local portions of domain
+	real(kind=8), intent(in)               :: x(nx),y(ny),z(nz)   ! local values of y and z
+	real(kind=8), intent(out)              :: VALS(nx,ny)
+	real(kind=8), intent(out)              :: DERIVS(nx,ny)
+	real(kind=8), intent(in)               :: t,Lz                ! time in [s], global size Ly in [m]
+	character(len=80),intent(in)           :: side 
+	character(len=80), save                :: dir='z'             ! return z derivs at B/T bdries 
+	integer                                :: i,j
+	real(kind=8)                           :: xval,yval,zval
+	logical, save                          :: do_bottom,do_top   
+
+	do_bottom=.FALSE. ;  do_top=.FALSE.
+	if(side=='B' .and. z(1) == 0.d0 )   do_bottom = .TRUE.
+	if(side=='T' .and. z(nz) == Lz )	do_top = .TRUE.
+	
+	if( do_bottom )  then
+		zval = z0
+		do i=1,nx
+			xval = x(i) + x0    
+			do j=1,ny
+				yval = y(j) + y0
+				VALS(i,j) = parent_soln(xval,yval,zval,t,id)
+				DERIVS(i,j) = parent_deriv(xval,yval,zval,t,id,dir)
+			enddo
+		enddo
+	endif
+	
+	if( do_top )  then
+		zval = z0 + Lz
+		do i=1,nx
+			xval = x(i) + x0    
+			do j=1,ny
+				yval = y(j) + y0
+				VALS(i,j) = parent_soln(xval,yval,zval,t,id)
+				DERIVS(i,j) = parent_deriv(xval,yval,zval,t,id,dir)
+			enddo
+		enddo
+	endif
+ return	          
+end subroutine bvals_BT
 
