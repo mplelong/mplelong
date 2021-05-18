@@ -589,112 +589,6 @@ end subroutine extrapolate_to_boundaries
 
 
 
-subroutine fill_boundary_arrays
-	use mpi_params,              only: myid
-	use decomposition_params
-	use boundary_data
-	use independent_variables,   only: Lx,Ly,Lz,tnp1,x_periodic,y_periodic,z_periodic
-	use methods_params,          only: do_second_scalar,user_bcs
-	implicit none
-	integer                         :: id
-	integer,save                    :: locnx,ny,locnz,nvars=4
-	real(kind=8),allocatable,save   :: x(:),y(:),z(:)
-	real(kind=8)                    :: XVAL,YVAL,ZVAL,tval
-	character(len=80)               :: dir,side
-	logical,save                    :: first_entry=.TRUE.
-	
-	if( .NOT. user_bcs ) return
-	
-	if( first_entry ) then
-	
-		if( do_second_scalar )  nvars = 5
-		
-		locnx = array_size(JDIM,YBLOCK,myid)
-		ny    = array_size(IDIM,YBLOCK,myid)
-		locnz = array_size(KDIM,YBLOCK,myid)
-		allocate( x(locnx), y(ny), z(locnz) )
-		call get_my_xvals(x,YBLOCK,myid)
-		call get_my_yvals(y,YBLOCK,myid)
-		call get_my_zvals(z,YBLOCK,myid)
-		
-		allocate( east_vals(ny,locnz,4),west_vals(ny,locnz,4) ) 
-		allocate( north_vals(locnx,locnz,4),south_vals(locnx,locnz,4) )
-		allocate( bottom_vals(locnx,ny,4),top_vals(locnx,ny,4) )
-		east_vals=0.d0; west_vals=0.d0; north_vals=0.d0; 
-		south_vals=0.d0; bottom_vals=0.d0; top_vals=0.d0
-		
-		allocate( east_derivs(ny,locnz,4),west_derivs(ny,locnz,4) ) 
-		allocate( north_derivs(locnx,locnz,4),south_derivs(locnx,locnz,4) )
-		allocate( bottom_derivs(locnx,ny,4),top_derivs(locnx,ny,4) )
-		east_derivs=0.d0; west_derivs=0.d0; north_derivs=0.d0; 
-		south_derivs=0.d0; bottom_derivs=0.d0; top_derivs=0.d0
-		
-		first_entry=.FALSE.
-	endif
-	
-	tval = tnp1   ! during a time step, we need BVALSand normal DERIVS at the next time step
-	
-	
-	
-	if( boundary_data_source == 'datafiles' ) then
-			
-		do id=1,nvars
-	
-			if(locnx>1 .and. .NOT. x_periodic) then
-				side='E'
-				call bvals_EW(x,y,z,tval,id,east_vals(1,1,id),east_derivs(1,1,id),locnx,ny,locnz,side,Lx)
-				side='W'
-				call bvals_EW(x,y,z,tval,id,west_vals(1,1,id),west_derivs(1,1,id),locnx,ny,locnz,side,Lx)
-			endif
-		
-			if(ny>1 .and. .NOT. y_periodic) then
-				side='S'
-				call bvals_NS(x,y,z,tval,id,south_vals(1,1,id),south_derivs(1,1,id),locnx,ny,locnz,side,Ly)
-				side='N'
-				call bvals_NS(x,y,z,tval,id,north_vals(1,1,id),north_derivs(1,1,id),locnx,ny,locnz,side,Ly)
-			endif
-		
-			if(locnz>1 .and. .NOT. z_periodic) then
-				side='B'
-				call bvals_BT(x,y,z,tval,id,bottom_vals(1,1,id),bottom_derivs(1,1,id),locnx,ny,locnz,side,Lz)
-				side='T'
-				call bvals_BT(x,y,z,tval,id,top_vals(1,1,id),top_derivs(1,1,id),locnx,ny,locnz,side,Lz)
-			endif
-		
-		enddo
-			
-	elseif( boundary_data_source == 'user_functions' ) then
-			
-		do id=1,nvars
-	
-			if(locnx>1 .and. .NOT. x_periodic) then
-				side='E'
-				call user_bvals_EW(x,y,z,tval,id,east_vals(1,1,id),east_derivs(1,1,id),locnx,ny,locnz,side,Lx)
-				side='W'
-				call user_bvals_EW(x,y,z,tval,id,west_vals(1,1,id),west_derivs(1,1,id),locnx,ny,locnz,side,Lx)
-			endif
-		
-			if(ny>1 .and. .NOT. y_periodic) then
-				side='S'
-				call user_bvals_NS(x,y,z,tval,id,south_vals(1,1,id),south_derivs(1,1,id),locnx,ny,locnz,side,Ly)
-				side='N'
-				call user_bvals_NS(x,y,z,tval,id,north_vals(1,1,id),north_derivs(1,1,id),locnx,ny,locnz,side,Ly)
-			endif
-		
-			if(locnz>1 .and. .NOT. z_periodic) then
-				side='B'
-				call user_bvals_BT(x,y,z,tval,id,bottom_vals(1,1,id),bottom_derivs(1,1,id),locnx,ny,locnz,side,Lz)
-				side='T'
-				call user_bvals_BT(x,y,z,tval,id,top_vals(1,1,id),top_derivs(1,1,id),locnx,ny,locnz,side,Lz)
-			endif
-		
-		enddo
-		
-	endif	
-			
- return
-end subroutine fill_boundary_arrays
-
 subroutine boundary_smooth(f,dir,npts)
 !------------------------------------------------------------------------
 !    smooth f near the boundaries
@@ -866,220 +760,952 @@ subroutine smooth_near_boundary(f,x,n,gamma,dir)
  return
 end subroutine smooth_near_boundary
 
-subroutine bvals_EW(x,y,z,t,id,VALS,DERIVS,nx,ny,nz,side,Lx)
+subroutine fill_boundary_arrays
+	use mpi_params,              only: myid
+	use decomposition_params
+	use boundary_data
+	use independent_variables,   only: Lx,Ly,Lz,tnp1,x_periodic,y_periodic,z_periodic,dt
+	use methods_params,          only: do_second_scalar,user_bcs
+	implicit none
+	integer                         :: id
+	integer,save                    :: locnx,ny,locnz,nvars=4
+	real(kind=8),allocatable,save   :: x(:),y(:),z(:)
+	real(kind=8)                    :: XVAL,YVAL,ZVAL,tval
+	character(len=80)               :: dir,side
+	logical,save                    :: first_entry=.TRUE.
+	
+	if( .NOT. user_bcs ) return
+	
+	if( first_entry ) then
+	
+		if( do_second_scalar )  nvars = 5
+		
+		locnx = array_size(JDIM,YBLOCK,myid)
+		ny    = array_size(IDIM,YBLOCK,myid)
+		locnz = array_size(KDIM,YBLOCK,myid)
+		allocate( x(locnx), y(ny), z(locnz) )
+		call get_my_xvals(x,YBLOCK,myid)
+		call get_my_yvals(y,YBLOCK,myid)
+		call get_my_zvals(z,YBLOCK,myid)
+		
+		allocate( east_vals(ny,locnz,4),west_vals(ny,locnz,4) ) 
+		allocate( north_vals(locnx,locnz,4),south_vals(locnx,locnz,4) )
+		allocate( bottom_vals(locnx,ny,4),top_vals(locnx,ny,4) )
+		east_vals=0.d0; west_vals=0.d0; north_vals=0.d0; 
+		south_vals=0.d0; bottom_vals=0.d0; top_vals=0.d0
+		
+		allocate( east_derivs(ny,locnz,4),west_derivs(ny,locnz,4) ) 
+		allocate( north_derivs(locnx,locnz,4),south_derivs(locnx,locnz,4) )
+		allocate( bottom_derivs(locnx,ny,4),top_derivs(locnx,ny,4) )
+		east_derivs=0.d0; west_derivs=0.d0; north_derivs=0.d0; 
+		south_derivs=0.d0; bottom_derivs=0.d0; top_derivs=0.d0
+				
+		first_entry=.FALSE.
+	endif
+	
+	tval = tnp1   ! during a time step, we need BVALSand normal DERIVS at the next time step
+	
+		
+	if( boundary_data_source == 'datafiles' ) then
+			
+		do id=1,nvars
+			
+			if(ny>1 .and. .NOT. y_periodic) then
+				call bvals_NS(x,y,z,tval,id,locnx,ny,locnz)
+			endif
+			
+			if(locnz>1 .and. .NOT. z_periodic) then
+				call bvals_BT(x,y,z,tval,id,locnx,ny,locnz)
+			endif
+			
+			if(locnx>1 .and. .NOT. x_periodic) then
+				call bvals_EW(x,y,z,tval,id,locnx,ny,locnz)   ! do EW last, it increments read counters
+			endif
+							
+		enddo
+				
+			
+	elseif( boundary_data_source == 'user_functions' ) then
+			
+		do id=1,nvars
+	
+			if(locnx>1 .and. .NOT. x_periodic) then
+				side='E'
+				call user_bvals_EW(x,y,z,tval,id,east_vals(1,1,id),east_derivs(1,1,id),locnx,ny,locnz,side,Lx)
+				side='W'
+				call user_bvals_EW(x,y,z,tval,id,west_vals(1,1,id),west_derivs(1,1,id),locnx,ny,locnz,side,Lx)
+			endif
+		
+			if(ny>1 .and. .NOT. y_periodic) then
+				side='S'
+				call user_bvals_NS(x,y,z,tval,id,south_vals(1,1,id),south_derivs(1,1,id),locnx,ny,locnz,side,Ly)
+				side='N'
+				call user_bvals_NS(x,y,z,tval,id,north_vals(1,1,id),north_derivs(1,1,id),locnx,ny,locnz,side,Ly)
+			endif
+		
+			if(locnz>1 .and. .NOT. z_periodic) then
+				side='B'
+				call user_bvals_BT(x,y,z,tval,id,bottom_vals(1,1,id),bottom_derivs(1,1,id),locnx,ny,locnz,side,Lz)
+				side='T'
+				call user_bvals_BT(x,y,z,tval,id,top_vals(1,1,id),top_derivs(1,1,id),locnx,ny,locnz,side,Lz)
+			endif
+		
+		enddo
+		
+	endif	
+			
+ return
+end subroutine fill_boundary_arrays
+
+subroutine bvals_EW(x,y,z,t,id,nx,ny,nz)
 	!--------------------------------------------------------------------------
 	! flow_solve routine to read the boundary data netcdf files and
-	! fill the arrays VALS(y,z,id) and DERIVS(y,z,id) 
+	! fill the arrays east_vals(y,z,id) and east_derivs(y,z,id)
+	! and  west_vals(y,z,id) and west_derivs(y,z,id)
 	! at the EAST and WEST boundaries x=0 and x=Lx at
 	! the y and z values requested at time t. All values in dimensional units.
-	! "side" is either 'E' for x=0 or 'W' for x=Lx requested values.
 	!
 	! x,y,z and nx,ny,nz are all local to the processor
 	!--------------------------------------------------------------------------
 	use mpi_params,             only: myid,comm,ierr
+	use methods_params,         only: do_second_scalar
 	use decomposition_params,   only: IDIM,JDIM,KDIM,array_size,YBLOCK, &
                                       proc_row,proc_col,p1,p2
+    use independent_variables, only : Lx,t0,tf  ! initial and final integration times
     use boundary_data		
 	implicit none
 	integer, intent(in)                    :: id                  ! 1,2,3,4,5 for u,v,w,s1,s2
 	integer, intent(in)                    :: nx,ny,nz            ! size of local portions of domain
-	real(kind=8), intent(in)               :: x(nx),y(ny),z(nz)   ! local values of y and z
-	real(kind=8), intent(out)              :: VALS(ny,nz)
-	real(kind=8), intent(out)              :: DERIVS(ny,nz)
-	real(kind=8), intent(in)               :: t,Lx                ! time in [s], global size Lx in [m]
-	character(len=80),intent(in)           :: side 
-	character(len=80),save                 :: dir='x'             ! return x derivs at E/W bdries 
-	integer                                :: j,k
-	real(kind=8)                           :: xval,yval,zval
-	logical                                :: do_east,do_west
+	real(kind=8), intent(in)               :: t                   ! time in [s], global size Lx in [m]
+	real(kind=8), intent(in)               :: x(nx),y(ny),z(nz)   ! local values of x, y and z
+	real(kind=8), allocatable, save        :: VALS(:,:,:,:,:)     ! (y,z,t,id,iside)
+	real(kind=8), allocatable, save        :: DERIVS(:,:,:,:,:)   ! (y,z,t,id,iside)	
+	real(kind=8), allocatable, save        :: TIME(:)             ! time in boundary data files
+	integer                                :: iside,i0,i1
+	real(kind=8)                           :: t_left,t_right,xx
+	logical, save                          :: do_east,do_west,do_read
 	
 	!------------------------------------------------------------
  	! filename stuff...
  	!------------------------------------------------------------
-	integer                         ::  ncid,varid,i_proc,j_proc
+	integer                         ::  ncid,varid,i_proc,j_proc,dimid
 	character(len=4)                ::  cid
-	character(len=3)                ::  iproc,jproc
-	character(len=80)               ::  ncfile
-	integer                         ::  start(4),count(4)
-	logical                         ::  debug=.FALSE., read_file=.FALSE.
+	character(len=3), save          ::  iproc,jproc
+	character(len=80)               ::  ncfile,val_name,deriv_name,char_side
+	integer, save                   ::  start(3),count(3),nvars=4,read_time=.TRUE.
+	logical, save                   ::  first_entry=.TRUE.
+	integer                         ::  j,k,icount,remaining
 	include 'netcdf.inc'
 	
-	!-----------------------------------------------------------
-	! determine if this processor needs to fill tha data values
-	!-----------------------------------------------------------
-	do_east=.FALSE. ;  do_west=.FALSE.
-	if(side=='E' .and. x(1) == 0.d0 )   do_east = .TRUE.
-	if(side=='W' .and. x(nx) == Lx )	do_west = .TRUE.
+	if( first_entry ) then
 	
-	write(unit=iproc,fmt='(I3.3)') proc_row(YBLOCK,myid) ! 3 digit char string for iproc
-   	write(unit=jproc,fmt='(I3.3)') proc_col(YBLOCK,myid) ! 3 digit char string for jproc
-	
+		if( do_second_scalar ) nvars = 5
+		
+		t_end = 0.d0
+		start_slice = 1
+		
+		allocate(   VALS(ny,nz,slices_per_chunk,nvars,2) )  ! E/W (y,z,t,id,side)
+		allocate( DERIVS(ny,nz,slices_per_chunk,nvars,2) )
+		VALS = 0.d0 ; DERIVS = 0.d0	
+		allocate( TIME(slices_per_chunk) )
+		TIME = 0.d0	
+		
+		write(unit=iproc,fmt='(I3.3)') proc_row(YBLOCK,myid) ! 3 digit char string for iproc
+   		write(unit=jproc,fmt='(I3.3)') proc_col(YBLOCK,myid) ! 3 digit char string for jproc
+   		
+   		!-----------------------------------------------------------
+		! determine if this processor needs to fill tha data values
+		!-----------------------------------------------------------
+		do_east=.FALSE. ;  do_west=.FALSE.
+		if( x(1) == 0.d0 ) do_east = .TRUE.
+		if( x(nx) == Lx )  do_west = .TRUE.
+		
+		if( myid == 0 ) then
+			open(1,file='output/debug_data/BC_data_EW_specs')
+				write(1,*) '---------------------------------------------------------------------------'
+				write(1,*) '---------------------------------------------------------------------------'
+				write(1,*) ' initial and final integration times [s]   :',t0,tf
+				write(1,*) ' processor myid=0  iproc,jproc             :',iproc,' , ',jproc
+				write(1,*) ' chunk size ny, nz, slices_per_chunk,nvars :',ny,nz,slices_per_chunk,nvars
+				write(1,*) ' for this processor do_east,do_west        :',do_east,do_west
+				write(1,*) '---------------------------------------------------------------------------'
+				write(1,*) '---------------------------------------------------------------------------'
+				write(1,*) ' '
+			close(1)	
+		endif
+   	
+		first_entry=.FALSE.
+	endif
+	   
+	if( id == 1 ) then
+		val_name = 'u' ; deriv_name = 'u_x'
+	elseif( id == 2 ) then
+		val_name = 'v' ; deriv_name = 'v_x'
+	elseif( id == 3 ) then
+		val_name = 'w' ; deriv_name = 'w_x'
+	elseif( id == 4 ) then
+		val_name = 's1' ; deriv_name = 's1_x'
+	elseif( id == 5 ) then
+		val_name = 's2' ; deriv_name = 's2_x'
+	endif
+			
 	!-----------------------------------------------------------
-	! determine if a new data chunk needs to be read and if so
+	! determine if a new data chunk needs to be read and if so,
 	! read the new chunk of boundary data
 	!-----------------------------------------------------------
-	if( t >= t_end ) then
+	if( do_east .or. do_west ) then
+		
+		if( t >= t_end ) then    ! a new chunk of boundary data is needed, read it
+	
+			do iside = 1,2    ! E to W
    		
+   				if( iside==1 .and. do_east ) then
+   					if(proc_row(YBLOCK,myid) .NE. 0) stop 'problem detecting do_east in bvals_EW' 
+   					ncfile = 'BVALS/east_'//iproc//'-'//jproc//'.nc'  ! i.e. east_000-013.nc
+   					do_read = .TRUE.   					
+   				elseif( iside==2 .and. do_west ) then
+   					if(proc_row(YBLOCK,myid) .NE. p1-1) stop 'problem detecting do_west in bvals_EW'
+   					ncfile = 'BVALS/west_'//iproc//'-'//jproc//'.nc'  ! i.e. west_000-013.nc
+   					do_read = .TRUE.
+   				else
+   					do_read = .FALSE.
+   				endif
+   			
+   				if( do_read ) then
+   					!--------------------------------------
+   					!  open the file, check for error
+   					!--------------------------------------
+   					ierr=NF_OPEN(ncfile,NF_NOWRITE,ncid)
+   					if(ierr.ne.NF_NOERR) then
+    					write(0,*) '... ERROR OPENING NETCDF FILE: bvals_EW ',trim(ncfile)
+    					write(0,*) '... myid, ierr ',myid, ierr
+    					stop
+   					endif
+   			
+   					!-----------------------------------------
+   					!  determine total number of time slices
+   					!-----------------------------------------
+   					ierr = NF_INQ_DIMID(ncid, "timedimension", dimid)
+					ierr = NF_INQ_DIMLEN(ncid,dimid,num_time_slices)
+					if(ierr.ne.NF_NOERR) then
+    					write(0,*) '... ERROR GETTING TIMEDIMENSION LENGTH: bvals_EW ',trim(ncfile)
+    					write(0,*) '... myid, ierr ',myid, ierr
+    					stop
+   					endif
+					if( num_time_slices < slices_per_chunk ) then
+						slices_per_chunk = num_time_slices  ! don't read more slices than there are in the file
+					endif
+					
+					!---------------------------------------------
+   					!  set start and count to read desired data
+   					!---------------------------------------------
+   					remaining = num_time_slices - start_slice + 1
+   					icount = min(remaining,slices_per_chunk)
+					start=(/1,1,start_slice/)
+   					count=(/ny,nz,icount/)
+   					
+			
+					!-----------------------------------------
+   					!  get start and end times for this chunk
+   					!  set the time increment
+   					!-----------------------------------------
+					ierr = NF_INQ_VARID(ncid,'time',varid)
+					ierr = NF_GET_VARA_DOUBLE(ncid,varid,start_slice,icount,TIME)
+					if (ierr.ne.NF_NOERR) then
+    					write(0,*) myid,'NetCDF ERROR GET_VARA_DOUBLE -> time: ',ierr,start_slice,icount    					
+    					stop
+   					endif
+					t_start = TIME(1)
+					dt_bvals = TIME(2)-TIME(1)
+					
+					if( t < TIME(1) .or. t > TIME(icount) ) then
+						if(myid==0) then
+							write(0,*) id,myid," time range of new chunk does not span current time t"
+							write(0,*) id,myid,"       t,TIME(1),TIME(icount): ",t,TIME(1),TIME(icount)
+							write(0,*) id,myid,"       start_slice,icount,num_time_slices: ",start_slice,icount,num_time_slices
+						endif	
+					endif
+												   			
+   					!------------------------------------------------
+   					!  extract variable id for VAL , check for error
+   					!------------------------------------------------
+   					ierr=NF_INQ_VARID(ncid,val_name,varid)
+   					if (ierr.ne.NF_NOERR) then
+    					write(0,*) myid,'NetCDF ERROR INQ_VARID -> val, id: ',id,ierr
+    					stop
+   					endif
+
+   					!------------------------------------------------
+   					!  read the corresponding variable (dimensional)
+   					!------------------------------------------------
+   					ierr = NF_GET_VARA_DOUBLE(ncid,varid,start,count,VALS(1,1,1,id,iside)) 
+   					if (ierr.ne.NF_NOERR) then
+   						write(0,*) myid,'NetCDF ERROR NF_GET_VARA_REAL -> val, id: ',id,ierr
+    					stop
+   					endif
+   				
+   					!---------------------------------------------------
+   					!  extract variable id for DERIV , check for error
+   					!---------------------------------------------------
+   					ierr=NF_INQ_VARID(ncid,deriv_name,varid)
+   					if (ierr.ne.NF_NOERR) then
+    					write(0,*) myid,'NetCDF ERROR INQ_VARID -> deriv, id: ',id,ierr
+    					stop
+   					endif
+
+   					!------------------------------------------------
+   					!  read the corresponding variable (dimensional)
+   					!------------------------------------------------
+   					ierr = NF_GET_VARA_DOUBLE(ncid,varid,start,count,DERIVS(1,1,1,id,iside)) 
+   					if (ierr.ne.NF_NOERR) then
+   						write(0,*) myid,'NetCDF ERROR NF_GET_VARA_REAL -> deriv, id: ',id,ierr
+    					stop
+   					endif
+   				
+   					if( myid == 0 .and. id<9 ) then
+   						open(1,file='output/debug_data/BC_data_EW_specs',position='append')
+   						write(1,*) ' finished reading file, iside        :',trim(ncfile),iside
+   						write(1,*) ' id and variable names read          :',id,trim(val_name),' , ',trim(deriv_name)
+   						write(1,*) ' total number of time slices in file :',num_time_slices
+   						write(1,*) ' slice range for this chunk          :',start_slice,start_slice + icount - 1 
+   						write(1,*) ' time range for this chunk           :',TIME(1),TIME(icount)
+   						write(1,*) ' time value triggering read          :',t
+   						write(1,*) '  '
+   						write(1,*) '  '
+   						close(1)
+   					endif
+   				
+   				endif ! do_read block
+   			
+   			enddo   ! end loop over 2 endpoints
+   			
+   			! wait until all variables have read their data before incrementing
+			if( id == nvars ) then   
+				!--------------------------------------------------------------------------
+				! increment indices used for deciding which slices are in the next chunk
+				! after reading last variable, only do this for bvals_EW assuming this
+				! is the LAST of the bvals routines to be called 
+				!--------------------------------------------------------------------------
+				t_end = TIME(icount)                    ! ending time of last chunk read
+				start_slice = start_slice + icount - 1  ! starting slice for the next chunk to be read
+			endif
+   			   		   			
+		endif   ! end block for reading a new chunk of boundary data
+		
+		!-----------------------------------------------------------------------
+		! a valid boundary data chunk is now available (new or old)
+		! interpolate between saved BC values to get values at the current time
+		!-----------------------------------------------------------------------
+		
+   		i0 = floor( (t-t_start)/dt_bvals ) + 1        ! index of saved time just lt t
+   		i1 = minval( (/i0 + 1,slices_per_chunk/) )    ! index of saved time just gt t
+   		t_left = t_start + (i0-1)*dt_bvals            ! saved time in [s] just lt t
+   		t_right = t_left + dt_bvals                   ! saved time in [s] just gt t
+   		xx = (t - t_left)/dt_bvals                    ! linear interpolation weight
+   		   
+   		!---------------
+   		! SANITY CHECK
+   		!---------------
+   		if( t < t_left .OR. t > t_right ) then
+    		if(myid==0) then
+     			write(0,*) 'misalignment in BC time values: ',t,t_start,t_end,dt_bvals
+     			write(0,*) 't_left, t_right ',t_left, t_right
+     			write(0,*) 'i0, i1, xx ',i0,i1,xx
+     			STOP
+    		endif
+   		endif   
+   		if( xx < 0.d0 .OR. xx > 1.d0 ) then
+    		if(myid==0) then
+     			write(0,*) 'misalignment in BC time values: ',t,t_start,t_end
+     			write(0,*) 't, t_left, t_right ',t, t_left, t_right
+     			write(0,*) 'xx, dt_bvals  ',xx, dt_bvals
+     			STOP
+    		endif
+   		endif
+   		   		   		 
+   		!-------------------------------------------------
+   		! do the interpolation and store the value
+   		!-------------------------------------------------
    		if( do_east ) then
-   			ncfile='BVALS/east_'//iproc//'-'//jproc//'.nc'  ! i.e. east_000-013.nc
+   			iside = 1
+   			east_vals(:,:,id)   =   VALS(:,:,i0,id,iside) + xx*(   VALS(:,:,i1,id,iside) -   VALS(:,:,i0,id,iside) )  ! time interpolated values
+   			east_derivs(:,:,id) = DERIVS(:,:,i0,id,iside) + xx*( DERIVS(:,:,i1,id,iside) - DERIVS(:,:,i0,id,iside) )  ! time interpolated derivs
    		endif
    		
    		if( do_west ) then
-   			ncfile='BVALS/west_'//iproc//'-'//jproc//'.nc'  ! i.e. east_000-013.nc
+   			iside = 2
+   			west_vals(:,:,id)   =   VALS(:,:,i0,id,iside) + xx*(   VALS(:,:,i1,id,iside) -   VALS(:,:,i0,id,iside) )  ! time interpolated values
+   			west_derivs(:,:,id) = DERIVS(:,:,i0,id,iside) + xx*( DERIVS(:,:,i1,id,iside) - DERIVS(:,:,i0,id,iside) )  ! time interpolated derivs
    		endif
-     	
-   			
-	endif 
+   		   		
+	endif   ! end block for processors that own EW boundaries
 	
+	!-------------------------------------------------
+   	! workload can be different, not all processors
+   	! have boundaries and do the reads, sync back up
+   	!-------------------------------------------------		
+	call mpi_barrier(comm,ierr)  
 	
-	 	
-	if( do_east )  then
-		xval = x0
-		do k=1,nz
-			zval = z(k) + z0    
-			do j=1,ny
-				yval = y(j) + y0
-				VALS(j,k) = parent_soln(xval,yval,zval,t,id)
-				DERIVS(j,k) = parent_deriv(xval,yval,zval,t,id,dir)
-			enddo
-		enddo
-	endif
-	
-	if( do_west )  then
-		xval = x0 + Lx
-		do k=1,nz
-			zval = z(k) + z0    
-			do j=1,ny
-				yval = y(j) + y0
-				VALS(j,k) = parent_soln(xval,yval,zval,t,id)
-				DERIVS(j,k) = parent_deriv(xval,yval,zval,t,id,dir)
-			enddo
-		enddo
-	endif
  return	          
 end subroutine bvals_EW
 
-subroutine bvals_NS(x,y,z,t,id,VALS,DERIVS,nx,ny,nz,side,Ly)
+subroutine bvals_NS(x,y,z,t,id,nx,ny,nz)
 	!--------------------------------------------------------------------------
-	! User routine to supply externally obtained boundary values and normal
-	! derivatives at the NORTH and SOUTH boundaries y=0 and y=Ly at
+	! flow_solve routine to read the boundary data netcdf files and
+	! fill the arrays south_vals(x,z,id) and south_derivs(x,z,id)
+	! and  north_vals(x,z,id) and north_derivs(x,z,id)
+	! at the SOUTH and NORTH boundaries y=0 and y=Ly at
 	! the x and z values requested at time t. All values in dimensional units.
-	! "side" is either 'S' for y=0 or 'N' for y=Ly requested values.
+	!
+	! x,y,z and nx,ny,nz are all local to the processor
 	!--------------------------------------------------------------------------
-	
-	!-----------------------------------------------------------------------------
-	!   These are user defined functions that return the actual boundary values.
-	!   Generally, the user will read and store boundary values coarser in
-	!   time than needed, and then interpolate to the desired time, returning the
-	!   requested values via a user defined function. Here we just evaluate an analytical
-	!   external solution directly at the locations and times requested by the
-	!   calling routine.
-	!-----------------------------------------------------------------------------
-	use user_params,                    only: parent_soln,parent_deriv,x0,y0,z0
-	!-----------------------------------------------------------------------------
-		
+	use mpi_params,             only: myid,comm,ierr
+	use methods_params,         only: do_second_scalar
+	use decomposition_params,   only: IDIM,JDIM,KDIM,array_size,YBLOCK, &
+                                      proc_row,proc_col,p1,p2
+    use independent_variables, only : Ly,t0,tf  ! initial and final integration times
+    use boundary_data		
 	implicit none
 	integer, intent(in)                    :: id                  ! 1,2,3,4,5 for u,v,w,s1,s2
 	integer, intent(in)                    :: nx,ny,nz            ! size of local portions of domain
-	real(kind=8), intent(in)               :: x(nx),y(ny),z(nz)   ! local values of y and z
-	real(kind=8), intent(out)              :: VALS(nx,nz)
-	real(kind=8), intent(out)              :: DERIVS(nx,nz)
-	real(kind=8), intent(in)               :: t,Ly                ! time in [s], global size Ly in [m]
-	character(len=80),intent(in)           :: side 
-	character(len=80), save                :: dir='y'             ! return y derivs at N/S bdries 
-	integer                                :: i,k
-	real(kind=8)                           :: xval,yval,zval
-	logical                                :: do_south,do_north   
-
-	do_south=.FALSE. ;  do_north=.FALSE.
-	if(side=='S' .and. y(1) == 0.d0 )   do_south = .TRUE.
-	if(side=='N' .and. y(ny) == Ly )	do_north = .TRUE.
-		
-	if( do_south )  then
-		yval = y0
-		do k=1,nz
-			zval = z(k) + z0    
-			do i=1,nx
-				xval = x(i) + x0
-				VALS(i,k) = parent_soln(xval,yval,zval,t,id)
-				DERIVS(i,k) = parent_deriv(xval,yval,zval,t,id,dir)
-			enddo
-		enddo
-	endif
+	real(kind=8), intent(in)               :: t                   ! time in [s], global size Lx in [m]
+	real(kind=8), intent(in)               :: x(nx),y(ny),z(nz)   ! local values of x, y and z
+	real(kind=8), allocatable, save        :: VALS(:,:,:,:,:)     ! (y,z,t,id,iside)
+	real(kind=8), allocatable, save        :: DERIVS(:,:,:,:,:)   ! (y,z,t,id,iside)	
+	real(kind=8), allocatable, save        :: TIME(:)             ! time in boundary data files
+	integer                                :: iside,i0,i1
+	real(kind=8)                           :: t_left,t_right,xx
+	logical, save                          :: do_south,do_north,do_read
 	
-	if( do_north )  then
-		yval = y0 + Ly
-		do k=1,nz
-			zval = z(k) + z0    
-			do i=1,nx
-				xval = x(i) + x0
-				VALS(i,k) = parent_soln(xval,yval,zval,t,id)
-				DERIVS(i,k) = parent_deriv(xval,yval,zval,t,id,dir)
-			enddo
-		enddo
+	!------------------------------------------------------------
+ 	! filename stuff...
+ 	!------------------------------------------------------------
+	integer                         ::  ncid,varid,i_proc,j_proc,dimid
+	character(len=4)                ::  cid
+	character(len=3), save          ::  iproc,jproc
+	character(len=80)               ::  ncfile,val_name,deriv_name,char_side
+	integer, save                   ::  start(3),count(3),nvars=4,read_time=.TRUE.
+	logical, save                   ::  first_entry=.TRUE.
+	integer                         ::  i,k,icount,remaining
+	include 'netcdf.inc'
+	
+	if( first_entry ) then
+	
+		if( do_second_scalar ) nvars = 5
+		
+		t_end = 0.d0
+		start_slice = 1
+		
+		allocate(   VALS(nx,nz,slices_per_chunk,nvars,2) )  ! S/N (x,z,t,id,side)
+		allocate( DERIVS(nx,nz,slices_per_chunk,nvars,2) )
+		VALS = 0.d0 ; DERIVS = 0.d0	
+		allocate( TIME(slices_per_chunk) )
+		TIME = 0.d0	
+		
+		write(unit=iproc,fmt='(I3.3)') proc_row(YBLOCK,myid) ! 3 digit char string for iproc
+   		write(unit=jproc,fmt='(I3.3)') proc_col(YBLOCK,myid) ! 3 digit char string for jproc
+   		
+   		!-----------------------------------------------------------
+		! determine if this processor needs to fill tha data values
+		!-----------------------------------------------------------
+		do_south=.FALSE. ;  do_north=.FALSE.
+		if( y(1) == 0.d0 ) do_south = .TRUE.
+		if( y(ny) == Ly )  do_north = .TRUE.
+		
+		if( myid == 0 ) then
+			open(1,file='output/debug_data/BC_data_NS_specs')
+				write(1,*) '---------------------------------------------------------------------------'
+				write(1,*) '---------------------------------------------------------------------------'
+				write(1,*) ' initial and final integration times [s]   :',t0,tf
+				write(1,*) ' processor myid=0  iproc,jproc             :',iproc,' , ',jproc
+				write(1,*) ' chunk size nx, nz, slices_per_chunk,nvars :',nx,nz,slices_per_chunk,nvars
+				write(1,*) ' for this processor do_south,do_north      :',do_south,do_north
+				write(1,*) '---------------------------------------------------------------------------'
+				write(1,*) '---------------------------------------------------------------------------'
+				write(1,*) ' '
+			close(1)	
+		endif
+   	
+		first_entry=.FALSE.
 	endif
+	   
+	if( id == 1 ) then
+		val_name = 'u' ; deriv_name = 'u_y'
+	elseif( id == 2 ) then
+		val_name = 'v' ; deriv_name = 'v_y'
+	elseif( id == 3 ) then
+		val_name = 'w' ; deriv_name = 'w_y'
+	elseif( id == 4 ) then
+		val_name = 's1' ; deriv_name = 's1_y'
+	elseif( id == 5 ) then
+		val_name = 's2' ; deriv_name = 's2_y'
+	endif
+			
+	!-----------------------------------------------------------
+	! determine if a new data chunk needs to be read and if so,
+	! read the new chunk of boundary data
+	!-----------------------------------------------------------
+	if( do_south .or. do_north ) then
+		
+		if( t >= t_end ) then    ! a new chunk of boundary data is needed, read it
+	
+			do iside = 1,2    ! S to N
+   		
+   				if( iside==1 .and. do_south ) then
+   					ncfile = 'BVALS/south_'//iproc//'-'//jproc//'.nc'  ! i.e. south_000-013.nc
+   					do_read = .TRUE.   					
+   				elseif( iside==2 .and. do_north ) then
+   					ncfile = 'BVALS/north_'//iproc//'-'//jproc//'.nc'  ! i.e. north_000-013.nc
+   					do_read = .TRUE.
+   				else
+   					do_read = .FALSE.
+   				endif
+   			
+   				if( do_read ) then
+   					!--------------------------------------
+   					!  open the file, check for error
+   					!--------------------------------------
+   					ierr=NF_OPEN(ncfile,NF_NOWRITE,ncid)
+   					if(ierr.ne.NF_NOERR) then
+    					write(0,*) '... ERROR OPENING NETCDF FILE: bvals_NS ',trim(ncfile)
+    					write(0,*) '... myid, ierr ',myid, ierr
+    					stop
+   					endif
+   			
+   					!-----------------------------------------
+   					!  determine total number of time slices
+   					!-----------------------------------------
+   					ierr = NF_INQ_DIMID(ncid, "timedimension", dimid)
+					ierr = NF_INQ_DIMLEN(ncid,dimid,num_time_slices)
+					if(ierr.ne.NF_NOERR) then
+    					write(0,*) '... ERROR GETTING TIMEDIMENSION LENGTH: bvals_NS ',trim(ncfile)
+    					write(0,*) '... myid, ierr ',myid, ierr
+    					stop
+   					endif
+					if( num_time_slices < slices_per_chunk ) then
+						slices_per_chunk = num_time_slices  ! don't read more slices than there are in the file
+					endif
+					
+					!---------------------------------------------
+   					!  set start and count to read desired data
+   					!---------------------------------------------
+   					remaining = num_time_slices - start_slice + 1
+   					icount = min(remaining,slices_per_chunk)
+					start=(/1,1,start_slice/)
+   					count=(/nx,nz,icount/)
+   					
+			
+					!-----------------------------------------
+   					!  get start and end times for this chunk
+   					!  set the time increment
+   					!-----------------------------------------
+					ierr = NF_INQ_VARID(ncid,'time',varid)
+					ierr = NF_GET_VARA_DOUBLE(ncid,varid,start_slice,icount,TIME)
+					if (ierr.ne.NF_NOERR) then
+    					write(0,*) myid,'NetCDF ERROR GET_VARA_DOUBLE -> time: ',ierr,start_slice,icount    					
+    					stop
+   					endif
+					t_start = TIME(1)
+					dt_bvals = TIME(2)-TIME(1)
+					
+					if( t < TIME(1) .or. t > TIME(icount) ) then
+						if(myid==0) then
+							write(0,*) id,myid," time range of new chunk does not span current time t"
+							write(0,*) id,myid,"       t,TIME(1),TIME(icount): ",t,TIME(1),TIME(icount)
+							write(0,*) id,myid,"       start_slice,icount,num_time_slices: ",start_slice,icount,num_time_slices
+						endif	
+					endif
+												   			
+   					!------------------------------------------------
+   					!  extract variable id for VAL , check for error
+   					!------------------------------------------------
+   					ierr=NF_INQ_VARID(ncid,val_name,varid)
+   					if (ierr.ne.NF_NOERR) then
+    					write(0,*) myid,'NetCDF ERROR INQ_VARID -> val, id: ',id,ierr
+    					stop
+   					endif
+
+   					!------------------------------------------------
+   					!  read the corresponding variable (dimensional)
+   					!------------------------------------------------
+   					ierr = NF_GET_VARA_DOUBLE(ncid,varid,start,count,VALS(1,1,1,id,iside)) 
+   					if (ierr.ne.NF_NOERR) then
+   						write(0,*) myid,'NetCDF ERROR NF_GET_VARA_REAL -> val, id: ',id,ierr
+    					stop
+   					endif
+   				
+   					!---------------------------------------------------
+   					!  extract variable id for DERIV , check for error
+   					!---------------------------------------------------
+   					ierr=NF_INQ_VARID(ncid,deriv_name,varid)
+   					if (ierr.ne.NF_NOERR) then
+    					write(0,*) myid,'NetCDF ERROR INQ_VARID -> deriv, id: ',id,ierr
+    					stop
+   					endif
+
+   					!------------------------------------------------
+   					!  read the corresponding variable (dimensional)
+   					!------------------------------------------------
+   					ierr = NF_GET_VARA_DOUBLE(ncid,varid,start,count,DERIVS(1,1,1,id,iside)) 
+   					if (ierr.ne.NF_NOERR) then
+   						write(0,*) myid,'NetCDF ERROR NF_GET_VARA_REAL -> deriv, id: ',id,ierr
+    					stop
+   					endif
+   				
+   					if( myid == 0 .and. id<9 ) then
+   						open(1,file='output/debug_data/BC_data_NS_specs',position='append')
+   						write(1,*) ' finished reading file, iside        :',trim(ncfile),iside
+   						write(1,*) ' id and variable names read          :',id,trim(val_name),' , ',trim(deriv_name)
+   						write(1,*) ' total number of time slices in file :',num_time_slices
+   						write(1,*) ' slice range for this chunk          :',start_slice,start_slice + icount - 1 
+   						write(1,*) ' time range for this chunk           :',TIME(1),TIME(icount)
+   						write(1,*) ' time value triggering read          :',t
+   						write(1,*) '  '
+   						write(1,*) '  '
+   						close(1)
+   					endif
+   				
+   				endif ! do_read block
+   			
+   			enddo   ! end loop over 2 endpoints
+   			   			   		   			
+		endif   ! end block for reading a new chunk of boundary data
+		
+		!-----------------------------------------------------------------------
+		! a valid boundary data chunk is now available (new or old)
+		! interpolate between saved BC values to get values at the current time
+		!-----------------------------------------------------------------------
+		
+   		i0 = floor( (t-t_start)/dt_bvals ) + 1        ! index of saved time just lt t
+   		i1 = minval( (/i0 + 1,slices_per_chunk/) )    ! index of saved time just gt t
+   		t_left = t_start + (i0-1)*dt_bvals            ! saved time in [s] just lt t
+   		t_right = t_left + dt_bvals                   ! saved time in [s] just gt t
+   		xx = (t - t_left)/dt_bvals                    ! linear interpolation weight
+   		   
+   		!---------------
+   		! SANITY CHECK
+   		!---------------
+   		if( t < t_left .OR. t > t_right ) then
+    		if(myid==0) then
+     			write(0,*) 'misalignment in BC time values: ',t,t_start,t_end,dt_bvals
+     			write(0,*) 't_left, t_right ',t_left, t_right
+     			write(0,*) 'i0, i1, xx ',i0,i1,xx
+     			STOP
+    		endif
+   		endif   
+   		if( xx < 0.d0 .OR. xx > 1.d0 ) then
+    		if(myid==0) then
+     			write(0,*) 'misalignment in BC time values: ',t,t_start,t_end
+     			write(0,*) 't, t_left, t_right ',t, t_left, t_right
+     			write(0,*) 'xx, dt_bvals  ',xx, dt_bvals
+     			STOP
+    		endif
+   		endif
+   		
+   		!-------------------------------------------------
+   		! do the interpolation and store the value
+   		!-------------------------------------------------
+   		if( do_south ) then
+   			iside = 1
+   			south_vals(:,:,id)   =   VALS(:,:,i0,id,iside) + xx*(   VALS(:,:,i1,id,iside) -   VALS(:,:,i0,id,iside) )  ! time interpolated values
+   			south_derivs(:,:,id) = DERIVS(:,:,i0,id,iside) + xx*( DERIVS(:,:,i1,id,iside) - DERIVS(:,:,i0,id,iside) )  ! time interpolated derivs
+   		endif
+   		
+   		if( do_north ) then
+   			iside = 2
+   			north_vals(:,:,id)   =   VALS(:,:,i0,id,iside) + xx*(   VALS(:,:,i1,id,iside) -   VALS(:,:,i0,id,iside) )  ! time interpolated values
+   			north_derivs(:,:,id) = DERIVS(:,:,i0,id,iside) + xx*( DERIVS(:,:,i1,id,iside) - DERIVS(:,:,i0,id,iside) )  ! time interpolated derivs
+   		endif
+   		   		
+	endif   ! end block for processors that own NS boundaries
+	
+	!-------------------------------------------------
+   	! workload can be different, not all processors
+   	! have boundaries and do the reads, sync back up
+   	!-------------------------------------------------		
+	call mpi_barrier(comm,ierr)  
+	
  return	          
 end subroutine bvals_NS
 
-subroutine bvals_BT(x,y,z,t,id,VALS,DERIVS,nx,ny,nz,side,Lz)
+subroutine bvals_BT(x,y,z,t,id,nx,ny,nz)
 	!--------------------------------------------------------------------------
-	! User routine to supply externally obtained boundary values and normal
-	! derivatives at the BOTTOM and TOP boundaries z=0 and z=Lz at
+	! flow_solve routine to read the boundary data netcdf files and
+	! fill the arrays bottom_vals(x,y,id) and bottom_derivs(x,y,id)
+	! and  top_vals(x,y,id) and top_derivs(x,y,id)
+	! at the BOTTOM and TOP boundaries z=0 and z=Lz at
 	! the x and y values requested at time t. All values in dimensional units.
-	! "side" is either 'B' for z=0 or 'T' for z=Lz requested values.
+	!
+	! x,y,z and nx,ny,nz are all local to the processor
 	!--------------------------------------------------------------------------
-	
-	!-----------------------------------------------------------------------------
-	!   These are user defined functions that return the actual boundary values.
-	!   Generally, the user will read and store boundary values coarser in
-	!   time than needed, and then interpolate to the desired time, returning the
-	!   requested values via a user defined function. Here we just evaluate an analytical
-	!   external solution directly at the locations and times requested by the
-	!   calling routine.
-	!-----------------------------------------------------------------------------
-	use user_params,                    only: parent_soln,parent_deriv,x0,y0,z0
-	!-----------------------------------------------------------------------------
-		
+	use mpi_params,             only: myid,comm,ierr
+	use methods_params,         only: do_second_scalar
+	use decomposition_params,   only: IDIM,JDIM,KDIM,array_size,YBLOCK, &
+                                      proc_row,proc_col,p1,p2
+    use independent_variables, only : Lz,t0,tf  ! initial and final integration times
+    use boundary_data		
 	implicit none
 	integer, intent(in)                    :: id                  ! 1,2,3,4,5 for u,v,w,s1,s2
 	integer, intent(in)                    :: nx,ny,nz            ! size of local portions of domain
-	real(kind=8), intent(in)               :: x(nx),y(ny),z(nz)   ! local values of y and z
-	real(kind=8), intent(out)              :: VALS(nx,ny)
-	real(kind=8), intent(out)              :: DERIVS(nx,ny)
-	real(kind=8), intent(in)               :: t,Lz                ! time in [s], global size Ly in [m]
-	character(len=80),intent(in)           :: side 
-	character(len=80), save                :: dir='z'             ! return z derivs at B/T bdries 
-	integer                                :: i,j
-	real(kind=8)                           :: xval,yval,zval
-	logical, save                          :: do_bottom,do_top   
+	real(kind=8), intent(in)               :: t                   ! time in [s], global size Lx in [m]
+	real(kind=8), intent(in)               :: x(nx),y(ny),z(nz)   ! local values of x, y and z
+	real(kind=8), allocatable, save        :: VALS(:,:,:,:,:)     ! (y,z,t,id,iside)
+	real(kind=8), allocatable, save        :: DERIVS(:,:,:,:,:)   ! (y,z,t,id,iside)	
+	real(kind=8), allocatable, save        :: TIME(:)             ! time in boundary data files
+	integer                                :: iside,i0,i1
+	real(kind=8)                           :: t_left,t_right,xx
+	logical, save                          :: do_bottom,do_top,do_read
+	
+	!------------------------------------------------------------
+ 	! filename stuff...
+ 	!------------------------------------------------------------
+	integer                         ::  ncid,varid,i_proc,j_proc,dimid
+	character(len=4)                ::  cid
+	character(len=3), save          ::  iproc,jproc
+	character(len=80)               ::  ncfile,val_name,deriv_name,char_side
+	integer, save                   ::  start(3),count(3),nvars=4,read_time=.TRUE.
+	logical, save                   ::  first_entry=.TRUE.
+	integer                         ::  i,j,icount,remaining
+	include 'netcdf.inc'
+	
+	if( first_entry ) then
+	
+		if( do_second_scalar ) nvars = 5
+		
+		t_end = 0.d0
+		start_slice = 1
+		
+		allocate(   VALS(nx,ny,slices_per_chunk,nvars,2) )  ! B/T (x,y,t,id,side)
+		allocate( DERIVS(nx,ny,slices_per_chunk,nvars,2) )
+		VALS = 0.d0 ; DERIVS = 0.d0	
+		allocate( TIME(slices_per_chunk) )
+		TIME = 0.d0	
+		
+		write(unit=iproc,fmt='(I3.3)') proc_row(YBLOCK,myid) ! 3 digit char string for iproc
+   		write(unit=jproc,fmt='(I3.3)') proc_col(YBLOCK,myid) ! 3 digit char string for jproc
+   		
+   		!-----------------------------------------------------------
+		! determine if this processor needs to fill tha data values
+		!-----------------------------------------------------------
+		do_bottom=.FALSE. ;  do_top=.FALSE.
+		if( z(1) == 0.d0 )   do_bottom = .TRUE.
+		if( z(nz) == Lz )    do_top = .TRUE.
+		
+		if( myid == 0 ) then
+			open(1,file='output/debug_data/BC_data_BT_specs')
+				write(1,*) '---------------------------------------------------------------------------'
+				write(1,*) '---------------------------------------------------------------------------'
+				write(1,*) ' initial and final integration times [s]   :',t0,tf
+				write(1,*) ' processor myid=0  iproc,jproc             :',iproc,' , ',jproc
+				write(1,*) ' chunk size nx, ny, slices_per_chunk,nvars :',nx,ny,slices_per_chunk,nvars
+				write(1,*) ' for this processor do_bottom,do_top       :',do_bottom,do_top
+				write(1,*) '---------------------------------------------------------------------------'
+				write(1,*) '---------------------------------------------------------------------------'
+				write(1,*) ' '
+			close(1)	
+		endif
+   	
+		first_entry=.FALSE.
+	endif
+	   
+	if( id == 1 ) then
+		val_name = 'u' ; deriv_name = 'u_z'
+	elseif( id == 2 ) then
+		val_name = 'v' ; deriv_name = 'v_z'
+	elseif( id == 3 ) then
+		val_name = 'w' ; deriv_name = 'w_z'
+	elseif( id == 4 ) then
+		val_name = 's1' ; deriv_name = 's1_z'
+	elseif( id == 5 ) then
+		val_name = 's2' ; deriv_name = 's2_z'
+	endif
+			
+	!-----------------------------------------------------------
+	! determine if a new data chunk needs to be read and if so,
+	! read the new chunk of boundary data
+	!-----------------------------------------------------------
+	if( do_bottom .or. do_top ) then
+		
+		if( t >= t_end ) then    ! a new chunk of boundary data is needed, read it
+	
+			do iside = 1,2    ! B to T
+   		
+   				if( iside==1 .and. do_bottom ) then
+   					if(proc_col(YBLOCK,myid) .NE. 0) stop 'problem detecting do_bottom in bvals_BT' 
+   					ncfile = 'BVALS/bottom_'//iproc//'-'//jproc//'.nc'  ! i.e.bottom_013-000.nc
+   					do_read = .TRUE.   					
+   				elseif( iside==2 .and. do_top ) then
+   					if(proc_col(YBLOCK,myid) .NE. p2-1) stop 'problem detecting do_top in bvals_BT'
+   					ncfile = 'BVALS/top_'//iproc//'-'//jproc//'.nc'  ! i.e. top_000-008.nc
+   					do_read = .TRUE.
+   				else
+   					do_read = .FALSE.
+   				endif
+   			
+   				if( do_read ) then
+   					!--------------------------------------
+   					!  open the file, check for error
+   					!--------------------------------------
+   					ierr=NF_OPEN(ncfile,NF_NOWRITE,ncid)
+   					if(ierr.ne.NF_NOERR) then
+    					write(0,*) '... ERROR OPENING NETCDF FILE: bvals_BT ',trim(ncfile)
+    					write(0,*) '... myid, ierr ',myid, ierr
+    					stop
+   					endif
+   			
+   					!-----------------------------------------
+   					!  determine total number of time slices
+   					!-----------------------------------------
+   					ierr = NF_INQ_DIMID(ncid, "timedimension", dimid)
+					ierr = NF_INQ_DIMLEN(ncid,dimid,num_time_slices)
+					if(ierr.ne.NF_NOERR) then
+    					write(0,*) '... ERROR GETTING TIMEDIMENSION LENGTH: bvals_BT ',trim(ncfile)
+    					write(0,*) '... myid, ierr ',myid, ierr
+    					stop
+   					endif
+					if( num_time_slices < slices_per_chunk ) then
+						slices_per_chunk = num_time_slices  ! don't read more slices than there are in the file
+					endif
+					
+					!---------------------------------------------
+   					!  set start and count to read desired data
+   					!---------------------------------------------
+   					remaining = num_time_slices - start_slice + 1
+   					icount = min(remaining,slices_per_chunk)
+					start=(/1,1,start_slice/)
+   					count=(/nx,ny,icount/)
+   							
+					!-----------------------------------------
+   					!  get start and end times for this chunk
+   					!  set the time increment
+   					!-----------------------------------------
+					ierr = NF_INQ_VARID(ncid,'time',varid)
+					ierr = NF_GET_VARA_DOUBLE(ncid,varid,start_slice,icount,TIME)
+					if (ierr.ne.NF_NOERR) then
+    					write(0,*) myid,'NetCDF ERROR GET_VARA_DOUBLE -> time: ',ierr,start_slice,icount    					
+    					stop
+   					endif
+					t_start = TIME(1)
+					dt_bvals = TIME(2)-TIME(1)
+					
+					if( t < TIME(1) .or. t > TIME(icount) ) then
+						if(myid==0) then
+							write(0,*) id,myid," time range of new chunk does not span current time t"
+							write(0,*) id,myid,"       t,TIME(1),TIME(icount): ",t,TIME(1),TIME(icount)
+							write(0,*) id,myid,"       start_slice,icount,num_time_slices: ",start_slice,icount,num_time_slices
+						endif	
+					endif
+												   			
+   					!------------------------------------------------
+   					!  extract variable id for VAL , check for error
+   					!------------------------------------------------
+   					ierr=NF_INQ_VARID(ncid,val_name,varid)
+   					if (ierr.ne.NF_NOERR) then
+    					write(0,*) myid,'NetCDF ERROR INQ_VARID -> val, id: ',id,ierr
+    					stop
+   					endif
 
-	do_bottom=.FALSE. ;  do_top=.FALSE.
-	if(side=='B' .and. z(1) == 0.d0 )   do_bottom = .TRUE.
-	if(side=='T' .and. z(nz) == Lz )	do_top = .TRUE.
+   					!------------------------------------------------
+   					!  read the corresponding variable (dimensional)
+   					!------------------------------------------------
+   					ierr = NF_GET_VARA_DOUBLE(ncid,varid,start,count,VALS(1,1,1,id,iside)) 
+   					if (ierr.ne.NF_NOERR) then
+   						write(0,*) myid,'NetCDF ERROR NF_GET_VARA_REAL -> val, id: ',id,ierr
+    					stop
+   					endif
+   				
+   					!---------------------------------------------------
+   					!  extract variable id for DERIV , check for error
+   					!---------------------------------------------------
+   					ierr=NF_INQ_VARID(ncid,deriv_name,varid)
+   					if (ierr.ne.NF_NOERR) then
+    					write(0,*) myid,'NetCDF ERROR INQ_VARID -> deriv, id: ',id,ierr
+    					stop
+   					endif
+
+   					!------------------------------------------------
+   					!  read the corresponding variable (dimensional)
+   					!------------------------------------------------
+   					ierr = NF_GET_VARA_DOUBLE(ncid,varid,start,count,DERIVS(1,1,1,id,iside)) 
+   					if (ierr.ne.NF_NOERR) then
+   						write(0,*) myid,'NetCDF ERROR NF_GET_VARA_REAL -> deriv, id: ',id,ierr
+    					stop
+   					endif
+   				
+   					if( myid == 0 .and. id<9 ) then
+   						open(1,file='output/debug_data/BC_data_BT_specs',position='append')
+   						write(1,*) ' finished reading file, iside        :',trim(ncfile),iside
+   						write(1,*) ' id and variable names read          :',id,trim(val_name),' , ',trim(deriv_name)
+   						write(1,*) ' total number of time slices in file :',num_time_slices
+   						write(1,*) ' slice range for this chunk          :',start_slice,start_slice + icount - 1 
+   						write(1,*) ' time range for this chunk           :',TIME(1),TIME(icount)
+   						write(1,*) ' time value triggering read          :',t
+   						write(1,*) '  '
+   						write(1,*) '  '
+   						close(1)
+   					endif
+   				
+   				endif ! do_read block
+   			
+   			enddo   ! end loop over 2 endpoints
+   			   			   		   			
+		endif   ! end block for reading a new chunk of boundary data
+		
+		!-----------------------------------------------------------------------
+		! a valid boundary data chunk is now available (new or old)
+		! interpolate between saved BC values to get values at the current time
+		!-----------------------------------------------------------------------
+		
+   		i0 = floor( (t-t_start)/dt_bvals ) + 1        ! index of saved time just lt t
+   		i1 = minval( (/i0 + 1,slices_per_chunk/) )    ! index of saved time just gt t
+   		t_left = t_start + (i0-1)*dt_bvals            ! saved time in [s] just lt t
+   		t_right = t_left + dt_bvals                   ! saved time in [s] just gt t
+   		xx = (t - t_left)/dt_bvals                    ! linear interpolation weight
+   		   
+   		!---------------
+   		! SANITY CHECK
+   		!---------------
+   		if( t < t_left .OR. t > t_right ) then
+    		if(myid==0) then
+     			write(0,*) 'misalignment in BC time values: ',t,t_start,t_end,dt_bvals
+     			write(0,*) 't_left, t_right ',t_left, t_right
+     			write(0,*) 'i0, i1, xx ',i0,i1,xx
+     			STOP
+    		endif
+   		endif   
+   		if( xx < 0.d0 .OR. xx > 1.d0 ) then
+    		if(myid==0) then
+     			write(0,*) 'misalignment in BC time values: ',t,t_start,t_end
+     			write(0,*) 't, t_left, t_right ',t, t_left, t_right
+     			write(0,*) 'xx, dt_bvals  ',xx, dt_bvals
+     			STOP
+    		endif
+   		endif
+   		   		   		 
+   		!-------------------------------------------------
+   		! do the interpolation and store the value
+   		!-------------------------------------------------
+   		if( do_bottom ) then
+   			iside = 1
+   			bottom_vals(:,:,id)   =   VALS(:,:,i0,id,iside) + xx*(   VALS(:,:,i1,id,iside) -   VALS(:,:,i0,id,iside) )  ! time interpolated values
+   			bottom_derivs(:,:,id) = DERIVS(:,:,i0,id,iside) + xx*( DERIVS(:,:,i1,id,iside) - DERIVS(:,:,i0,id,iside) )  ! time interpolated derivs
+   		endif
+   		
+   		if( do_top ) then
+   			iside = 2
+   			top_vals(:,:,id)   =   VALS(:,:,i0,id,iside) + xx*(   VALS(:,:,i1,id,iside) -   VALS(:,:,i0,id,iside) )  ! time interpolated values
+   			top_derivs(:,:,id) = DERIVS(:,:,i0,id,iside) + xx*( DERIVS(:,:,i1,id,iside) - DERIVS(:,:,i0,id,iside) )  ! time interpolated derivs
+   		endif
+   		
+   		
+	endif   ! end block for processors that own EW boundaries
 	
-	if( do_bottom )  then
-		zval = z0
-		do i=1,nx
-			xval = x(i) + x0    
-			do j=1,ny
-				yval = y(j) + y0
-				VALS(i,j) = parent_soln(xval,yval,zval,t,id)
-				DERIVS(i,j) = parent_deriv(xval,yval,zval,t,id,dir)
-			enddo
-		enddo
-	endif
+	!-------------------------------------------------
+   	! workload can be different, not all processors
+   	! have boundaries and do the reads, sync back up
+   	!-------------------------------------------------		
+	call mpi_barrier(comm,ierr)  
 	
-	if( do_top )  then
-		zval = z0 + Lz
-		do i=1,nx
-			xval = x(i) + x0    
-			do j=1,ny
-				yval = y(j) + y0
-				VALS(i,j) = parent_soln(xval,yval,zval,t,id)
-				DERIVS(i,j) = parent_deriv(xval,yval,zval,t,id,dir)
-			enddo
-		enddo
-	endif
  return	          
 end subroutine bvals_BT
 

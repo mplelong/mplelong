@@ -46,7 +46,7 @@ def fill_boundary_vals(x,y,z,t,x0,y0,z0,WAVE_PARAMS,BVALS,BDERIVS):
 		U_west[:,k] = parent_soln(x0+Lx,Z,t,id,WAVE_PARAMS)
 		U_x_east[:,k] = parent_derivs(x0   ,Z,t,id,'x',WAVE_PARAMS)	# not actually used
 		U_x_west[:,k] = parent_derivs(x0+Lx,Z,t,id,'x',WAVE_PARAMS)	# not actually used
-		
+				
 		id = 1           
 		V_east[:,k] = parent_soln(x0   ,Z,t,id,WAVE_PARAMS)
 		V_west[:,k] = parent_soln(x0+Lx,Z,t,id,WAVE_PARAMS)
@@ -283,8 +283,8 @@ def write_east_vals(tval,islice,yvec,zvec,east_vals,east_derivs,outdir,nt):
 	[U_x_east,V_x_east,W_x_east,B_x_east] = east_derivs
 	
 	g=9.81; rho0=1027.  
-	S1_east = -(g/rho0) * B_east 
-	S1_x_east = -(g/rho0) * B_x_east   
+	S1_east = -(rho0/g) * B_east 
+	S1_x_east = -(rho0/g) * B_x_east   
                
 	#----------------------------------------------------------------------
 	#  write data into fname with the time slice equal to islice
@@ -396,8 +396,8 @@ def write_west_vals(tval,islice,yvec,zvec,west_vals,west_derivs,outdir,nt):
 	[U_x_west,V_x_west,W_x_west,B_x_west] = west_derivs
 	
 	g=9.81; rho0=1027.  
-	S1_west = -(g/rho0) * B_west 
-	S1_x_west = -(g/rho0) * B_x_west   
+	S1_west = -(rho0/g) * B_west 
+	S1_x_west = -(rho0/g) * B_x_west   
                
 	#----------------------------------------------------------------------
 	#  write data into fname with the time slice equal to islice
@@ -510,8 +510,8 @@ def write_south_vals(tval,islice,xvec,zvec,south_vals,south_derivs,outdir,nt):
 	[U_y_south,V_y_south,W_y_south,B_y_south] = south_derivs
 	
 	g=9.81; rho0=1027.  
-	S1_south = -(g/rho0) * B_south 
-	S1_y_south = -(g/rho0) * B_y_south   
+	S1_south = -(rho0/g) * B_south 
+	S1_y_south = -(rho0/g) * B_y_south   
                
 	#----------------------------------------------------------------------
 	#  write data into fname with the time slice equal to islice
@@ -623,8 +623,8 @@ def write_north_vals(tval,islice,xvec,zvec,north_vals,north_derivs,outdir,nt):
 	[U_y_north,V_y_north,W_y_north,B_y_north] = north_derivs
 	
 	g=9.81; rho0=1027.  
-	S1_north = -(g/rho0) * B_north 
-	S1_y_north = -(g/rho0) * B_y_north   
+	S1_north = -(rho0/g) * B_north 
+	S1_y_north = -(rho0/g) * B_y_north   
                
 	#----------------------------------------------------------------------
 	#  write data into fname with the time slice equal to islice
@@ -737,8 +737,8 @@ def write_bottom_vals(tval,islice,xvec,yvec,bottom_vals,bottom_derivs,outdir,nt)
 	[U_z_bottom,V_z_bottom,W_z_bottom,B_z_bottom] = bottom_derivs
 	
 	g=9.81; rho0=1027.  
-	S1_bottom = -(g/rho0) * B_bottom 
-	S1_z_bottom = -(g/rho0) * B_z_bottom   
+	S1_bottom = -(rho0/g) * B_bottom 
+	S1_z_bottom = -(rho0/g) * B_z_bottom   
                
 	#----------------------------------------------------------------------
 	#  write data into fname with the time slice equal to islice
@@ -850,8 +850,8 @@ def write_top_vals(tval,islice,xvec,yvec,top_vals,top_derivs,outdir,nt):
 	[U_z_top,V_z_top,W_z_top,B_z_top] = top_derivs
 	
 	g=9.81; rho0=1027.  
-	S1_top = -(g/rho0) * B_top 
-	S1_z_top = -(g/rho0) * B_z_top   
+	S1_top = -(rho0/g) * B_top 
+	S1_z_top = -(rho0/g) * B_z_top   
                
 	#----------------------------------------------------------------------
 	#  write data into fname with the time slice equal to islice

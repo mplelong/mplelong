@@ -1,0 +1,56 @@
+
+!-------------------------------------------------------------------------------------------
+! Set the boundary_data_source to 'user_functions' or 'datafiles'
+! Whenever a dimension is not periodic or treated specially as part of FS_XY_periodic,
+! user supplied boundary data is required. This can be supplied in the routines
+! user_bvals_EW, user_bvals_NS & user_bvals_BT when boundary_data_source = 'user_functions'
+! or via the boundary data files stored in root/BVALS when 'datafiles' is set.
+
+
+
+
+Overall control is determined by the value of boundary_data_source in
+the module boundary_data. Its default value is 'datafiles'. In this
+case, the code (not in the user domain) will look for specifically
+formatted boundary files in the directory $FLOW_SOLVE_ROOT/BVALS . The
+files have names like east_000-001.nc etc. They contain 2d planar data
+at coarse time intervals, broken down for the specific p1p2
+decomposition of the run. Interpolation in time is done internally by
+the code. These files can, if desired have very many time slices. Time
+slices are read in chunks, controlled by the parameter slices_per_chunk
+in the module boundary_data. Both values and normal derivatives are
+stored at each boundary face.
+
+Generally, for nesting, the user would first create a set of spatially
+and temporally coarse files, one for each of the EAST, WEST, SOUTH,
+NORTH BOTTOM and TOP faces bounding the child domain. These can then
+easily be interpolated to the desired spatial resolution and distributed
+to the desired p1p2 decomposition using the script
+
+      python input/data_tools/python_scripts/create_BC_files.py
+      $FLOW_SOLVE_ROOT 129 9 129 2 2 The resulting files are stored in
+      BVALS and the code will process them in chunks.
+
+When boundary_data_source='user_functions', the user must configure the
+subroutines user_bvals_EW, user_bvals_NS & user_bvals_BT to supply the
+requested values. The interface looks like
+
+     subroutine user_bvals_NS(x,y,z,t,id,VALS,DERIVS,nx,ny,nz,side,Ly)
+     where, e.g. x,y,z/nx,ny,nz are local coord arrays for the given
+     processor, t is time, id=1,2,3,4 for u,v,w,s1 , side is 'N' or 'S'
+     and the values and normal derivatives for the requested variable
+     are to be returned in VALS and DERIVS. Examples are found in
+     flow_solve_user.f90 for the XZ_nested_IWs setup.
+
+
+!
+!  For the XZ_nested_IW test case, either scheme can be used. The boundary data files
+!  are generated using the scripts create_global_bdry_files.py (w/ XZ_IWs_utilities.py)
+!  followed by create_BC_files.py which interpolates and breaks the data apart into 
+!  distributed files for each processor that needs the data.
+!
+! e.g. 
+! for global bdry files at the desired resolution w/ 65 time slices and distributed files w/ p1=p2=2
+!
+! python input/data_tools/python_scripts/create_global_bdry_files.py $FLOW_SOLVE_ROOT 129 9 129 65
+! python input/data_tools/python_scripts/create_BC_files.py $FLOW_SOLVE_ROOT 129 9 129 2 2

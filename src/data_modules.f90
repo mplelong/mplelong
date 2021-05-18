@@ -360,12 +360,11 @@
 		real(kind=8), allocatable    :: step_b(:),step_t(:)     ! (y)
 		
 		integer                      :: num_time_slices         ! total number of slices in datafiles
-		integer                      :: slices_per_chunk = 500  ! number of slices in each read chunk
+		integer                      :: slices_per_chunk = 32  ! number of slices in each read chunk
 		real(kind=8)                 :: dt_bvals                ! time increment between saved BVALS
-		character(len=80)            :: interp_method='linear'  ! used for interpolating in time
 		real(kind=8)                 :: t_start                 ! time of first slice in current chunk
-		real(kind=8)                 :: t_end = -99999.         ! time of last  slice in current chunk
-		integer                      :: start_slice = 0         ! index of first slice in current chunk
+		real(kind=8)                 :: t_end=0.d0              ! time of last  slice in current chunk
+		integer                      :: start_slice=1           ! index of first slice in current chunk
 		integer                      :: end_slice               ! index of last  slice in current chunk
 	end module boundary_data
 

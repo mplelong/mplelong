@@ -40,7 +40,7 @@ m_iw = 1.*pi/H            # [1/m]         vertical wavenumber of internal wave
 omega2 = (k_iw**2 * N2 + m_iw**2 * f2)/(k_iw**2 + m_iw**2)
 omega = np.sqrt(omega2)   # [1/s]         internal wave frequency
 IWPER = (2.*pi/omega)     # [s]
-A = 0.01                  # [m/s]         amplitude of U
+A = 0.05                  # [m/s]         amplitude of U
 phase = pi/4.             # [1]           initial phase shift of wave mode
 WAVE_PARAMS = [A,f,N2,omega,k_iw,m_iw,phase]
 
@@ -62,7 +62,7 @@ ny = int(sys.argv[3])
 nz = int(sys.argv[4])
 
 nt = int(sys.argv[5])
-dt = IWPER/(nt-1.)
+dt = 1.01*IWPER/(nt-1.)
 
 
 print('...  create_global_bdry_files.py executing' )
