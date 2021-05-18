@@ -51,6 +51,7 @@ contains
 		use io_params,                only: variable_key
 		use methods_params,           only: rs_basename,subtract_s1_bar,restart,add_restart_time
 		use etc,                      only: istart
+		use boundary_data,            only: boundary_data_source
 		implicit none
 		!--------------------------------------------------------------------------------------------
 		!  For example, can set values different than defaults for Bernoulli/Cosine differentiation
@@ -75,8 +76,25 @@ contains
 			add_restart_time=.TRUE.               ! add time stored in restart file to t0,tf specified in problem_params
 		endif
 		
-		
-		
+		!-------------------------------------------------------------------------------------------
+		! Set the boundary_data_source to 'user_functions' or 'datafiles'
+		! Whenever a dimension is not periodic or treated specially as part of FS_XY_periodic,
+		! user supplied boundary data is required. This can be supplied in the routines
+		! user_bvals_EW, user_bvals_NS & user_bvals_BT when boundary_data_source = 'user_functions'
+		! or via the boundary data files stored in root/BVALS when 'datafiles' is set.
+		!
+		!  For the XZ_nested_IW test case, either scheme can be used. The boundary data files
+		!  are generated using the scripts create_global_bdry_files.py (w/ XZ_IWs_utilities.py)
+		!  followed by create_BC_files.py which interpolates and breaks the data apart into 
+		!  distributed files for each processor that needs the data.
+		!
+		! e.g. 
+		! for global bdry files at the desired resolution w/ 65 time slices and distributed files w/ p1=p2=2
+		!
+		! python input/data_tools/python_scripts/create_global_bdry_files.py $FLOW_SOLVE_ROOT 129 9 129 65
+		! python input/data_tools/python_scripts/create_BC_files.py $FLOW_SOLVE_ROOT 129 9 129 2 2
+		!-------------------------------------------------------------------------------------------
+		boundary_data_source = 'datafiles'   ! datafiles is the default
 		
 	end subroutine change_default_values
 
