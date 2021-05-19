@@ -151,27 +151,33 @@ subroutine ReadUserData
   		call mpi_bcast(nsteps(i),1,MPI_INTEGER,0,comm,ierr)
   
   		if(myid==0) read(1,*) ilocs(1,i)
+  		if( ilocs(1,i) < 0 ) ilocs(1,i) = 1    ! negative values trigger limiting value 
   		call mpi_bcast(ilocs(1,i),1,MPI_INTEGER,0,comm,ierr)
   
   		if(myid==0) read(1,*) ilocs(2,i)
+  		if( ilocs(2,i) < 0 ) ilocs(2,i) = nx   ! negative values trigger limiting value 
   		call mpi_bcast(ilocs(2,i),1,MPI_INTEGER,0,comm,ierr)
   
   		if(myid==0) read(1,*) ilocs(3,i)
   		call mpi_bcast(ilocs(3,i),1,MPI_INTEGER,0,comm,ierr)
   
   		if(myid==0) read(1,*) jlocs(1,i)
+  		if( jlocs(1,i) < 0 ) jlocs(1,i) = 1    ! negative values trigger limiting value
   		call mpi_bcast(jlocs(1,i),1,MPI_INTEGER,0,comm,ierr)
   
   		if(myid==0) read(1,*) jlocs(2,i)
+  		if( jlocs(2,i) < 0 ) jlocs(2,i) = ny   ! negative values trigger limiting value
   		call mpi_bcast(jlocs(2,i),1,MPI_INTEGER,0,comm,ierr)
   
   		if(myid==0) read(1,*) jlocs(3,i)
   		call mpi_bcast(jlocs(3,i),1,MPI_INTEGER,0,comm,ierr)
   
   		if(myid==0) read(1,*) klocs(1,i)
+  		if( klocs(1,i) < 0 ) klocs(1,i) = 1    ! negative values trigger limiting value
   		call mpi_bcast(klocs(1,i),1,MPI_INTEGER,0,comm,ierr)
   
   		if(myid==0) read(1,*) klocs(2,i)
+  		if( klocs(2,i) < 0 ) klocs(2,i) = nz   ! negative values trigger limiting value
   		call mpi_bcast(klocs(2,i),1,MPI_INTEGER,0,comm,ierr)
   
   		if(myid==0) read(1,*) klocs(3,i)

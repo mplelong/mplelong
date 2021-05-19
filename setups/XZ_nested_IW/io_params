@@ -2,14 +2,14 @@
 XZ           !!===>  rootname for this file-set, 2D XZ plane
 append       !!===>  append w/ each write or create new file
 16           !!===>  steps between writes     (16 ==> 64 frames in 1024 step period)
-1            !!===>  istart
-129          !!===>  iend
+-999         !!===>  istart		negative values trigger "full global plane" values
+-999         !!===>  iend		negative values trigger "full global plane" values
 1            !!===>  i inc
 5            !!===>  jstart
 5            !!===>  jend
 1            !!===>  j inc
-1            !!===>  kstart
-129          !!===>  kend 
+-999         !!===>  kstart
+-999         !!===>  kend 
 1            !!===>  k inc
 1            !!===>  write u  (don't write if 0, write if 1)
 1            !!===>  write v
@@ -22,11 +22,11 @@ append       !!===>  append w/ each write or create new file
 65           !!===>  istart
 65           !!===>  iend
 1            !!===>  i inc
-1            !!===>  jstart
-8            !!===>  jend
+-999         !!===>  jstart		negative values trigger "full global plane" values
+-999         !!===>  jend		negative values trigger "full global plane" values
 1            !!===>  j inc
-1            !!===>  kstart
-129          !!===>  kend 
+-999         !!===>  kstart		negative values trigger "full global plane" values
+-999         !!===>  kend		negative values trigger "full global plane" values 
 1            !!===>  k inc
 1            !!===>  write u  (don't write if 0, write if 1)
 1            !!===>  write v
@@ -36,11 +36,11 @@ append       !!===>  append w/ each write or create new file
 XY           !!===>  rootname for this file-set, 2D XY plane
 append       !!===>  append w/ each write or create new file
 16           !!===>  steps between writes     (16 ==> 64 frames in 1024 step period)
-1            !!===>  istart
-129          !!===>  iend
+-999         !!===>  istart		negative values trigger "full global plane" values
+-999         !!===>  iend		negative values trigger "full global plane" values
 1            !!===>  i inc
-1            !!===>  jstart
-8            !!===>  jend
+-999         !!===>  jstart		negative values trigger "full global plane" values
+-999         !!===>  jend		negative values trigger "full global plane" values
 1            !!===>  j inc
 65           !!===>  kstart
 65           !!===>  kend 
@@ -53,14 +53,14 @@ append       !!===>  append w/ each write or create new file
 XYZ          !!===>  rootname for this file-set, 3D XYZ volume
 new          !!===>  append w/ each write or create new file
 256          !!===>  steps between writes    256 ==> 4 in 1024 step period (+ initial fields)
-1            !!===>  istart
-129          !!===>  iend
+-999         !!===>  istart		negative values trigger "full global plane" values
+-999         !!===>  iend		negative values trigger "full global plane" values
 1            !!===>  i inc
-1            !!===>  jstart
-8            !!===>  jend
+-999         !!===>  jstart		negative values trigger "full global plane" values
+-999         !!===>  jend		negative values trigger "full global plane" values
 1            !!===>  j inc
-1            !!===>  kstart
-129          !!===>  kend 
+-999         !!===>  kstart		negative values trigger "full global plane" values
+-999         !!===>  kend 		negative values trigger "full global plane" values
 1            !!===>  k inc
 1            !!===>  write u  (don't write if 0, write if 1)
 1            !!===>  write v
