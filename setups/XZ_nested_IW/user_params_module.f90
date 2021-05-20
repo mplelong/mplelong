@@ -62,7 +62,7 @@ contains
 		!--------------------------------------------------------------------------------------------
 		filter_fraction = 0.000              ! .025 using 2/3 rule gives worse results near E/W boundaries
 		
-		variable_key(6,:)=1                  ! for debugging, output div_u*
+		variable_key(6,:) = 1                ! for debugging, output div_u*
 		variable_key(9:11,:) = 1             ! for debugging, output ustar,vstar and wstar
 		
 		!--------------------------------------------------------------------------------------

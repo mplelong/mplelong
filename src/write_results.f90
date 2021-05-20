@@ -74,6 +74,8 @@ subroutine init_netcdf(fid)
 	integer                        :: s1VarID,s2VarID
 	integer                        :: s1_barVarID,s2_barVarID
 	integer                        :: divustarVarID,phiVarID,pdVarID
+	integer                        :: uderivVarID,vderivVarID,wderivVarID
+	integer                        :: s1derivVarID,s2derivVarID
 	integer                        :: s1_name_len,s2_name_len
 	integer                        :: s1_units_len,s2_units_len
 	integer                        :: npts,start1D(1),count1D(1)
@@ -406,6 +408,90 @@ subroutine init_netcdf(fid)
     endif
     
     
+    !----------------------------------------------------------
+    ! child grid needs extra variables: 
+    ! the normal derivatives at the 6 boundary faces
+    !-----------------------------------------------------------
+    if( t_secs >= t_start_child .and. do_child_grid .and. filename_root(fid) .NE. 'XYZ_child_' ) then
+    
+    	if( filename_root(fid)=='east' .or. filename_root(fid)=='west') then
+    	
+    		rcode=NF_DEF_VAR(ncid,'u_x',NF_DOUBLE,ndims,All_nD_VarSIZE,uderivVarID)
+    		rcode=NF_PUT_ATT_TEXT(ncid,uderivVarID,'long_name',3,'u_x')
+    		rcode=NF_PUT_ATT_TEXT(ncid,uderivVarID,'units',3,'1/s]')
+    		
+    		rcode=NF_DEF_VAR(ncid,'v_x',NF_DOUBLE,ndims,All_nD_VarSIZE,vderivVarID)
+    		rcode=NF_PUT_ATT_TEXT(ncid,vderivVarID,'long_name',3,'v_x')
+    		rcode=NF_PUT_ATT_TEXT(ncid,vderivVarID,'units',3,'1/s]')
+    		
+    		rcode=NF_DEF_VAR(ncid,'w_x',NF_DOUBLE,ndims,All_nD_VarSIZE,wderivVarID)
+    		rcode=NF_PUT_ATT_TEXT(ncid,wderivVarID,'long_name',3,'w_x')
+    		rcode=NF_PUT_ATT_TEXT(ncid,wderivVarID,'units',3,'1/s]')
+    		
+    		rcode=NF_DEF_VAR(ncid,'s1_x',NF_DOUBLE,ndims,All_nD_VarSIZE,s1derivVarID)
+    		rcode=NF_PUT_ATT_TEXT(ncid,s1derivVarID,'long_name',3,'s1_x')
+    		rcode=NF_PUT_ATT_TEXT(ncid,s1derivVarID,'units',6,'[s1]/m]')
+    		
+    		if(write_s2_child_grid) then
+    			rcode=NF_DEF_VAR(ncid,'s2_x',NF_DOUBLE,ndims,All_nD_VarSIZE,s2derivVarID)
+    			rcode=NF_PUT_ATT_TEXT(ncid,s2derivVarID,'long_name',4,'s2_x')
+    			rcode=NF_PUT_ATT_TEXT(ncid,s2derivVarID,'units',6,'[s2]/m]')
+    		endif	
+    			
+    	elseif( filename_root(fid)=='south' .or. filename_root(fid)=='north') then
+    
+    		rcode=NF_DEF_VAR(ncid,'u_y',NF_DOUBLE,ndims,All_nD_VarSIZE,uderivVarID)
+    		rcode=NF_PUT_ATT_TEXT(ncid,uderivVarID,'long_name',3,'u_y')
+    		rcode=NF_PUT_ATT_TEXT(ncid,uderivVarID,'units',3,'1/s]')
+    		
+    		rcode=NF_DEF_VAR(ncid,'v_y',NF_DOUBLE,ndims,All_nD_VarSIZE,vderivVarID)
+    		rcode=NF_PUT_ATT_TEXT(ncid,vderivVarID,'long_name',3,'v_y')
+    		rcode=NF_PUT_ATT_TEXT(ncid,vderivVarID,'units',3,'1/s]')
+    		
+    		rcode=NF_DEF_VAR(ncid,'w_y',NF_DOUBLE,ndims,All_nD_VarSIZE,wderivVarID)
+    		rcode=NF_PUT_ATT_TEXT(ncid,wderivVarID,'long_name',3,'w_y')
+    		rcode=NF_PUT_ATT_TEXT(ncid,wderivVarID,'units',3,'1/s]')
+    		
+    		rcode=NF_DEF_VAR(ncid,'s1_y',NF_DOUBLE,ndims,All_nD_VarSIZE,s1derivVarID)
+    		rcode=NF_PUT_ATT_TEXT(ncid,s1derivVarID,'long_name',3,'s1_y')
+    		rcode=NF_PUT_ATT_TEXT(ncid,s1derivVarID,'units',6,'[s1]/m]')
+    		
+    		if(write_s2_child_grid) then
+    			rcode=NF_DEF_VAR(ncid,'s2_y',NF_DOUBLE,ndims,All_nD_VarSIZE,s2derivVarID)
+    			rcode=NF_PUT_ATT_TEXT(ncid,s2derivVarID,'long_name',4,'s2_y')
+    			rcode=NF_PUT_ATT_TEXT(ncid,s2derivVarID,'units',6,'[s2]/m]')
+    		endif
+    	
+    	
+    	elseif( filename_root(fid)=='bottom' .or. filename_root(fid)=='top') then
+    	
+    		rcode=NF_DEF_VAR(ncid,'u_z',NF_DOUBLE,ndims,All_nD_VarSIZE,uderivVarID)
+    		rcode=NF_PUT_ATT_TEXT(ncid,uderivVarID,'long_name',3,'u_z')
+    		rcode=NF_PUT_ATT_TEXT(ncid,uderivVarID,'units',3,'1/s]')
+    		
+    		rcode=NF_DEF_VAR(ncid,'v_z',NF_DOUBLE,ndims,All_nD_VarSIZE,vderivVarID)
+    		rcode=NF_PUT_ATT_TEXT(ncid,vderivVarID,'long_name',3,'v_z')
+    		rcode=NF_PUT_ATT_TEXT(ncid,vderivVarID,'units',3,'1/s]')
+    		
+    		rcode=NF_DEF_VAR(ncid,'w_z',NF_DOUBLE,ndims,All_nD_VarSIZE,wderivVarID)
+    		rcode=NF_PUT_ATT_TEXT(ncid,wderivVarID,'long_name',3,'w_z')
+    		rcode=NF_PUT_ATT_TEXT(ncid,wderivVarID,'units',3,'1/s]')
+    		
+    		rcode=NF_DEF_VAR(ncid,'s1_z',NF_DOUBLE,ndims,All_nD_VarSIZE,s1derivVarID)
+    		rcode=NF_PUT_ATT_TEXT(ncid,s1derivVarID,'long_name',3,'s1_z')
+    		rcode=NF_PUT_ATT_TEXT(ncid,s1derivVarID,'units',6,'[s1]/m]')
+    		
+    		if(write_s2_child_grid) then
+    			rcode=NF_DEF_VAR(ncid,'s2_z',NF_DOUBLE,ndims,All_nD_VarSIZE,s2derivVarID)
+    			rcode=NF_PUT_ATT_TEXT(ncid,s2derivVarID,'long_name',4,'s2_z')
+    			rcode=NF_PUT_ATT_TEXT(ncid,s2derivVarID,'units',6,'[s2]/m]')
+    		endif
+    		
+    	endif
+    	
+    endif ! end do_child_grid block
+    
+    
 	!------------------------------------------------------------------------
 	!End define mode
 	!------------------------------------------------------------------------
@@ -517,18 +603,27 @@ subroutine write_netcdf(fid)
  	integer                   :: Nd_count(4)=0
  	integer                   :: ii,jj,kk,offset
  	real(kind=8),allocatable  :: scratch(:,:,:)
+ 	real(kind=8)              :: h,deriv
      
+    integer      :: locnx,locny,locnz
  	integer      :: fid,ncid,rcode  
  	integer      :: tVarID,s1VarID,s2VarID   
  	integer      :: divustarVarID,phiVarID,pdVarID
  	integer      :: uVarID,vVarID,wVarID
  	integer      :: ustarVarID,vstarVarID,wstarVarID
- 	integer      :: do_bar
+ 	integer      :: uderivVarID,vderivVarID,wderivVarID
+	integer      :: s1derivVarID,s2derivVarID
+ 	integer      :: do_bar,deriv_inc
 
  	if( .NOT. do_write(fid) ) then  !! no data to write
   		goto 999
  	endif
- 
+ 	
+ 	
+	locnx = array_size(JDIM,YBLOCK,myid)
+	locny = array_size(IDIM,YBLOCK,myid)
+	locnz = array_size(KDIM,YBLOCK,myid)
+
 	!--------------------------------------------------- 
 	!  open up the existing, initialized netcdf file
 	!--------------------------------------------------- 
@@ -612,6 +707,33 @@ subroutine write_netcdf(fid)
    		if (rcode.ne.NF_NOERR) print *,myid,   &
        	'NetCDF ERROR INQ_VARID -> wstar: ',rcode
   	endif
+  	
+  	if( t_secs >= t_start_child .and. do_child_grid .and. filename_root(fid) .NE. 'XYZ_child_' ) then
+  		if( filename_root(fid)=='east' .or. filename_root(fid)=='west' ) then
+  			rcode=NF_INQ_VARID(ncid,'u_x',uderivVarID)
+  			rcode=NF_INQ_VARID(ncid,'v_x',vderivVarID)
+  			rcode=NF_INQ_VARID(ncid,'w_x',wderivVarID)
+  			rcode=NF_INQ_VARID(ncid,'s1_x',s1derivVarID)
+  			if(write_s2_child_grid) rcode=NF_INQ_VARID(ncid,'s2_x',s2derivVarID) 
+  			h = x(2)-x(1)
+  		elseif( filename_root(fid)=='south' .or. filename_root(fid)=='north' ) then
+  			rcode=NF_INQ_VARID(ncid,'u_y',uderivVarID)
+  			rcode=NF_INQ_VARID(ncid,'v_y',vderivVarID)
+  			rcode=NF_INQ_VARID(ncid,'w_y',wderivVarID)
+  			rcode=NF_INQ_VARID(ncid,'s1_y',s1derivVarID)
+  			if(write_s2_child_grid) rcode=NF_INQ_VARID(ncid,'s2_y',s2derivVarID)
+  			h = y(2)-y(1)
+  		elseif( filename_root(fid)=='bottom' .or. filename_root(fid)=='top' ) then
+  			rcode=NF_INQ_VARID(ncid,'u_z',uderivVarID)
+  			rcode=NF_INQ_VARID(ncid,'v_z',vderivVarID)
+  			rcode=NF_INQ_VARID(ncid,'w_z',wderivVarID)
+  			rcode=NF_INQ_VARID(ncid,'s1_z',s1derivVarID)
+  			if(write_s2_child_grid) rcode=NF_INQ_VARID(ncid,'s2_z',s2derivVarID)
+  			h = z(2)-z(1)
+  		endif 		
+  	endif
+  	
+  	
         
 	!------------------------------------------------------------  
 	!  set up count and start arrays for this file
@@ -620,9 +742,9 @@ subroutine write_netcdf(fid)
   	Nd_count(dimid_x(fid))=count(dimid_x(fid),fid)
        
   	Nd_start(dimid_y(fid))=1
- 	 Nd_count(dimid_y(fid))=count(dimid_y(fid),fid)
+ 	Nd_count(dimid_y(fid))=count(dimid_y(fid),fid)
        
- 	 Nd_start(dimid_z(fid))=1
+ 	Nd_start(dimid_z(fid))=1
   	Nd_count(dimid_z(fid))=count(dimid_z(fid),fid)
        
   	Nd_start(dimid_t(fid))=time_counter(fid)
@@ -900,8 +1022,320 @@ subroutine write_netcdf(fid)
    		if(rcode.ne.NF_NOERR) print *,myid,   &
       		'NetCDF ERROR: PUT_VARA_DOUBLE wstar',rcode
    	endif
+   	
+   	
+   	if( t_secs >= t_start_child .and. do_child_grid .and. filename_root(fid) .NE. 'XYZ_child_' ) then
+   	
+  		if( filename_root(fid)=='east' .or. filename_root(fid)=='west' ) then
+   	  			
+   			deriv_inc = 1                             ! forward difference
+   			if( my_x0(fid) == locnx ) deriv_inc = -1  ! backward difference needed
+   			
+   			! u deriv
+   			ii=1 ;  
+    		do i=my_x0(fid),my_x1(fid),my_xinc(fid)
+     			jj=1;
+      			do j=my_y0(fid),my_y1(fid),my_yinc(fid)
+       				kk=1;
+        			do k=my_z0(fid),my_z1(fid),my_zinc(fid)
+        				deriv = deriv_inc*( u(j,i+deriv_inc,k) - u(j,i,k) )/h
+          				scratch(ii,jj,kk) = deriv
+          				kk=kk+1
+        			enddo
+       				jj=jj+1
+      			enddo
+     			ii=ii+1
+    		enddo
+   			rcode=NF_PUT_VARA_DOUBLE(ncid,uderivVarID,Nd_start,Nd_count,scratch)
+   			if(rcode.ne.NF_NOERR) print *,myid,   &
+      			'NetCDF ERROR: PUT_VARA_DOUBLE u_x',rcode
+      			
+      		! v deriv
+   			ii=1 ;  
+    		do i=my_x0(fid),my_x1(fid),my_xinc(fid)
+     			jj=1;
+      			do j=my_y0(fid),my_y1(fid),my_yinc(fid)
+       				kk=1;
+        			do k=my_z0(fid),my_z1(fid),my_zinc(fid)
+        				deriv = deriv_inc*( v(j,i+deriv_inc,k) - v(j,i,k) )/h
+          				scratch(ii,jj,kk) = deriv
+          				kk=kk+1
+        			enddo
+       				jj=jj+1
+      			enddo
+     			ii=ii+1
+    		enddo
+   			rcode=NF_PUT_VARA_DOUBLE(ncid,vderivVarID,Nd_start,Nd_count,scratch)
+   			if(rcode.ne.NF_NOERR) print *,myid,   &
+      			'NetCDF ERROR: PUT_VARA_DOUBLE v_x',rcode
+      			
+      		! w deriv
+   			ii=1 ;  
+    		do i=my_x0(fid),my_x1(fid),my_xinc(fid)
+     			jj=1;
+      			do j=my_y0(fid),my_y1(fid),my_yinc(fid)
+       				kk=1;
+        			do k=my_z0(fid),my_z1(fid),my_zinc(fid)
+        				deriv = deriv_inc*( w(j,i+deriv_inc,k) - w(j,i,k) )/h
+          				scratch(ii,jj,kk) = deriv
+          				kk=kk+1
+        			enddo
+       				jj=jj+1
+      			enddo
+     			ii=ii+1
+    		enddo
+   			rcode=NF_PUT_VARA_DOUBLE(ncid,wderivVarID,Nd_start,Nd_count,scratch)
+   			if(rcode.ne.NF_NOERR) print *,myid,   &
+      			'NetCDF ERROR: PUT_VARA_DOUBLE w_x',rcode
+      			
+      		! s1 deriv
+   			ii=1 ;  
+    		do i=my_x0(fid),my_x1(fid),my_xinc(fid)
+     			jj=1;
+      			do j=my_y0(fid),my_y1(fid),my_yinc(fid)
+       				kk=1;
+        			do k=my_z0(fid),my_z1(fid),my_zinc(fid)
+        				deriv = deriv_inc*( s1(j,i+deriv_inc,k) - s1(j,i,k) )/h
+          				scratch(ii,jj,kk) = deriv
+          				kk=kk+1
+        			enddo
+       				jj=jj+1
+      			enddo
+     			ii=ii+1
+    		enddo
+   			rcode=NF_PUT_VARA_DOUBLE(ncid,s1derivVarID,Nd_start,Nd_count,scratch)
+   			if(rcode.ne.NF_NOERR) print *,myid,   &
+      			'NetCDF ERROR: PUT_VARA_DOUBLE s1_x',rcode
+      		
+      		if( write_s2_child_grid ) then	
+      			! s2 deriv
+   				ii=1 ;  
+    			do i=my_x0(fid),my_x1(fid),my_xinc(fid)
+     				jj=1;
+      				do j=my_y0(fid),my_y1(fid),my_yinc(fid)
+       					kk=1;
+        				do k=my_z0(fid),my_z1(fid),my_zinc(fid)
+        					deriv = deriv_inc*( s2(j,i+deriv_inc,k) - s2(j,i,k) )/h
+          					scratch(ii,jj,kk) = deriv
+          					kk=kk+1
+        				enddo
+       					jj=jj+1
+      				enddo
+     				ii=ii+1
+    			enddo
+   				rcode=NF_PUT_VARA_DOUBLE(ncid,s2derivVarID,Nd_start,Nd_count,scratch)
+   				if(rcode.ne.NF_NOERR) print *,myid,   &
+      				'NetCDF ERROR: PUT_VARA_DOUBLE s2_x',rcode  	
+   			endif
+   	
+   		elseif( filename_root(fid)=='south' .or. filename_root(fid)=='north' ) then
+   	  			
+   			deriv_inc = 1                             ! forward difference
+   			if( my_y0(fid) == locny ) deriv_inc = -1  ! backward difference needed
+   			
+   			! u deriv
+   			ii=1 ;  
+    		do i=my_x0(fid),my_x1(fid),my_xinc(fid)
+     			jj=1;
+      			do j=my_y0(fid),my_y1(fid),my_yinc(fid)
+       				kk=1;
+        			do k=my_z0(fid),my_z1(fid),my_zinc(fid)
+        				deriv = deriv_inc*( u(j+deriv_inc,i,k) - u(j,i,k) )/h
+          				scratch(ii,jj,kk) = deriv
+          				kk=kk+1
+        			enddo
+       				jj=jj+1
+      			enddo
+     			ii=ii+1
+    		enddo
+   			rcode=NF_PUT_VARA_DOUBLE(ncid,uderivVarID,Nd_start,Nd_count,scratch)
+   			if(rcode.ne.NF_NOERR) print *,myid,   &
+      			'NetCDF ERROR: PUT_VARA_DOUBLE u_y',rcode
+      			
+      		! v deriv
+   			ii=1 ;  
+    		do i=my_x0(fid),my_x1(fid),my_xinc(fid)
+     			jj=1;
+      			do j=my_y0(fid),my_y1(fid),my_yinc(fid)
+       				kk=1;
+        			do k=my_z0(fid),my_z1(fid),my_zinc(fid)
+        				deriv = deriv_inc*( v(j+deriv_inc,i,k) - v(j,i,k) )/h
+          				scratch(ii,jj,kk) = deriv
+          				kk=kk+1
+        			enddo
+       				jj=jj+1
+      			enddo
+     			ii=ii+1
+    		enddo
+   			rcode=NF_PUT_VARA_DOUBLE(ncid,vderivVarID,Nd_start,Nd_count,scratch)
+   			if(rcode.ne.NF_NOERR) print *,myid,   &
+      			'NetCDF ERROR: PUT_VARA_DOUBLE v_y',rcode
+      			
+      		! w deriv
+   			ii=1 ;  
+    		do i=my_x0(fid),my_x1(fid),my_xinc(fid)
+     			jj=1;
+      			do j=my_y0(fid),my_y1(fid),my_yinc(fid)
+       				kk=1;
+        			do k=my_z0(fid),my_z1(fid),my_zinc(fid)
+        				deriv = deriv_inc*( w(j+deriv_inc,i,k) - w(j,i,k) )/h
+          				scratch(ii,jj,kk) = deriv
+          				kk=kk+1
+        			enddo
+       				jj=jj+1
+      			enddo
+     			ii=ii+1
+    		enddo
+   			rcode=NF_PUT_VARA_DOUBLE(ncid,wderivVarID,Nd_start,Nd_count,scratch)
+   			if(rcode.ne.NF_NOERR) print *,myid,   &
+      			'NetCDF ERROR: PUT_VARA_DOUBLE w_y',rcode
+   	
+   	
+   			! s1 deriv
+   			ii=1 ;  
+    		do i=my_x0(fid),my_x1(fid),my_xinc(fid)
+     			jj=1;
+      			do j=my_y0(fid),my_y1(fid),my_yinc(fid)
+       				kk=1;
+        			do k=my_z0(fid),my_z1(fid),my_zinc(fid)
+        				deriv = deriv_inc*( s1(j+deriv_inc,i,k) - s1(j,i,k) )/h
+          				scratch(ii,jj,kk) = deriv
+          				kk=kk+1
+        			enddo
+       				jj=jj+1
+      			enddo
+     			ii=ii+1
+    		enddo
+   			rcode=NF_PUT_VARA_DOUBLE(ncid,s1derivVarID,Nd_start,Nd_count,scratch)
+   			if(rcode.ne.NF_NOERR) print *,myid,   &
+      			'NetCDF ERROR: PUT_VARA_DOUBLE s1_y',rcode
+   	
+   			if( write_s2_child_grid ) then
+   				! s2 deriv
+   				ii=1 ;  
+    			do i=my_x0(fid),my_x1(fid),my_xinc(fid)
+     				jj=1;
+      				do j=my_y0(fid),my_y1(fid),my_yinc(fid)
+       					kk=1;
+        				do k=my_z0(fid),my_z1(fid),my_zinc(fid)
+        					deriv = deriv_inc*( s2(j+deriv_inc,i,k) - s2(j,i,k) )/h
+          					scratch(ii,jj,kk) = deriv
+          					kk=kk+1
+        				enddo
+       					jj=jj+1
+      				enddo
+     				ii=ii+1
+    			enddo
+   				rcode=NF_PUT_VARA_DOUBLE(ncid,s2derivVarID,Nd_start,Nd_count,scratch)
+   				if(rcode.ne.NF_NOERR) print *,myid,   &
+      				'NetCDF ERROR: PUT_VARA_DOUBLE s2_y',rcode
+   			endif
+   	
+   		elseif( filename_root(fid)=='bottom' .or. filename_root(fid)=='top' ) then
+   	  			
+   			deriv_inc = 1                             ! forward difference
+   			if( my_z0(fid) == locnz ) deriv_inc = -1  ! backward difference needed
+   			
+   			! u deriv
+   			ii=1 ;  
+    		do i=my_x0(fid),my_x1(fid),my_xinc(fid)
+     			jj=1;
+      			do j=my_y0(fid),my_y1(fid),my_yinc(fid)
+       				kk=1;
+        			do k=my_z0(fid),my_z1(fid),my_zinc(fid)
+        				deriv = deriv_inc*( u(j,i,k+deriv_inc) - u(j,i,k) )/h
+          				scratch(ii,jj,kk) = deriv
+          				kk=kk+1
+        			enddo
+       				jj=jj+1
+      			enddo
+     			ii=ii+1
+    		enddo
+   			rcode=NF_PUT_VARA_DOUBLE(ncid,uderivVarID,Nd_start,Nd_count,scratch)
+   			if(rcode.ne.NF_NOERR) print *,myid,   &
+      			'NetCDF ERROR: PUT_VARA_DOUBLE u_z',rcode
+      			
+      		! v deriv
+   			ii=1 ;  
+    		do i=my_x0(fid),my_x1(fid),my_xinc(fid)
+     			jj=1;
+      			do j=my_y0(fid),my_y1(fid),my_yinc(fid)
+       				kk=1;
+        			do k=my_z0(fid),my_z1(fid),my_zinc(fid)
+        				deriv = deriv_inc*( v(j,i,k+deriv_inc) - v(j,i,k) )/h
+          				scratch(ii,jj,kk) = deriv
+          				kk=kk+1
+        			enddo
+       				jj=jj+1
+      			enddo
+     			ii=ii+1
+    		enddo
+   			rcode=NF_PUT_VARA_DOUBLE(ncid,vderivVarID,Nd_start,Nd_count,scratch)
+   			if(rcode.ne.NF_NOERR) print *,myid,   &
+      			'NetCDF ERROR: PUT_VARA_DOUBLE v_z',rcode
+      			
+      		! w deriv
+   			ii=1 ;  
+    		do i=my_x0(fid),my_x1(fid),my_xinc(fid)
+     			jj=1;
+      			do j=my_y0(fid),my_y1(fid),my_yinc(fid)
+       				kk=1;
+        			do k=my_z0(fid),my_z1(fid),my_zinc(fid)
+        				deriv = deriv_inc*( w(j,i,k+deriv_inc) - w(j,i,k) )/h
+          				scratch(ii,jj,kk) = deriv
+          				kk=kk+1
+        			enddo
+       				jj=jj+1
+      			enddo
+     			ii=ii+1
+    		enddo
+   			rcode=NF_PUT_VARA_DOUBLE(ncid,wderivVarID,Nd_start,Nd_count,scratch)
+   			if(rcode.ne.NF_NOERR) print *,myid,   &
+      			'NetCDF ERROR: PUT_VARA_DOUBLE w_z',rcode
+      			
+      		! s1 deriv
+   			ii=1 ;  
+    		do i=my_x0(fid),my_x1(fid),my_xinc(fid)
+     			jj=1;
+      			do j=my_y0(fid),my_y1(fid),my_yinc(fid)
+       				kk=1;
+        			do k=my_z0(fid),my_z1(fid),my_zinc(fid)
+        				deriv = deriv_inc*( s1(j,i,k+deriv_inc) - s1(j,i,k) )/h
+          				scratch(ii,jj,kk) = deriv
+          				kk=kk+1
+        			enddo
+       				jj=jj+1
+      			enddo
+     			ii=ii+1
+    		enddo
+   			rcode=NF_PUT_VARA_DOUBLE(ncid,s1derivVarID,Nd_start,Nd_count,scratch)
+   			if(rcode.ne.NF_NOERR) print *,myid,   &
+      			'NetCDF ERROR: PUT_VARA_DOUBLE s1_z',rcode
+      		
+      		if( write_s2_child_grid ) then	
+      			! s2 deriv
+   				ii=1 ;  
+    			do i=my_x0(fid),my_x1(fid),my_xinc(fid)
+     				jj=1;
+      				do j=my_y0(fid),my_y1(fid),my_yinc(fid)
+       					kk=1;
+        				do k=my_z0(fid),my_z1(fid),my_zinc(fid)
+        					deriv = deriv_inc*( s2(j,i,k+deriv_inc) - s2(j,i,k) )/h
+          					scratch(ii,jj,kk) = deriv
+          					kk=kk+1
+        				enddo
+       					jj=jj+1
+      				enddo
+     				ii=ii+1
+    			enddo
+   				rcode=NF_PUT_VARA_DOUBLE(ncid,s2derivVarID,Nd_start,Nd_count,scratch)
+   				if(rcode.ne.NF_NOERR) print *,myid,   &
+      				'NetCDF ERROR: PUT_VARA_DOUBLE s2_z',rcode
+      			endif
+      			
+      	endif
+    endif
       
-
 	!   Each processor closes the netcdf file.
     rcode=NF_CLOSE(ncid)
     if(rcode.ne.NF_NOERR) print *,myid,   &

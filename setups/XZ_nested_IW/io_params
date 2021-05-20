@@ -67,3 +67,16 @@ new          !!===>  append w/ each write or create new file
 1            !!===>  write w
 1            !!===>  write s1 (don't write if 0, write s1' if 1, s1' + s1_bar if 2)
 0            !!===>  write s2 (don't write if 0, write s2' if 1, s2' + s2_bar if 2)
+.TRUE.       !!===>  continue to set up child grid output? if TRUE keep reading to configure
+9            !!===>  istart for child grid
+120          !!===>  iend   for child grid
+1            !!===>  jstart for child grid
+9            !!===>  jend   for child grid
+9            !!===>  kstart for child grid
+120          !!===>  kend   for child grid
+16           !!===>  steps between writes for boundary data
+256          !!===>  steps between writes for 3d data
+0.d0         !!===>  [s] only start writing child grid data when t >= t_start
+.FALSE.      !!===>  write second scalar for child grid?
+.FALSE.      !!===>  write s1_bar for child grid?
+.FALSE.      !!===>  write s2_bar for child grid?

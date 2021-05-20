@@ -90,7 +90,7 @@ use warnings;
     #------------------------------------
     $outfile = $out_dir . "/" . $out_root . $istep . ".nc";
     $cmd="$NCRCAT -O " . $tmp_dir . "/" . $myid . '_*' . "-" . $char_j . ".nc" . " $outfile";
-    print " $cmd \n";
+    #print " $cmd \n";
     system($cmd);
     
     #-----------------------------------------                                                                                                                                                          
@@ -114,90 +114,4 @@ use warnings;
 }   #  end 
 
 
-#---------------------------------------------------------------------------------------
-#  (1)  ./create_global_snapshot.pl tslice p1 p2 data_dir data_root out_dir out_root myid
-#        use for any concatenating needed for 1d decomposition w/ p1=1
-#        use for XZplanes and XYZ blocks for 2d decomposition p1>1 and p2>1
-#
-#  (2)  ./concat_YZ.pl
-#        use for YZ planes for 2d decomposition
-#
-#  (3)  ./concat_XY.pl
-#        use for XY planes for 2d decomposition
-#
-#   Scripts assume that  output/slices  output/slices/2D and output/slices/3D exist.
-#   (I create these directories in the "make outdirs" block in Makefile). Scripts are
-#   intended to live in the "input" directory so they can be fine-tuned for different
-#   sets of simulations.
-#
-#   NB the conventions regarding trailing slashes and underscores 
-#      when directories and filename roots: i.e. don't add either in calling cmd.
-#
-#   The XYZ global files get bad names, e.g.  XYZ_30_000000.nc, 
-#    rename the result in calling script if desired
-#    e.g. 30 is the time slice but 000000 is the unimportant slice number in "new" files
-#
-#   All tmp files have myid in the filenames so these scripts can be called in parallel
-#   from an MPI4PY script, distributing the time steps across processors, i.e. different
-#   processors won't try to use the same tmp file names.
-#---------------------------------------------------------------------------------------
-
-
-#------------------------------------------------------------------------------------------------------------
-#     1D DATA DECOMPOSITION EXAMPLES & TESTS:
-#
-#        p1=1   p2=4  ==> np=4         test case  (nx,ny,nz) = (5,513,129)
-#------------------------------------------------------------------------------------------------------------
-
- #  NB  2D files are "append", w/ many time slices (starting with 0)  
-   #==> ./create_global_snapshot.pl 2 1 4 '../../../output/2D' 'XZplane' '../../../output/slices/2D' 'XZ' 0
- 
- #  NB  2D files are "append", w/ many time slices (starting with 0)  
-   #==> ./create_global_snapshot.pl 0 1 4 '../../../output/2D' 'YZplane' '../../../output/slices/2D' 'YZ' 0
-
- #  NB  3D files are "new", w/ only one slice, request time slice 0, specify which slice in filename
-   #==> ./create_global_snapshot.pl 0 1 4 '../../../output/3D' 'XYZ_000030' '../../../output/slices/3D' 'XYZ_30' 0
-
- #  XY planes entirely contained on single  "j" processor when p1=1
- #  e.g.  output/2D/XYplane_iii-003.nc
- #
- # ./concat_XY.pl tslice p1 jproc data_dir data_root out_dir out_root myid
-   #==> ./concat_XY.pl 1 2 3 '../../../output/2D' 'XYplane' '../../../output/slices/2D' 'XY' 0
-#------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-#------------------------------------------------------------------------------------------------------------
-#     2D DATA DECOMPOSITION TESTS:
-#
-#        p1=2   p2=4  ==> np=8        test case  (nx,ny,nz) = (5,513,129)
-#------------------------------------------------------------------------------------------------------------
- #  NB  2D files are "append", w/ many time slices (starting with 0) 
- #        XZ planes involve all p1 x p2 processors 
-   #==> ./create_global_snapshot.pl 2 2 4 '../../../output/2D' 'XZplane' '../../../output/slices/2D' 'XZ' 0
-
-
- #  NB  3D files are "new", w/ only one slice, request time slice 0, specify which slice in filename
- #        XYZ blocks involve all p1 x p2 processors
-   #==> ./create_global_snapshot.pl 0 2 4 '../../../output/3D' 'XYZ_000030' '../../../output/slices/3D' 'XYZ_30' 0
-   #==> mv ../../../output/slices/3D/XYZ_30_000000.nc ../../../output/slices/3D/XYZ_30.nc
-
-
- #  YZ planes have only a single "i" processor and all "j" processors
- #  e.g.  output/2D/YZplane_001-00*.nc
- #
- # ./concat_YZ.pl tslice iproc p2 data_dir data_root out_dir out_root myid
-   #==> ./concat_YZ.pl 2 1 4 '../../../output/2D' 'YZplane' '../../../output/slices/2D' 'YZ' 0
-
- 
- #  XY planes have only a single "j" processor and all "i" processors
- #  e.g.  output/2D/XYplane_iii-003.nc
- #
- # ./concat_XY.pl tslice p1 jproc data_dir data_root out_dir out_root myid
-   #==> ./concat_XY.pl 2 2 3 '../../../output/2D' 'XYplane' '../../../output/slices/2D' 'XY' 0
-#------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------------------------------------------------------------
 

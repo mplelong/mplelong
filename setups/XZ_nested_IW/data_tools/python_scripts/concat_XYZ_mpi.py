@@ -79,11 +79,11 @@ for islice in my_slices:
 #  extract slice and concatenate files to create an XYZ snapshot  
 #---------------------------------------------------------------------------------------
     # concatenate all the distributed 3d files...    
-    cmd = "perl " + perl_dir +  "create_global_snapshot.pl 0 " + str(p1) + "  " + str(p2) + " " + data_dir[0:-1] + " XYZ_" + str(islice).zfill(6) + " " + slice_dir[0:-1] +  " " + fnrs + str(islice).zfill(6) + " " + str(myid)
+    cmd = "perl " + perl_dir +  "create_global_snapshot.pl 0 " + str(p1) + "  " + str(p2) + " " + data_dir[0:-1] + "  " + fnrs + str(islice).zfill(6) + " " + slice_dir[0:-1] +  " " + fnrs + str(islice).zfill(6) + " " + str(myid)
     #print(cmd)
     os.system(cmd) 
     # condense the output filename and rename the file for convenience   
-    cmd = "mv " + slice_dir + "XYZ_" + str(islice).zfill(6) +"_000000.nc " + slice_dir + fnrs + str(islice).zfill(6) + ".nc"
+    cmd = "mv " + slice_dir + fnrs + str(islice).zfill(6) +"_000000.nc " + slice_dir + fnrs + str(islice).zfill(6) + ".nc"
     os.system(cmd)
     
     # adjust storage order so that global file has same structure as flow_solve distributed files

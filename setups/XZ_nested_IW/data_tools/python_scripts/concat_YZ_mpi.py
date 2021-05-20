@@ -1,11 +1,7 @@
 #!
 """
-Routine to concatenate YZ netcdf files (2d)
-in parallel using mpi4py.
-usage examples 
-amigo :  mpirun -np 2 python concat_YZ_mpi.py
-morgon:  /usr/bin/mpirun -np 2 python concat_YZ_mpi.py < /dev/null &> concat_log &
-comet:  via run_concat.sh
+Routine to concatenate YZ netcdf files (2d) in parallel using mpi4py.
+
 """
 #---------------------------------------------------------------------------------------
 #  import and name the various modules I'll use
@@ -16,9 +12,6 @@ from scipy.io import netcdf
 from mpi4py import MPI
 #-----------------------------------------------------------------------------------------
 
-#-----------------------------------------------------------------------
-#  parse command line arguments
-#-----------------------------------------------------------------------
 #-----------------------------------------------------------------------
 #  parse command line arguments
 #-----------------------------------------------------------------------

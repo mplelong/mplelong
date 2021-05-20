@@ -12,7 +12,7 @@ subroutine ReadUserData
 	implicit none  
 
 	include 'mpif.h' 
-	integer           :: id,endpt,i,j,idim
+	integer           :: id,endpt,i,j,k,idim
 	character(len=80) :: file1,file2,file3,file4,file5
 
 	if(myid==0) write(0,*) ' ................'
@@ -138,6 +138,7 @@ subroutine ReadUserData
 	if(myid==0) open(1,file=file2,position='rewind')
 	if(myid==0) read(1,*) num_file_sets
  	call mpi_bcast(num_file_sets,1,MPI_INTEGER,0,comm,ierr)
+ 	write_normal_derivs(:) = .FALSE.    ! only switch on as appropriate
  
  
  	do i=1,num_file_sets
@@ -185,8 +186,8 @@ subroutine ReadUserData
   
   		do j=1,5 !! u,v,w,s1,s2
    			if(myid==0) read(1,*) variable_key(j,i)
-   			call mpi_bcast(variable_key(j,i),1,MPI_LOGICAL,0,comm,ierr)
-  		enddo
+   			call mpi_bcast(variable_key(j,i),1,MPI_INTEGER,0,comm,ierr)   ! was LOGIVCAL  why did this even work???
+   		enddo
   
   		if( variable_key(4,i) == 1 ) write_s1_bar(i)=.FALSE.
   		if( variable_key(4,i) == 2 ) write_s1_bar(i)=.TRUE.
@@ -210,10 +211,149 @@ subroutine ReadUserData
   		if(jlocs(2,i) > ny ) stop 'io_params data > ny'
   		if(klocs(2,i) > nz ) stop 'io_params data > nz'
  	enddo 
+ 	
+ 	!   read logical variable to see if child grid output needs to be configured
+ 	if(myid==0) read(1,*) do_child_grid
+   	call mpi_bcast(do_child_grid,1,MPI_LOGICAL,0,comm,ierr) 
+   	
+   	if( do_child_grid ) then
+   	
+   		!--------------------------------------------------------
+   		!  read the extra child grid parameters
+   		!--------------------------------------------------------
+   		if(myid==0) read(1,*) i0_child
+  		call mpi_bcast(i0_child,1,MPI_INTEGER,0,comm,ierr)
+  		if(myid==0) read(1,*) i1_child
+  		call mpi_bcast(i1_child,1,MPI_INTEGER,0,comm,ierr)
+  		
+  		if(myid==0) read(1,*) j0_child
+  		call mpi_bcast(j0_child,1,MPI_INTEGER,0,comm,ierr)
+  		if(myid==0) read(1,*) j1_child
+  		call mpi_bcast(j1_child,1,MPI_INTEGER,0,comm,ierr)
+  		
+  		if(myid==0) read(1,*) k0_child
+  		call mpi_bcast(k0_child,1,MPI_INTEGER,0,comm,ierr)
+  		if(myid==0) read(1,*) k1_child
+  		call mpi_bcast(k1_child,1,MPI_INTEGER,0,comm,ierr)
+  		
+  		if(myid==0) read(1,*) inc_child_2d
+  		call mpi_bcast(inc_child_2d,1,MPI_INTEGER,0,comm,ierr)
+  		
+  		if(myid==0) read(1,*) inc_child_3d
+  		call mpi_bcast(inc_child_3d,1,MPI_INTEGER,0,comm,ierr)
+  		
+  		if(myid==0) read(1,*) t_start_child
+		call mpi_bcast(t_start_child,1,MPI_DOUBLE_PRECISION,0,comm,ierr)
+		
+		if(myid==0) read(1,*) write_s2_child_grid
+		call mpi_bcast(write_s2_child_grid,1,MPI_LOGICAL,0,comm,ierr)
+		
+		if(myid==0) read(1,*) write_s1_bar_child_grid
+		call mpi_bcast(write_s1_bar_child_grid,1,MPI_LOGICAL,0,comm,ierr)
+		
+		if(myid==0) read(1,*) write_s2_bar_child_grid
+		call mpi_bcast(write_s2_bar_child_grid,1,MPI_LOGICAL,0,comm,ierr)
+		!--------------------------------------------------------
+   		!  done reading the extra child grid parameters
+   		!--------------------------------------------------------
+		
+		
+		!----------------------------------------------------------
+		! Add 7 to num_file_sets for E/W, S/N, B/T and XYZ_child
+		!----------------------------------------------------------
+   		j = num_file_sets    
+   		num_file_sets = num_file_sets + 7
+   		
+   		!-------------------------------------------------------------
+   		! indicate that these files need normal derivs to be written
+   		!-------------------------------------------------------------
+   		write_normal_derivs(i+1:i+7) = .TRUE. 
+   		
+   		!--------------------
+   		! set the file names
+   		!--------------------
+   		filename_root(j+1) = 'east'
+   		filename_root(j+2) = 'west'
+   		filename_root(j+3) = 'south'
+   		filename_root(j+4) = 'north'
+   		filename_root(j+5) = 'bottom'
+   		filename_root(j+6) = 'top'
+   		filename_root(j+7) = 'XYZ_child'
+   		
+   		!-----------------------------------------------
+   		! all processors set the write parameters
+   		! afterwards, these should be look like all
+   		! the other filesets except for the additional
+   		! output of the normal derivatives
+   		!-----------------------------------------------
+   		if(myid==0) open(11,file='output/debug_data/child_grid_data')
+   		do j=num_file_sets-7+1,num_file_sets   ! j is fileset id
+   			
+   			variable_key(6,j) = 0                ! suppress output of div_u*
+			variable_key(9:11,j) = 0             ! suppress  output of ustar,vstar and wstar
+		 			
+  			if(j<num_file_sets) then
+  				nsteps(j) = inc_child_2d
+  				mode(j) = 'append'
+  			else
+  				nsteps(j) = inc_child_3d
+  				mode(j) = 'new'
+  			endif
+  			
+  			ilocs(1,j) = i0_child
+  			ilocs(2,j) = i1_child
+  			ilocs(3,j) = 1
+  			jlocs(1,j) = j0_child
+  			jlocs(2,j) = j1_child
+  			jlocs(3,j) = 1
+  			klocs(1,j) = k0_child
+  			klocs(2,j) = k1_child
+  			klocs(3,j) = 1
+  			
+  			k = num_file_sets - 7
+  			if( j==k+1 )  ilocs(2,j) = i0_child   !  E
+  			if( j==k+2 )  ilocs(1,j) = i1_child   !  W
+  			if( j==k+3 )  jlocs(2,j) = j0_child   !  S
+  			if( j==k+4 )  jlocs(1,j) = j1_child   !  N
+  			if( j==k+5 )  klocs(2,j) = k0_child   !  B
+  			if( j==k+6 )  klocs(1,j) = k1_child   !  T
+  			
+  			
+  			variable_key(1:4,j) = 1            	! always write u,v,w,s1  			  			
+  			if( write_s2_child_grid ) then
+  				variable_key(5,j) = 1     		! write s2
+  			else
+  				variable_key(5,j) = 0
+  			endif
+  			
+  			if(myid==0) then
+  				write(11,*) ' '
+  				write(11,*) '         fileset , root: ',j,filename_root(j)
+  				write(11,*) '                  mode : ', mode(j)
+  				write(11,*) '                    inc: ', nsteps(j)
+  				write(11,*) '          t_start_child: ', t_start_child
+  				write(11,*) '                  ilocs: ', ilocs(:,j)
+  				write(11,*) '                  jlocs: ', jlocs(:,j)
+  				write(11,*) '                  klocs: ', klocs(:,j) 				
+  				write(11,*) '     variable_key(:,j) : ', variable_key(1:5,j)  				
+  				write(11,*) '    write_normal_derivs: ', write_normal_derivs(j)
+  				write(11,*) '    write_s2_child_grid: ', write_s2_child_grid
+  				write(11,*) 'write_s1_bar_child_grid: ', write_s1_bar_child_grid
+  				write(11,*) 'write_s2_bar_child_grid: ', write_s2_bar_child_grid
+  				write(11,*) ' '
+  				write(11,*) ' '
+  			endif
+  			  			
+  		enddo
+  		if(myid==0) close(11)
+  		 		
+   	endif ! end do_child_grid block
+   	
+ 		
  	if(myid==0) write(0,*) ' ................      ',trim(file2),' read'
  	if(myid==0) close(1)
 
 
 	call mpi_barrier(comm,ierr)
-	return
+ return
 end subroutine ReadUserData

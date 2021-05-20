@@ -323,13 +323,13 @@
 		integer                       :: my_xinc(maxsets)  ! increment for x coordinate sampling
 		integer                       :: my_nx(maxsets)    ! number of x coord vals to be written
 
-		integer                       :: my_y0(maxsets)    ! initial local indey for y coordinate
-		integer                       :: my_y1(maxsets)    ! final   local indey for y coordinate
+		integer                       :: my_y0(maxsets)    ! initial local index for y coordinate
+		integer                       :: my_y1(maxsets)    ! final   local index for y coordinate
 		integer                       :: my_yinc(maxsets)  ! increment for y coordinate sampling
 		integer                       :: my_ny(maxsets)    ! number of y coord vals to be written
 
-		integer                       :: my_z0(maxsets)    ! initial local indez for z coordinate
-		integer                       :: my_z1(maxsets)    ! final   local indez for z coordinate
+		integer                       :: my_z0(maxsets)    ! initial local index for z coordinate
+		integer                       :: my_z1(maxsets)    ! final   local index for z coordinate
 		integer                       :: my_zinc(maxsets)  ! increment for z coordinate sampling
 		integer                       :: my_nz(maxsets)    ! number of z coord vals to be written
 
@@ -337,6 +337,18 @@
 		logical                       :: do_write(maxsets)
 		logical                       :: write_s1_bar(maxsets)
 		logical                       :: write_s2_bar(maxsets)
+		
+		! additional variables for writing out child domain data
+		logical						  :: do_child_grid
+		logical						  :: write_s2_child_grid
+		logical						  :: write_s1_bar_child_grid
+		logical						  :: write_s2_bar_child_grid
+		logical						  :: write_normal_derivs(maxsets)
+		integer                       :: i0_child, i1_child
+		integer                       :: j0_child, j1_child
+		integer                       :: k0_child, k1_child
+		integer                       :: inc_child_2d, inc_child_3d
+		real(kind=8)                  :: t_start_child
 	end module io_params
 
 

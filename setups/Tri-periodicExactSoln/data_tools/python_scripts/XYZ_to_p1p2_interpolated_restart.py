@@ -62,9 +62,6 @@ print('...     output file directory:  ',restart_dir)
 print('...     output filename root:  restart_')
 
 
-command = 'cd ' + top_dir + 'input/data_tools/python_scripts/'
-os.system(command)
-
 # (a) interpolate in x and y
 command = PYTHON + ' input/data_tools/python_scripts/interp_H.py ' + top_dir + ' ' + infile + ' ' + str(NX) + ' ' + str(NY) + ' ' + interp_method
 print( command )

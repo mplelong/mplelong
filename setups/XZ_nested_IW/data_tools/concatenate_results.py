@@ -26,11 +26,14 @@ from python_scripts.data_processing_utilities import parse_problem_params
 #--------------------------------------
 # script control params
 #--------------------------------------
-do_XY=True  ; delete_XY=False
-do_XZ=True  ; delete_XZ=False
-do_YZ=True   ; delete_YZ=False
-do_XYZ=True ; delete_XYZ=False
-ES = 65   # end_slice
+do_XY=True  ; delete_XY=True
+do_XZ=True  ; delete_XZ=True
+do_YZ=True   ; delete_YZ=True
+do_XYZ=True ; delete_XYZ=True
+ES = 65   # end_slice XY XZ YZ planes
+
+do_child_grid = True                                 # whether to concatenate child grid files as well
+child_grid_specs = ' 1 65 1 9 120 1 9 9 120'  # time_slice_start time_slice_end time_slice_inc i0 i1 j0 j1 k0 k1
 
 #------------------------------------------
 # make a directory to store file locations
@@ -98,6 +101,16 @@ if( do_XZ ):
 		os.system(command)
 	command = 'ls -lh ' + root_dir + 'output/slices/2D/' + fnrs + '* > paths/concatenated_' + fnrs + '_files'
 	os.system(command)
+	
+	if( do_child_grid ):
+		cmd_base = MPIRUN + ' -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_XZ_subplane_mpi.py '
+		command = cmd_base + root_dir + child_grid_specs
+		os.system(command)
+		if( delete_XY ):
+			command = 'rm -f ' + root_dir + 'output/2D/south_*.nc'
+			os.system(command)
+			command = 'rm -f ' + root_dir + 'output/2D/north_*.nc'
+			os.system(command)
 
 
 
@@ -126,6 +139,17 @@ if( do_YZ ):
 		os.system(command)
 	command = 'ls -lh ' + root_dir + 'output/slices/2D/' + fnrs + '* > paths/concatenated_' + fnrs + '_files'
 	os.system(command)
+	
+	if( do_child_grid ):
+		cmd_base = MPIRUN + ' -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_YZ_subplane_mpi.py '
+		command = cmd_base + root_dir + child_grid_specs
+		os.system(command)
+		if( delete_XY ):
+			command = 'rm -f ' + root_dir + 'output/2D/east_*.nc'
+			os.system(command)
+			command = 'rm -f ' + root_dir + 'output/2D/west_*.nc'
+			os.system(command)
+	
 
 
 
@@ -153,6 +177,16 @@ if( do_XY ):
 		os.system(command)
 	command = 'ls -lh ' + root_dir + 'output/slices/2D/' + fnrs + '* > paths/concatenated_' + fnrs + '_files'
 	os.system(command)
+	
+	if( do_child_grid ):
+		cmd_base = MPIRUN + ' -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_XY_subplane_mpi.py '
+		command = cmd_base + root_dir + child_grid_specs
+		os.system(command)
+		if( delete_XY ):
+			command = 'rm -f ' + root_dir + 'output/2D/bottom_*.nc'
+			os.system(command)
+			command = 'rm -f ' + root_dir + 'output/2D/top_*.nc'
+			os.system(command)
 
 
 #---------------------------------------------------- 
@@ -164,16 +198,41 @@ if( do_XYZ ):
 	start_slice = 0                         # starting time slice  i.e. slices = np.arange(start_slice,end_slice,inc)
 	end_slice = 1025                        # ending time slice    
 	inc = 256                               # time slice increment
-	numprocs = 5                            # number of processors to be used by concat_YZ_mpi.py	
+	numprocs = 5                            # number of processors to be used by concat_YZ_mpi.py
 	
 	cmd_base = MPIRUN + ' -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_XYZ_mpi.py '
 	command = cmd_base + root_dir + ' ' + str(p1) + ' ' + str(p2) + ' ' + str(start_slice) + ' ' + str(end_slice) + ' ' + str(inc) + ' ' + fnrs
-	os.system(command)
+	os.system(command)	
+	
+	if( do_child_grid ):
+		fnrs = 'XYZ_child'                      # filename root string
+		start_slice = 0                         # starting time slice  i.e. slices = np.arange(start_slice,end_slice,inc)
+		end_slice = 1025                        # ending time slice    
+		inc = 256                               # time slice increment
+		numprocs = 5                            # number of processors to be used by concat_YZ_mpi.py	
+	
+		cmd_base = MPIRUN + ' -np ' + str(numprocs) + ' ' + PYTHON + ' python_scripts/concat_XYZ_mpi.py '
+		command = cmd_base + root_dir + ' ' + str(p1) + ' ' + str(p2) + ' ' + str(start_slice) + ' ' + str(end_slice) + ' ' + str(inc) + ' ' + fnrs
+		os.system(command)
+	
+	
+	fnrs = 'XYZ'
 	if( delete_XYZ ):
 		command = 'rm -f ' + root_dir + 'output/3D/' + fnrs + '_*.nc'
 		os.system(command)
 	command = 'ls -lh ' + root_dir + 'output/slices/3D/' + fnrs + '* > paths/concatenated_' + fnrs + '_files'
 	os.system(command)
+	
+	
+	if( do_child_grid ):
+		fnrs = 'XYZ_child'
+		if( delete_XYZ ):
+			command = 'rm -f ' + root_dir + 'output/3D/' + fnrs + '_*.nc'
+			os.system(command)
+		command = 'ls -lh ' + root_dir + 'output/slices/3D/' + fnrs + '* > paths/concatenated_' + fnrs + '_files'
+		os.system(command)
+	
+	
 
 
 

@@ -67,3 +67,4 @@ new          !!===>  append w/ each write or create new file
 1            !!===>  write w
 1            !!===>  write s1 (don't write if 0, write s1' if 1, s1' + s1_bar if 2)
 0            !!===>  write s2 (don't write if 0, write s2' if 1, s2' + s2_bar if 2)
+.FALSE.      !!===>  continue to set up child grid output? if TRUE keep reading to configure

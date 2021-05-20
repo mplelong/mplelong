@@ -33,15 +33,21 @@ fi
 # 2nd arg for plot_cfl.py is s, hrs or days for plot time scale
 #---------------------------------------------------------------
 cd input/data_tools
-"$PYTHON" concatenate_results.py "$FLOW_SOLVE_ROOT"
-"$PYTHON" python_scripts/plot_cfl.py "$FLOW_SOLVE_ROOT"  s  # plot the time scale seconds
+	"$PYTHON" concatenate_results.py "$FLOW_SOLVE_ROOT"
+	"$PYTHON" python_scripts/plot_cfl.py "$FLOW_SOLVE_ROOT"  s  # plot the time scale seconds
 
 cd "$FLOW_SOLVE_ROOT"
-open -a Preview output/figures/cfl.pdf
+	open -a Preview output/figures/cfl.pdf
 
-cd "$FLOW_SOLVE_ROOT"
-ncrcat -O output/slices/2D/XZ* output/slices/2D/XZ.nc
-"$NCVIEW" output/slices/2D/XZ.nc &
+	ncrcat -O output/slices/2D/XY* output/slices/2D/XY.nc
+	rm -f output/slices/2D/XY_*.nc
+
+	ncrcat -O output/slices/2D/YZ* output/slices/2D/YZ.nc
+	rm -f output/slices/2D/YZ_*.nc
+
+	ncrcat -O output/slices/2D/XZ* output/slices/2D/XZ.nc
+	rm -f output/slices/2D/XZ_*.nc
+	"$NCVIEW" output/slices/2D/XZ.nc &
 
 if( "$do_movie_frames" ) then
 	cd input/data_tools/python_scripts
