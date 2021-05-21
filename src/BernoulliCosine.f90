@@ -897,6 +897,8 @@ subroutine verify_deriv_BC
 	character(len=80), parameter             :: method='BC'
 	logical                                  :: debug
 	
+	if( Q==0 ) return    ! we won't need and haven't prepared for BC method
+	
 	pi = 4.d0*atan(1.d0)	  
 
 	!----------------------------------------------------
@@ -920,7 +922,8 @@ subroutine verify_deriv_BC
  				if( diff  > tol ) stop ' problem verifying x Bernoulli-cosine differentiation in preliminary_tasks '
  			enddo
  		endif
- 		write(0,*) '                         ....................... d/dx using Bernoulli-cosine method looks fine, tol=',tol
+ 		if(myid==0 .and. nx>nmin)   &
+ 			write(0,*) '                         ....................... d/dx using Bernoulli-cosine method looks fine, tol=',tol
  		deallocate( in,out ) 
  	endif
  	
@@ -942,7 +945,8 @@ subroutine verify_deriv_BC
  				if( abs(diff) > tol ) stop ' problem verifying y Bernoulli-cosine differentiation in preliminary_tasks '
  			enddo
  		endif
- 		write(0,*) '                         ....................... d/dy using Bernoulli-cosine method looks fine, tol=',tol
+ 		if(myid==0 .and. ny>nmin)   &
+ 			write(0,*) '                         ....................... d/dy using Bernoulli-cosine method looks fine, tol=',tol
  		deallocate( in,out )
  	endif
  	
@@ -964,7 +968,8 @@ subroutine verify_deriv_BC
  				if( diff > tol ) stop ' problem verifying z Bernoulli-cosine differentiation in preliminary_tasks '
  			enddo
  		endif
- 		write(0,*) '                         ....................... d/dz using Bernoulli-cosine method looks fine, tol=',tol
+ 		if(myid==0 .and. nz>nmin)  &
+ 			write(0,*) '                         ....................... d/dz using Bernoulli-cosine method looks fine, tol=',tol
  		deallocate( in,out )
  	endif 
 
