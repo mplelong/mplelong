@@ -66,22 +66,24 @@ end subroutine rhs_v
 
 
 subroutine rhs_w
-	use mpi_params,                      only: myid
+	use mpi_params,                      only: myid,comm,ierr
 	use dependent_variables,             only: u,v,w,s1,scalar_kind
 	use dimensional_scales,              only: rho0,g
 	use intermediate_variables,          only: explicit_rhs
 	use etc,                             only: MM0
-	use independent_variables,           only: Lz,z_FSRL,s1_z_BC
+	use independent_variables,           only: Lz,z_FSRL,s1_z_BC,nx,ny,nz
 	use decomposition_params
 	implicit none
 	integer,parameter                       :: id=3
-	integer                                 :: k
+	integer                                 :: k,icount
 	integer, save                           :: locnz
-	real(kind=8)                            :: dz,gamma
+	real(kind=8)                            :: dz,gamma,local_mean
 	real(kind=8), allocatable               :: z(:)
 	real(kind=8), allocatable, save         :: z_taper(:)
+	real(kind=8), save                      :: rho_mean     ! spatial avg at t=0
 	real(kind=8), external                  :: myexp
 	logical, save                           :: first_entry=.TRUE.
+	include "mpif.h"
 		
 	if( first_entry ) then					
 		if( z_FSRL .and. s1_z_BC=='HOMOGENEOUS_NEUMANN') then
@@ -94,7 +96,17 @@ subroutine rhs_w
 				z_taper(k) = 1.d0 - myexp(-((z(k)-0.d0)/gamma)**2) - myexp(-((z(k)-Lz)/gamma)**2)
 			enddo
 			deallocate(z)
-		endif		
+		endif
+		
+		if( scalar_kind(1)=='r' ) then
+			! calculate local spatial mean
+			local_mean = SUM( s1(:,:,:) )
+			call MPI_ALLREDUCE(local_mean,rho_mean,icount,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ierr)
+			rho_mean = rho_mean/(nx*ny*nz)
+		else
+			rho_mean = 0.d0
+		endif	
+			
 		first_entry=.FALSE.
 	endif
 	
@@ -108,7 +120,7 @@ subroutine rhs_w
 	! buoyancy...
 	!-----------------
 	if( scalar_kind(1) =='r' ) then
-	 explicit_rhs(:,:,:,id,MM0) = explicit_rhs(:,:,:,id,MM0) - (g/rho0)*s1(:,:,:)    
+		explicit_rhs(:,:,:,id,MM0) = explicit_rhs(:,:,:,id,MM0) - (g/rho0)*(s1(:,:,:) - rho_mean)   
 	endif
 	
 	! If necessary, taper acceleration due to buoyancy near top/bottom
