@@ -138,13 +138,14 @@ subroutine ddz(f,df,order,fid)
 	! set default method to be Bernoulli-Cosine
 	method = 'BC'
 	if( z_periodic ) method = 'fourier'
-	if( z_FSRL .and. fid < 3 ) method = 'cos'   ! u,v for free-slip rigid lids
+	if( z_FSRL .and. fid  < 3 ) method = 'cos'    ! u,v for free-slip rigid lids
+	if( z_FSRL .and. fid == 3 ) method = 'sin'    ! w for free-slip rigid lids
 	if( z_FSRL .and. fid == 4 ) then
 		if(s1_z_BC=='HOMOGENEOUS_NEUMANN')   method='cos'   ! s1 cos expanded in z
 		if(s1_z_BC=='HOMOGENEOUS_DIRICHLET') method='sin'   ! s1 cos expanded in z
 	endif	
 	if( fid==6 .and. .NOT. z_periodic ) method = 'cos'
-	if(fid==999) method = 'BC' ! used for testing, even if x_periodic
+	if(fid==999) method = 'BC' ! used for testing, even if z_periodic
 		
 
 	!--------------------------------------------------------------------------

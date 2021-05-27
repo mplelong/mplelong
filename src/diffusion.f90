@@ -116,11 +116,11 @@ subroutine diffuse
 	!-----------------------------------------------------------------------------------
 	use mpi_params,                   only: myid
  	use decomposition_params
- 	use independent_variables,        only: dt,ny,nz,x_periodic,y_periodic ! need global nz to pass to z_diffusion
+ 	use independent_variables,        only: dt,ny,nz,x_periodic,y_periodic,z_FSRL ! need global nz to pass to z_diffusion
  	use dependent_variables,          only: u,v,v,w,s1,s2,s1_bar,s2_bar
 	use intermediate_variables,       only: tmpX,tmpY,tmpZ
 	use differentiation_params,       only: kx,ky,kxfilter,kyfilter
-	use methods_params,               only: do_second_scalar,do_sponging
+	use methods_params,               only: do_second_scalar
 	use dimensionless_params,         only: p                     ! 1/2 order of diffusion operators, x,y,z
 	use dimensional_scales,           only: nu_star, kappa_star   ! nu/kappa_star(3) x,y and z dirs
  	implicit none
@@ -239,9 +239,6 @@ subroutine diffuse
 		enddo
 		
 		
- 
-		
-	
 		!------------------------------------------------------------------------
 		!  transpose to ZBLOCK(z,x,y)
 		!------------------------------------------------------------------------
@@ -255,6 +252,15 @@ subroutine diffuse
 				call z_diffusion(tmpZ(1,i,j,1),tmpZ(1,i,j,2),nz,id)
 			enddo
 		enddo
+		
+		!------------------------------------------------------------
+		! set w identically to zero at top and bottom
+		! if we have free-slip rigid lid BCs
+		!------------------------------------------------------------
+		if( id==3 .and. z_FSRL ) then
+			tmpZ(1,:,:,2) = 0.d0     ! w at z=0
+			tmpZ(nz,:,:,2) = 0.d0    ! w at z=Lz
+		endif
 	
 		!------------------------------------------------------------------------
 		!  transpose back to YBLOCK, storing result in tmpY(1)
@@ -272,6 +278,7 @@ subroutine diffuse
 		if(id==3) call transform_xy(tmpY,w,dir,exp_type)
 		if(id==4) call transform_xy(tmpY,s1,dir,exp_type)
 		if(id==5) call transform_xy(tmpY,s2,dir,exp_type)
+		
 		
 				
 	enddo   ! end id loop over nvars

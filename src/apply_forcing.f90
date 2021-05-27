@@ -5,14 +5,16 @@ subroutine apply_forcing
 !---------------------------------------------------------------
 	use mpi_params,                          only: myid
 	use decomposition_params
-	use independent_variables,               only: x,y,z,t_secs
+	use independent_variables,               only: x,y,z,t_secs,z_FSRL,s1_z_BC,Lz
 	use intermediate_variables,              only: tmpY,explicit_rhs
 	use methods_params,                      only: do_second_scalar,forcing_key,do_forcing
 	use etc,                                 only: MM0 
 	implicit none
 	integer                                      :: id,k 
-	real(kind=8),allocatable,save                :: xvals(:),yvals(:),zvals(:)
+	real(kind=8),allocatable,save                :: xvals(:),yvals(:),zvals(:),z_taper(:)
 	integer,save                                 :: npts(3),npvs
+	real(kind=8)                                 :: dz,gamma
+	real(kind=8), external                       :: myexp
 	logical,save                                 :: first_entry=.TRUE.
   
 	if( do_forcing ) then
@@ -34,6 +36,15 @@ subroutine apply_forcing
 			call get_my_xvals( xvals, YBLOCK, myid )
 			call get_my_yvals( yvals, YBLOCK, myid )
 			call get_my_zvals( zvals, YBLOCK, myid )
+			
+			if( z_FSRL ) then
+				allocate( z_taper(npts(3)) )
+				dz = zvals(2)-zvals(1)
+				gamma = 2.d0*dz
+				do k=1,npts(3)
+					z_taper(k) = 1.d0 - myexp(-((zvals(k)-0.d0)/gamma)**2) - myexp(-((zvals(k)-Lz)/gamma)**2)
+				enddo
+			endif
 		
 			first_entry=.FALSE.
 		endif
@@ -53,9 +64,22 @@ subroutine apply_forcing
 				!------------------------------------
 				! add to previously computed values
 				!------------------------------------
-				explicit_rhs(:,:,:,id,MM0) = explicit_rhs(:,:,:,id,MM0) + tmpY(:,:,:,1) 
+				explicit_rhs(:,:,:,id,MM0) = explicit_rhs(:,:,:,id,MM0) + tmpY(:,:,:,1)
+				
+				!---------------------------------------------------------------------
+ 				! If necessary, taper vertical acceleration near top/bottom
+ 				!  NB nontraditional Coriolis term also needs tapering independent
+ 				! of the buoyancy term
+ 				!---------------------------------------------------------------------
+				if( id==3 .and. z_FSRL .and. s1_z_BC=='HOMOGENEOUS_NEUMANN') then 
+					do k=1,npts(3)
+						explicit_rhs(:,:,k,id,MM0) = explicit_rhs(:,:,k,id,MM0)*z_taper(k)
+					enddo  
+				endif  
   			endif
- 		enddo  
+ 		enddo 
+ 		
+ 		
  
 	endif  ! end if do_forcing block
    

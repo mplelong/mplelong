@@ -141,6 +141,7 @@ subroutine project
 	v = vstar - dt * tmpY(:,:,:,2)      ! v <== v* - dt phi_y
 	w = wstar - dt * tmpY(:,:,:,3)      ! w <== w* - dt phi_z
 	
+	
 	if( istep==istart ) then
 	
 		if(myid==0) then
@@ -211,6 +212,7 @@ subroutine update_ustar
 	use intermediate_variables,               only: ustar,vstar,wstar,tmpY
 	use boundary_data
 	use etc,                                  only: istep,istart
+	use methods_params,                       only: user_bcs
 	implicit none
  
  	integer, save                                :: locnx, ny, locnz, p, npts(3)
@@ -220,6 +222,15 @@ subroutine update_ustar
 	real(kind=8),external                        :: myexp     ! to avoid large negative args to intrinsic exp()
 	logical,save                                 :: first_entry=.TRUE.
  
+ 	!------------------------------------------------------
+ 	! user_bcs id .FALSE. only if ALL BCs are such that
+ 	! no explicit boundary values are needed, e.g. all
+ 	! periodic, free-slip rigid lid w/ horizontal periodicity,
+ 	! FSRL w/ x periodicity and y explicitly cosine ...
+ 	!------------------------------------------------------
+ 	if( .not. user_bcs ) return   ! don't need anything here
+ 	
+ 	
 	if( first_entry ) then	
 		p = 4       ! exponent
 		npts(:) =  (/3,3,6/)   ! gamma = npts*h, h=step size   2,2,6 is also good

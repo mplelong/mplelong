@@ -116,6 +116,15 @@ subroutine preliminary_tasks
 	endif
 	
 	!-----------------------------------------------
+	! In this case, the Q=0 setting implies cos in y
+	! no BCs needed at y=0,Ly (or anywhere else)
+	!-----------------------------------------------
+	if( z_FSRL .and. x_periodic .and. Q==0 ) then
+		user_bcs = .FALSE.
+		endpoint_smoothing = .FALSE.
+	endif
+	
+	!-----------------------------------------------
 	! call user routine to prescribe the ambient
 	! scalar profiles s1_bar(z) and s2_bar(z)
 	!-----------------------------------------------	
