@@ -1,0 +1,43 @@
+niskine_parent_2.2   ! runlabel  
+.TRUE.               ! Restart flag. Read initial conditions from saved netcdf files?
+.FALSE.              ! Compute evolution a second scalar field?
+4                    ! Order of explicit Adams-Bashforth time stepping, must be <= 4
+2                    ! MPI decomposition parameter p1, splits (nx)   
+2                    ! MPI decomposition parameter p2, splits (ny,nz)  p1*p2=numprocs=np
+128                  ! nx    split by (p1)
+129                  ! ny    split by (p1,p2)  256x313x265  8x24 
+129                  ! nz    split by (p2)     
+60.d0                ! dt       (s)       60 for higher resolution production runs
+0.d0                 ! t_start  (s)    
+2.592d6              ! t_end    (s)    30 days  52740.d0 = 1 inertial period 
+500.d3               ! Lx       (m)     
+600.d3               ! Ly       (m)       
+3500.d0              ! Lz       (m)     
+.TRUE.               ! x coordinate periodic?
+.FALSE.              ! y coordinate periodic?
+.FALSE.              ! z coordinate periodic?
+r                    ! defn of scalar s1 ( t = temp in deg C, r = Boussinesq density, i.e. rho )
+p                    ! defn of scalar s2 ( p =  passive tracer )
+.TRUE.               ! Call user forcing routine?         
+1027.d0              ! rho_0  constant reference density  (kg/m3)
+9.81d0               ! g  gravity                         (m/s2)
+1.191408353940443d-4 ! f0 Coriolis parameter at Lx/2 Ly/2 (1/s)   55 N
+1.d-6                ! nu     viscosity                   (m2/s)  
+1.d-6                ! kappa  diffusivity for s1          (m2/s)
+1.d-6                ! kappa  diffusivity for s2          (m2/s)
+.TRUE.               ! high_order_operators,  Use high order diffusion operators? 
+4                    ! half order of high order diffusion operators, x direction    (only read and used if TRUE)
+4                    ! half order of high order diffusion operators, y direction    (only read and used if TRUE)
+4                    ! half order of high order diffusion operators, z direction    (only read and used if TRUE)
+500.d0               ! diffusive time scale at x nyquist wavenumber (s)  (only read and used if TRUE)
+500.d0               ! diffusive time scale at y nyquist wavenumber (s)  (only read and used if TRUE)
+500.d0               ! diffusive time scale at z nyquist wavenumber (s)  (only read and used if TRUE)
+----------------------------------------------------------------------------------------------------
+you can keep notes below here...
+----------------------------------------------------------------------------------------------------
+
+
+1st run:  dt=60, p1=p2=2  64x65x65  0 to 7.776d6 s  (90 days)  
+
+2nd run:  restart from XYZ_125000.nc t=7.5d6 s ~ 86.8055 days
+		  ==> 128x129x129  dt=60 s  run for 30 days

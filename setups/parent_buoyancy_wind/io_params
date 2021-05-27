@@ -1,0 +1,82 @@
+4            !!===>  num of filesets to process: 1 XZ plane, 1 YZ plane, 1 XY plane, 1 XYZ block
+XZ           !!===>  rootname for this file-set, 2D XZ plane
+append       !!===>  append w/ each write or create new file
+128          !!===>  steps between writes    
+-999         !!===>  istart		negative values trigger "full global plane" values
+-999         !!===>  iend		negative values trigger "full global plane" values
+1            !!===>  i inc
+5            !!===>  jstart
+5            !!===>  jend
+1            !!===>  j inc
+-999         !!===>  kstart
+-999         !!===>  kend 
+1            !!===>  k inc
+1            !!===>  write u  (don't write if 0, write if 1)
+1            !!===>  write v
+1            !!===>  write w
+1            !!===>  write s1 (don't write if 0, write s1' if 1, s1' + s1_bar if 2)
+0            !!===>  write s2 (don't write if 0, write s2' if 1, s2' + s2_bar if 2)
+YZ           !!===>  rootname for this file-set, 2D YZ plane
+append       !!===>  append w/ each write or create new file
+128          !!===>  steps between writes
+33           !!===>  istart
+33           !!===>  iend
+1            !!===>  i inc
+-999         !!===>  jstart		negative values trigger "full global plane" values
+-999         !!===>  jend		negative values trigger "full global plane" values
+1            !!===>  j inc
+-999         !!===>  kstart		negative values trigger "full global plane" values
+-999         !!===>  kend		negative values trigger "full global plane" values 
+1            !!===>  k inc
+1            !!===>  write u  (don't write if 0, write if 1)
+1            !!===>  write v
+1            !!===>  write w
+1            !!===>  write s1 (don't write if 0, write s1' if 1, s1' + s1_bar if 2)
+0            !!===>  write s2 (don't write if 0, write s2' if 1, s2' + s2_bar if 2)
+XY           !!===>  rootname for this file-set, 2D XY plane
+append       !!===>  append w/ each write or create new file
+128          !!===>  steps between writes
+-999         !!===>  istart		negative values trigger "full global plane" values
+-999         !!===>  iend		negative values trigger "full global plane" values
+1            !!===>  i inc
+-999         !!===>  jstart		negative values trigger "full global plane" values
+-999         !!===>  jend		negative values trigger "full global plane" values
+1            !!===>  j inc
+129          !!===>  kstart
+129          !!===>  kend 
+1            !!===>  k inc
+1            !!===>  write u  (don't write if 0, write if 1)
+1            !!===>  write v
+1            !!===>  write w
+1            !!===>  write s1 (don't write if 0, write s1' if 1, s1' + s1_bar if 2)
+0            !!===>  write s2 (don't write if 0, write s2' if 1, s2' + s2_bar if 2)
+XYZ          !!===>  rootname for this file-set, 3D XYZ volume
+new          !!===>  append w/ each write or create new file
+25000        !!===>  steps between writes    
+-999         !!===>  istart		negative values trigger "full global plane" values
+-999         !!===>  iend		negative values trigger "full global plane" values
+1            !!===>  i inc
+-999         !!===>  jstart		negative values trigger "full global plane" values
+-999         !!===>  jend		negative values trigger "full global plane" values
+1            !!===>  j inc
+-999         !!===>  kstart		negative values trigger "full global plane" values
+-999         !!===>  kend 		negative values trigger "full global plane" values
+1            !!===>  k inc
+1            !!===>  write u  (don't write if 0, write if 1)
+1            !!===>  write v
+1            !!===>  write w
+1            !!===>  write s1 (don't write if 0, write s1' if 1, s1' + s1_bar if 2)
+0            !!===>  write s2 (don't write if 0, write s2' if 1, s2' + s2_bar if 2)
+.FALSE.      !!===>  continue to set up child grid output? if TRUE keep reading to configure
+9            !!===>  istart for child grid
+120          !!===>  iend   for child grid
+1            !!===>  jstart for child grid
+9            !!===>  jend   for child grid
+9            !!===>  kstart for child grid
+120          !!===>  kend   for child grid
+16           !!===>  steps between writes for boundary data
+256          !!===>  steps between writes for 3d data
+0.d0         !!===>  [s] only start writing child grid data when t >= t_start
+.FALSE.      !!===>  write second scalar for child grid?
+.FALSE.      !!===>  write s1_bar for child grid?
+.FALSE.      !!===>  write s2_bar for child grid?

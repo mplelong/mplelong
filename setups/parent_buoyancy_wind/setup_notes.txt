@@ -1,0 +1,116 @@
+As a default treatment, a coordinate dimensions will be treated using the
+Bernoulli-Cosine method for spatial differentiation and boundary data consisting
+of the prognostic variables and their normal derivatives need to be supplied by
+the user at the two endpoints. This boundary data can be supplied in one of two
+ways depending on the value of the variable
+
+		boundary_data_source    'user_functions' or 'datafiles'
+
+This variable is found in the boundary_data_module. It's default value is 'datafiles' but
+can be reset if needed in the subroutine change_default_values in user_params_module.f90.
+
+
+
+
+(1) Through user-configured subroutines in flow_solve_user.f90: boundary_data_source='user_functions'
+
+		user_bvals_EW(x,y,z,t,id,VALS,DERIVS,nx,ny,nz,side,Lx)
+		user_bvals_NS(x,y,z,t,id,VALS,DERIVS,nx,ny,nz,side,Ly)
+		user_bvals_BT(x,y,z,t,id,VALS,DERIVS,nx,ny,nz,side,Lz)
+	
+	Input:
+	x, y, z			the local portions of coordinate arrays for the given processor
+	nx, ny, nz		the lengths of the local coordinate arrays
+	side			indicates for which boundary the vals are needed 'E','W','S','N','B','T'
+	Lx, Ly or Lz    physical length of domain in coordinate direction in [m]
+	t               time in [s] at which the boundary data is needed
+	id              variable id indicating which values are to be returned [1,2,3,4,5]=>[u,v,w,s1,s2]
+	
+	To be returned:
+	VALS            2d array of field id values arranged (y,z) for EW, (x,z) for NS and (x,y) for BT
+	DERIVS			2d array of field id normal derivs, e.g. w_x(y,z) for id=3 in user_bvals_EW
+	
+	These subroutines must exist, even if they have no content and will not be used. Generally,
+	they are located in flow_solve_user.f90 in the $FLOW_SOLVE_ROOT/input directory.
+	
+	
+	
+(2) In a distributed set of boundary data files in the $FLOW_SOLVE_ROOT/BVALS directory.
+	boundary_data_source = 'datafiles'
+	For example, for a 2x2 processor decomposition, the files
+	
+	bottom.nc			east_000-001.nc		north_001-001.nc	south_001-001.nc	west_001-000.nc
+	bottom_000-000.nc	north.nc			south.nc			top.nc				west_001-001.nc
+	bottom_001-000.nc	north_000-000.nc	south_000-000.nc	top_000-001.nc
+	east.nc				north_000-001.nc	south_000-001.nc	top_001-001.nc
+	east_000-000.nc		north_001-000.nc	south_001-000.nc	west.nc
+	
+	Note that the python processing tools rely on the strict file naming conventions used here.
+	
+	
+	There are two families of files here. The first, are global and contain the all the boundary
+	data for a given boundary plane: east.nc, west.nc, south.nc, north.nc, bottom.nc and top.nc.
+	These can be considered to be coarsely resolved in space and time relative to the resolution
+	of the nested run in which they will be used. For example, an ncdump -h of east.nc will show
+	
+		double u(tdim, kdim, jdim) ;
+		u:units = "m/s" ;
+		
+		double u_x(tdim, kdim, jdim) ;
+		u_x:units = "1/s" ;
+		
+	along with the other variables u,w,s1 and possibly s2 and y, z and t arrays. The y and z arrays
+	are assumed to define the size of the east face in the nested run.
+	
+	The second set of files are smaller, having been broken down into the portions of the data
+	needed by individual processors in the nested run, in this case a 2x2 run. In a 2x2 run, each
+	processor has a proc_row and proc_col id and these are coded into the filenames. The global
+	files are split apart using the routine
+	
+		input/data_tools/python_scripts/create_BC_files.py root_dir nx ny nz p1 p2
+		
+	The arguments are the number of grid points and processor decomposition to be used in the
+	nested run. The saved data from the parent run is then interpolated to the desired resolution
+	and broken apart to match the requested decomposition.
+	
+	 
+
+Boundary data will not be accessed or used for
+
+	(a) a coordinate is that is declared to be periodic in user_params
+	(b) any coordinate if FS_XY_PERIODIC = .TRUE. 
+	(c) the z coordinate if z_FSRL = .TRUE.    (free-slip rigid lid)
+	
+	
+	
+So, for a parent run with imposed N/S density gradient that is periodic in the zonal direction:
+
+	set
+	x_periodic = .TRUE.
+	z_FSRL = .TRUE.
+	s1_z_BC = 'HOMOGENEOUS_NEUMANN'
+			
+	set the Bernoulli parameter Q=0 ==> straight cosine expansion in y direction
+		
+
+
+(1) do a 90 day run on my mac with 64x65x65 grid points, dt=60 s
+
+	python input/data_tools/python_scripts/concat_XYZ_mpi.py ./ 2 2 125000 125001 1 XYZ
+	save 3d field XYZ_125000.nc	==> t=7.5e6 s ~ 86.8055 days
+
+(2) interpolate this field to 128x129x129
+	(modified interp_H and XYZ_to_p1p2_restart.py to allow for x to be periodic)
+	python input/data_tools/python_scripts/XYZ_to_p1p2_interpolated_restart.py ./ XYZ_125000.nc 128 129 129 2 2 cubic
+	
+(3) restart the calculation, run 30 days p1=p2=2 , dt=60 s  
+	allow initial time to be reset tp t=0, spinup not physical anyway	
+	
+	
+	
+		
+		
+	
+	
+	
+	
