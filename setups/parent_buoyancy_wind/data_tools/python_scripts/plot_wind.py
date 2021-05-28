@@ -40,6 +40,7 @@ kappa1,kappa2,high_order_flag,p,T_diff] = problem_params
 data_file = root_dir + 'output/1D/wind_speed_direction'     # t [s], u_10 [m/s], theta [rad]
 plot_dir  = root_dir + 'output/figures/'
 plot_file = plot_dir + 'wind.pdf'
+plot_file2 = plot_dir + 'wind_polar.pdf'
 
 if not os.path.exists(plot_dir):
 	cmd = 'mkdir -p ' + plot_dir
@@ -53,10 +54,13 @@ f = open(data_file, 'r')
 f = np.loadtxt(data_file)
 time = f[:,0] ; speed = f[:,1]  ; dir = f[:,2] 
 
+inc=60*1    # 1 hrs for dt=1 min
+
 
 
 FS=14
 fig = plt.figure(figsize=(8,3.75),dpi=300)                 # fig size in inches
+plt.style.use('dark_background')
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 axes = fig.add_axes([0.10, 0.15, 0.75, 0.75])              # lower, bottom, width, height in ( 0 to 1)
@@ -72,7 +76,7 @@ mean = 12.0         # prescribed mean wind speed
 LC='r'
 axes.set_xlabel(r'$t \, \rm[days]$',fontsize=FS)
 axes.set_ylabel(r'10 m wind speed [m/s]',fontsize=FS,color=LC)
-axes.plot(time,speed,color=LC,linewidth=1.5)
+axes.plot(time[0:-1:inc],speed[0:-1:inc],color=LC,linewidth=0.5)
 axes.plot([time[0],time[-1]],[mean,mean],color=LC,linewidth=0.5,linestyle='--')
 axis_lims = [time[0], 1.0*time[-1], 0., 20.0]
 axes.axis(axis_lims)
@@ -82,22 +86,22 @@ axes.tick_params(axis='y', labelcolor=LC)
 axes.set_yticks([0,5,10,15,20])
 
 
-mean = 1./4.   # mean diriction/pi
-LC='b'
+mean = 1./4.   # mean direction/pi
+LC='y'
 axes2 = axes.twinx()
 axes2.tick_params(direction='out', top=False, right=True,) # Turn ticks out
 axes2.tick_params(axis='both', which='major', labelsize=FS)
 axes2.spines['top'].set_visible(False)                     # Get rid of top axis line
 axes2.set_ylabel(r'10 m wind direction',fontsize=FS,color=LC)
-axes2.plot(time,dir/np.pi,color=LC,linewidth=1.5)
+axes2.plot(time[0:-1:inc],dir[0:-1:inc]/np.pi,color=LC,linewidth=0.5)
 axes2.plot([time[0],time[-1]],[mean,mean],color=LC,linewidth=0.5,linestyle='--')
 #axes2.plot(time,0.25*np.ones_like(time),'--',color=LC,linewidth=0.5)
-axis_lims = [time[0], 1.0*time[-1], -0.5, 1]
+axis_lims = [time[0], 1.0*time[-1], -0.25, 1]
 axes2.axis(axis_lims)
 axes2.tick_params(axis='y', labelcolor=LC)
 
-axes2.set_yticks([-.5,0,.5,1])
-axes2.set_yticklabels(['$-\pi/2$','0','$\pi/2$','$\pi$'])
+axes2.set_yticks([-.25,0,.25,.5])
+axes2.set_yticklabels(['$-\pi/4$','0','$\pi/4$','$\pi/2$'])
 
 plt.savefig(plot_file,dpi=300)      # save plot file
 
@@ -105,14 +109,16 @@ plt.savefig(plot_file,dpi=300)      # save plot file
 
 
 
-
-
-ax = plt.subplot(111, projection='polar')
-inc=60*1    # 1 hrs for dt=1 min
-ax.plot(dir[0:-1:inc], speed[0:-1:inc],'k.',markersize=0.25)
+# lots of preset styles:  print(plt.style.available)
+plt.style.use('dark_background')  ;  MC='y.'
+matplotlib.rcParams.update({'font.size': 16})
+fig = plt.figure(figsize=(4,4),dpi=300)                 # fig size in inches
+plt.rc('text', usetex=True)
+plt.rc('font', family='serif')
+ax = fig.add_axes([0.10, 0.15, 0.75, 0.75], projection='polar')
+ax.plot(dir[0:-1:inc], speed[0:-1:inc],MC,markersize=1.25)
 ax.set_rmax(20)
 ax.set_rticks([5, 10, 15, 20])  # less radial ticks
-ax.set_rlabel_position(225)  # get radial labels away from plotted line
+ax.set_rlabel_position(215)  # get radial labels away from plotted line
 ax.grid(True)
-plt.show()
-#plt.savefig(plot_file,dpi=300)      # save plot file
+plt.savefig(plot_file2,dpi=300)      # save plot file
