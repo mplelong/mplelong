@@ -246,7 +246,7 @@ w_exact=np.zeros_like(w); b_exact=np.zeros_like(b); p_exact=np.zeros_like(b)
 
 
 # locations for plotting slices
-K = (nz-1)/4  ;  I = (nx-1)/4
+K = int((nz-1)/4)  ;  I = int((nx-1)/4)
 
 
 #--------------------------------------------------------------------------------

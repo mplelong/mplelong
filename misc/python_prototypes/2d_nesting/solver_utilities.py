@@ -22,7 +22,7 @@ def evaluate_basis_functions(x,Q):
 	from Bernoulli_polynomials import U_n,ddx_U_n,kth_deriv_U_n
 	nx = x.size
 	# number of terms in the series expansions
-	M = (Q+1)/2
+	M = int((Q+1)/2)
 	U_0 = np.zeros( (nx,M),float )   ; U_L = np.zeros( (nx,M),float )
 	U_0_x = np.zeros( (nx,M),float ) ; U_L_x = np.zeros( (nx,M),float )
 	U_0_xk = np.zeros( (nx,M),float ) ; U_L_xk = np.zeros( (nx,M),float )
@@ -72,7 +72,7 @@ def ddx(f,x,frac,Q,LU,basis_functions):
 		s0=np.zeros_like(x); sL=np.zeros_like(x)
 		s0_x=np.zeros_like(x); sL_x=np.zeros_like(x)
 	
-		M = (Q+1)/2
+		M = int((Q+1)/2)
 	
 		# unpack  LU 
 		[lu_A,lu_B,piv_A,piv_B] = LU
@@ -545,8 +545,8 @@ def time_step(n,dt,U,RHS,AB_order,idx):
 	elif( AB_order == 1 ):     # flag for Euler method
 		MM0 = MM0
  
-	U = [u,v,w,b,eta,zeta]                     # updated dependent variables
- 	jdx = [MM0,MM1,MM2,MM3,method]    # updated index array
+	U = [u,v,w,b,eta,zeta]              # updated dependent variables
+	jdx = [MM0,MM1,MM2,MM3,method]    	# updated index array
 	return U,jdx
 	
 def high_order_ddx(f,x,frac,Q,LU,basis_functions,k):
