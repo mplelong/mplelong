@@ -11,14 +11,9 @@ def fourier_wavenumbers(dk,N):
 #  construct Fourier wavenumber vector k arranged as [pos 0 negative] wavenumber order
 #-----------------------------------------------------------------------------------------
 	import numpy as np
-	nb2=int(N/2)
-	k = np.zeros(N,float)
-	if N%2 == 0: 
-		for j in range(nb2):
-			k[j]=dk*j
-		for j in range(-nb2+1,0,1):
-			k[j]=dk*j    
-		#k = dk * np.array(range(nb2+1) + range(-nb2+1,0,1))
+	if N%2 == 0:     
+		k = dk * np.array([*range(int(N/2+1)),*range(int(-N/2+1),0,1)]) # Python 3
+		# k = dk * np.array(range(N/2+1) + range(-N/2+1,0,1))   # Python 2
 	else:
 		print("fourier_wavenumbers:  N must be even  ",N )
 		exit()
@@ -76,38 +71,37 @@ def dst(f,n,L,flag):
 #  flag = 1  ==> f is expandable in sin, f(-x)=f(x) near x=0,L  f(0)=f(L)=0 explicitly stored
 #  flag =-1  ==> f is expandable in cos, f(-x)=-f(x) near x=0,L  f(0)=f(L)  explicitly stored
 #-----------------------------------------------------------------------------------------
-    import numpy as np
-    from scipy.fftpack import fft, ifft
+	import numpy as np
+	from scipy.fftpack import fft, ifft
     
-    N = f.size 
-    i = 1j     # cmplx(0.,1.)
+	N = f.size 
+	i = 1j     # cmplx(0.,1.)
     
-    #  f(x) can be expanded in a sin series
-    if( flag == 1 ):
-    	F = odd_extend(f)
-    #  f(x) can be expanded in a cos series
-    if( flag == -1 ):
-    	F = even_extend(f)
+	#  f(x) can be expanded in a sin series
+	if( flag == 1 ):
+		F = odd_extend(f)
+	#  f(x) can be expanded in a cos series
+	if( flag == -1 ):
+		F = even_extend(f)
     
-	
-    if( flag == 0 ):                   # f(x) can be expanded in a Fourier series                                 
-    	dk = 2.*np.pi/L
-    	k = fourier_wavenumbers(dk,N)
-    	F = f.astype(float)            # was having an endian problem  http://stackoverflow.com/questions/12307429/scipy-fftpack-and-float64
-    	FHAT = ((i*k)**n) * fft(F)     # have imported scipy's fft,ifft
-    	df = ifft(FHAT)[0:N].real      # imaginary parts are zero, keep as real array rather than complex with imag=0
+	if( flag == 0 ):                   # f(x) can be expanded in a Fourier series                                 
+		dk = 2.*np.pi/L
+		k = fourier_wavenumbers(dk,N)
+		F = f.astype(float)            # was having an endian problem  http://stackoverflow.com/questions/12307429/scipy-fftpack-and-float64
+		FHAT = ((i*k)**n) * fft(F)     # have imported scipy's fft,ifft
+		df = ifft(FHAT)[0:N].real      # imaginary parts are zero, keep as real array rather than complex with imag=0
 		
-    if( np.abs(flag) == 1 ):           # f(x) can be expanded in a sine or cosine series
-    	dk = np.pi/L
-    	M = (N-1)*2                    # M extended array length
-    	k = fourier_wavenumbers(dk,M)
-    	FHAT = ((i*k)**n) * fft(F)     # Fourier transform of nth derivative
-    	df = ifft(FHAT)[0:M/2+1].real  # nth derivative in [0,L] as real-valued array	
+	if( np.abs(flag) == 1 ):           # f(x) can be expanded in a sine or cosine series
+		dk = np.pi/L
+		M = (N-1)*2                    # M extended array length
+		k = fourier_wavenumbers(dk,M)
+		FHAT = ((i*k)**n) * fft(F)     # Fourier transform of nth derivative
+		df = ifft(FHAT)[0:M/2+1].real  # nth derivative in [0,L] as real-valued array	
 			
-    if( np.abs(flag) > 1 ):
-    	print("dst problem, called with illegal flag value  ",flag)
-    	exit()
-    return df
+	if( np.abs(flag) > 1 ):
+		print("dst problem, called with illegal flag value  ",flag)
+		exit()
+	return df
 
 def dst_filtered(f,n,L,flag,frac):
 #-----------------------------------------------------------------------------------------
@@ -118,44 +112,44 @@ def dst_filtered(f,n,L,flag,frac):
 #  flag = 1  ==> f is expandable in sin, f(-x)=f(x) near x=0,L  f(0)=f(L)=0 explicitly stored
 #  flag =-1  ==> f is expandable in cos, f(-x)=-f(x) near x=0,L  f(0)=f(L)  explicitly stored
 #-----------------------------------------------------------------------------------------
-    import numpy as np
-    from scipy.fftpack import fft, ifft
+	import numpy as np
+	from scipy.fftpack import fft, ifft
     
-    N = f.size 
-    i = 1j     # cmplx(0.,1.)
+	N = f.size 
+	i = 1j     # cmplx(0.,1.)
     
-    #  f(x) can be expanded in a sin series
-    if( flag == 1 ):
-    	F = odd_extend(f)
-    #  f(x) can be expanded in a cos series
-    if( flag == -1 ):
-    	F = even_extend(f)
+	#  f(x) can be expanded in a sin series
+	if( flag == 1 ):
+		F = odd_extend(f)
+	#  f(x) can be expanded in a cos series
+	if( flag == -1 ):
+		F = even_extend(f)
     	
-    if(flag == 0):                     # f(x) can be expanded in a Fourier series                                 
-        dk = 2.*np.pi/L
-        k = fourier_wavenumbers(dk,N)
-        F = f.astype(float)            # was having an endian problem  http://stackoverflow.com/questions/12307429/scipy-fftpack-and-float64
-        FHAT = ((i*k)**n) * fft(F)     # have imported scipy's fft,ifft
-        if(frac>0.): 
-            filter = fourier_filter(k,frac)
-            FHAT = FHAT*filter
-        df = ifft(FHAT)[0:N].real      # imaginary parts are zero, keep as real array rather than complex with imag=0
+	if(flag == 0):                     # f(x) can be expanded in a Fourier series                                 
+		dk = 2.*np.pi/L
+		k = fourier_wavenumbers(dk,N)
+		F = f.astype(float)            # was having an endian problem  http://stackoverflow.com/questions/12307429/scipy-fftpack-and-float64
+		FHAT = ((i*k)**n) * fft(F)     # have imported scipy's fft,ifft
+		if(frac>0.): 
+			filter = fourier_filter(k,frac)
+			FHAT = FHAT*filter
+		df = ifft(FHAT)[0:N].real      # imaginary parts are zero, keep as real array rather than complex with imag=0
 
-    if( np.abs(flag) == 1 ):           # f(x) can be expanded in a sine or cosine series
-        dk = np.pi/L
-        M = int((N-1)*2)                    # M extended array length
-        k = fourier_wavenumbers(dk,M)
-        FHAT = ((i*k)**n) * fft(F)     # Fourier transform of nth derivative
-        if(frac>0.): 
-            filter = fourier_filter(k,frac)
-            FHAT = FHAT*filter**n
-        Mb2 = int(M/2)
-        df = ifft(FHAT)[0:Mb2+1].real  # nth derivative in [0,L] as real-valued array
+	if( np.abs(flag) == 1 ):           # f(x) can be expanded in a sine or cosine series
+		dk = np.pi/L
+		M = (N-1)*2                    # M extended array length
+		k = fourier_wavenumbers(dk,M)
+		FHAT = ((i*k)**n) * fft(F)     # Fourier transform of nth derivative
+		if(frac>0.): 
+			filter = fourier_filter(k,frac)
+			FHAT = FHAT*filter**n
+		#df = ifft(FHAT)[0:M/2+1].real  # nth derivative in [0,L] as real-valued array  #Python 2
+		df = ifft(FHAT)[0:int(M/2+1)].real  # nth derivative in [0,L] as real-valued array   #Python 3
 		
-    if( np.abs(flag) > 1 ):
-        print("dst problem, called with illegal flag value  ",flag)
-        exit()
-    return df
+	if( np.abs(flag) > 1 ):
+		print("dst problem, called with illegal flag value  ",flag)
+		exit()
+	return df
 
 
 def compute_spectrum(f,flag,L):
