@@ -104,7 +104,16 @@ So, for a parent run with imposed N/S density gradient that is periodic in the z
 	python input/data_tools/python_scripts/XYZ_to_p1p2_interpolated_restart.py ./ XYZ_125000.nc 128 129 129 2 2 cubic
 	
 (3) restart the calculation, run 30 days p1=p2=2 , dt=60 s  
-	allow initial time to be reset tp t=0, spinup not physical anyway	
+	allow initial time to be reset to t=0, spinup not physical anyway
+	this is run niskine_parent_2.2	
+	last 3d datasets: chascona 19M May 29 04:50 XYZ_125000_000-000.nc   etc
+	time = 7500000 s = 86.80555555555556 days
+	
+	
+(4) restart again:
+	(a) mv output output_niskine_parent_2.2 
+	(b) cp the XYZ_125000_** files to RESTART and use these as initial conditions
+	(c) run another 90 days, allow initial time to be reset to t=0
 	
 	
 	
