@@ -2,6 +2,10 @@ include Make.inc
 FF = ${F90}
 FFLAGS = ${F77OPTFLAGS}
 
+ifeq ($(VENDOR), gcc)
+ FFLAGS = -g -O3 -ffast-math -ffixed-line-length-132
+endif
+
 INCL= 
 LDFLAGS=
 DFLAGS = "-DDOUBLE_PREC"

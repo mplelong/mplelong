@@ -1,9 +1,8 @@
 subroutine InitialConditions  
 	use etc,                    only: logfile
 	use independent_variables,  only: x,y,z,t0,tf
-	use methods_params,         only: do_second_scalar,ambient_profile,restart,          \
-	                                  rs_basename,subtract_s1_bar,subtract_s2_bar,       \
-	                                  add_restart_time
+	use methods_params,         only: do_second_scalar,ambient_profile,restart
+	use methods_params,         only: rs_basename,subtract_s1_bar,subtract_s2_bar,add_restart_time
 	use decomposition_params 
 	use intermediate_variables
 	use dependent_variables

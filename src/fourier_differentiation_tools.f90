@@ -540,8 +540,8 @@ SUBROUTINE differentiate_fcs(f,df,n,dir,method,order)
 ! method is the expansion type for the data 'fourier', 'cos' or 'sin'
 !-------------------------------------------------------------------------
 	use independent_variables,        only: nx,ny,nz
-	use differentiation_params,       only: kx,ky,kz,kxfilter,kyfilter,kzfilter, \
-	                                        cos_plan,sin_plan,fourier_plan
+	use differentiation_params,       only: kx,ky,kz,kxfilter,kyfilter,kzfilter
+	use differentiation_params,       only: cos_plan,sin_plan,fourier_plan
 	implicit none 
 	integer, intent(in)                  :: n
 	integer, intent(in)                  :: dir       ! 1,2,3 for diff wrt to x,y,z coordinate

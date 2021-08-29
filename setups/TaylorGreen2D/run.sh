@@ -5,14 +5,14 @@
 #-------------------------------------------------------------------------
 echo run.sh now running on "$HOSTNAME"
 
-source set_env_variables.sh
+source ./set_env_variables.sh
 
-do_run=True
+#do_run=True
 
 #------------------------------------------------------------
 # prepare things for the TaylorGreen2D test
 #------------------------------------------------------------
-if( "$do_run" ) then
+#if( "$do_run" ) then
 	rm -f input
 	ln -s setups/TaylorGreen2D input
 	make clean
@@ -22,8 +22,8 @@ if( "$do_run" ) then
 	#---------------------------------------------------
 	# do the run (it's set up for a 4x1 processor grid)
 	#---------------------------------------------------
-	"$MPIRUN" -np 4 ./flow.x
-fi
+	"$MPIRUN" -np 1 ./flow.x
+#fi
 
 #---------------------------------------------------------------
 # when run is complete, stitch together the output files
@@ -35,7 +35,7 @@ cd input/data_tools
 "$PYTHON" python_scripts/plot_cfl.py "$FLOW_SOLVE_ROOT"  s    # plot the time scale seconds
 "$PYTHON" python_scripts/compare_results.py "$FLOW_SOLVE_ROOT"
 
-cd "$FLOW_SOLVE_ROOT"
-open -a Preview output/figures/cfl.pdf output/figures/comparison.pdf
+#cd "$FLOW_SOLVE_ROOT"
+#open -a Preview output/figures/cfl.pdf output/figures/comparison.pdf
 
-"$NCVIEW" output/slices/2D/XY* &
+#"$NCVIEW" output/slices/2D/XY* &

@@ -2,8 +2,8 @@ TG_XY_FSRL_test      ! runlabel
 .FALSE.              ! Restart flag. Read initial conditions from saved netcdf files?
 .FALSE.              ! Compute evolution a second scalar field?
 4                    ! Order of explicit Adams-Bashforth time stepping, must be <= 4
-2                    ! MPI decomposition parameter p1, splits (nx)   
-2                    ! MPI decomposition parameter p2, splits (ny,nz)  p1*p2=numprocs=np
+1                    ! MPI decomposition parameter p1, splits (nx)   
+1                    ! MPI decomposition parameter p2, splits (ny,nz)  p1*p2=numprocs=np
 128                  ! nx    split by (p1)
 128                  ! ny    split by (p1,p2)   
 17                   ! nz    split by (p2)     

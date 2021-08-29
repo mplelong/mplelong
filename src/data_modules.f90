@@ -249,8 +249,7 @@
   			integer, intent(in)               :: iblock, myid
   			integer                           :: nvals, i, ig
   			real(kind=8), intent(out)         :: xvals(:)  			                             
-			nvals = global_x_indices(END  ,iblock,myid) \
-			      - global_x_indices(START,iblock,myid) + 1			
+			nvals = global_x_indices(END  ,iblock,myid) - global_x_indices(START,iblock,myid) + 1
 			do i = 1,nvals
 				ig = global_x_indices(START,iblock,myid) + i - 1
 				xvals(i) = x(ig)
@@ -263,8 +262,7 @@
   			integer, intent(in)               :: iblock, myid
   			integer                           :: nvals, i, ig
   			real(kind=8), intent(out)         :: yvals(:)  			                             
-			nvals = global_y_indices(END  ,iblock,myid) \
-			      - global_y_indices(START,iblock,myid) + 1			
+			nvals = global_y_indices(END  ,iblock,myid) - global_y_indices(START,iblock,myid) + 1
 			do i = 1,nvals
 				ig = global_y_indices(START,iblock,myid) + i - 1
 				yvals(i) = y(ig)
@@ -277,8 +275,7 @@
   			integer, intent(in)               :: iblock, myid
   			integer                           :: nvals, i, ig
   			real(kind=8), intent(out)         :: zvals(:)  			                             
-			nvals = global_z_indices(END  ,iblock,myid) \
-			      - global_z_indices(START,iblock,myid) + 1			
+			nvals = global_z_indices(END  ,iblock,myid) - global_z_indices(START,iblock,myid) + 1
 			do i = 1,nvals
 				ig = global_z_indices(START,iblock,myid) + i - 1
 				zvals(i) = z(ig)

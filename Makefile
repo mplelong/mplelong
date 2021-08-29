@@ -81,7 +81,8 @@ flow.x:
 	cp -f src/p3dfft/*.o src/p3dfft/*.mod compile_directory/src/. 
 	@echo "... "
 	@echo "... copying standard user routines to use for compilation"
-	-cp -f input/*.f90  input/Makefile compile_directory/src/. # >& /dev/null
+	-cp -f input/*.f90  compile_directory/src/. # >& /dev/null
+#	-cp -f input/*.f90  input/Makefile compile_directory/src/. # >& /dev/null
 	@echo "... "
 	@echo "... compiling flow.x in compile_directory/src directory"
 	cp Make.inc compile_directory/src/. ; cd compile_directory/src; make "BASE=${BASE}" all

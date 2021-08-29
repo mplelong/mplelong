@@ -1,0 +1,9 @@
+#!/bin/bash
+#-------------------------------------------------------------------------
+# Script to explicitly set some environment variables that will make  
+# lower level working tools more portable. 
+#-------------------------------------------------------------------------
+export FLOW_SOLVE_ROOT="$PWD"
+export PYTHON="/usr/bin/python"
+export MPIRUN=/usr/lib64/openmpi/bin/mpirun
+export NCVIEW="/usr/bin/ncview"
