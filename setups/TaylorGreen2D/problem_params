@@ -1,30 +1,30 @@
-TG_XY_FSRL_test      ! runlabel  
+NEMO_test            ! runlabel  
 .FALSE.              ! Restart flag. Read initial conditions from saved netcdf files?
 .FALSE.              ! Compute evolution a second scalar field?
 4                    ! Order of explicit Adams-Bashforth time stepping, must be <= 4
 1                    ! MPI decomposition parameter p1, splits (nx)   
 1                    ! MPI decomposition parameter p2, splits (ny,nz)  p1*p2=numprocs=np
-128                  ! nx    split by (p1)
-128                  ! ny    split by (p1,p2)   
-17                   ! nz    split by (p2)     
-0.001d0              ! dt       (s)    
+257                  ! nx    split by (p1)
+257                  ! ny    split by (p1,p2)   
+257                   ! nz    split by (p2)     
+5.d0              ! dt       (s)    
 0.d0                 ! t_start  (s)    
-1.d0                 ! t_end    (s)     1001 steps
-1.d0                 ! Lx       (m)      
-1.d0                 ! Ly       (m)       
-1.d0                 ! Lz       (m)     
-.TRUE.               ! x coordinate periodic?
-.TRUE.               ! y coordinate periodic?
+7200.d0                 ! t_end    (s)     1001 steps
+128000.d0                 ! Lx       (m)      
+128000.d0                 ! Ly       (m)       
+2048.d0                 ! Lz       (m)     
+.FALSE.               ! x coordinate periodic?
+.FALSE.               ! y coordinate periodic?
 .FALSE.              ! z coordinate periodic?
-p                    ! defn of scalar s1 ( t = temp in deg C, r = Boussinesq density, i.e. rho )
+r                    ! defn of scalar s1 ( t = temp in deg C, r = Boussinesq density, i.e. rho )
 p                    ! defn of scalar s2 ( p =  passive tracer )
 .FALSE.              ! Call user forcing routine?         
-1027.d0              ! rho_0  constant reference density  (kg/m3)
+1030.d0              ! rho_0  constant reference density  (kg/m3)
 9.81d0               ! g  gravity                         (m/s2)
-0.d-4                ! f0 Coriolis parameter at Lx/2 Ly/2 (1/s)
-1.d-2                ! nu     viscosity                   (m2/s)  
-1.d-2                ! kappa  diffusivity for s1          (m2/s)
-1.d-2                ! kappa  diffusivity for s2          (m2/s)
+9.87d-5                ! f0 Coriolis parameter at Lx/2 Ly/2 (1/s)
+1.d-3                ! nu     viscosity                   (m2/s)  
+1.d-3                ! kappa  diffusivity for s1          (m2/s)
+1.d-3                ! kappa  diffusivity for s2          (m2/s)
 .FALSE.              ! high_order_operators,  Use high order diffusion operators? 
 99                   ! half order of high order diffusion operators, x direction    (only read and used if TRUE)
 99                   ! half order of high order diffusion operators, y direction    (only read and used if TRUE)
