@@ -12,7 +12,8 @@ subroutine preliminary_tasks
 	use fourier_differentiation_tools
 	use methods_params
 	use etc
-	use user_params, only: change_default_values
+!        use user_params, only: change_default_values
+        use user_params
 	implicit none
 	integer                 :: i,n_seed
 	integer, allocatable    :: seed(:)
@@ -23,22 +24,6 @@ subroutine preliminary_tasks
 	!-------------------
  	call start_mpi(myid,np,logfile,comm)
  	numprocs=np
- 	
- 	!-----------------------------------------------------------
-	! Initialize random number generator
-	! F90 intrinsics RANDOM_SEED, RANDOM_NUMBER
-	! --> make sure each processor gets a unique random sequence
-	!-----------------------------------------------------------
-	call RANDOM_SEED(size = n_seed)   ! get the size of the seed sequence
-	allocate(seed(n_seed))            ! create a temp array to store the seed sequence
-
- 	seed(1) = myid                    ! starting point unique to each processor
- 	do i=2,n_seed
-  		seed(i) = seed(i-1) + 1       ! some arbitrary unique sequence for each processor
- 	enddo
- 	call RANDOM_SEED(put=seed(1:n_seed))   ! initialize the generator with this sequence       
- 	deallocate(seed)                       !  don't need this array anymore
- 
  	
  	!-------------------
 	!  Read user data
@@ -150,8 +135,9 @@ subroutine preliminary_tasks
   		write(0,*) message
   		call LogMessage(message,logfile)
  	endif 	
-	call prescribe_ambient_scalar_profiles
-	
+
+        	call prescribe_ambient_scalar_profiles
+ 
 	
 	!-----------------------------------------------
 	! get t=t0 boundary conditions and apply

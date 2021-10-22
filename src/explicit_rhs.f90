@@ -5,7 +5,6 @@ subroutine explicit_rhs
 	implicit none
 		
 	t_start_time_step = mpi_wtime()   ! start the clock at beginning of time step
-	
 	call rhs_u
 	call rhs_v
 	call rhs_w
@@ -98,14 +97,14 @@ subroutine rhs_w
 			deallocate(z)
 		endif
 		
-		if( scalar_kind(1)=='r' ) then
-			! calculate local spatial mean
-			local_mean = SUM( s1(:,:,:) )
-			call MPI_ALLREDUCE(local_mean,rho_mean,icount,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ierr)
-			rho_mean = rho_mean/(nx*ny*nz)
-		else
-			rho_mean = 0.d0
-		endif	
+!		if( scalar_kind(1)=='r' ) then
+!			! calculate local spatial mean
+!			local_mean = SUM( s1(:,:,:) )
+!			call MPI_ALLREDUCE(local_mean,rho_mean,icount,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ierr)
+!			rho_mean = rho_mean/(nx*ny*nz)
+!		else
+!			rho_mean = 0.d0
+!		endif	
 			
 		first_entry=.FALSE.
 	endif
@@ -120,7 +119,8 @@ subroutine rhs_w
 	! buoyancy...
 	!-----------------
 	if( scalar_kind(1) =='r' ) then
-		explicit_rhs(:,:,:,id,MM0) = explicit_rhs(:,:,:,id,MM0) - (g/rho0)*(s1(:,:,:) - rho_mean)   
+!		explicit_rhs(:,:,:,id,MM0) = explicit_rhs(:,:,:,id,MM0) - (g/rho0)*(s1(:,:,:) - rho_mean)   
+                explicit_rhs(:,:,:,id,MM0) = explicit_rhs(:,:,:,id,MM0) - (g/rho0)*(s1(:,:,:))
 	endif
 	
 	! If necessary, taper acceleration due to buoyancy near top/bottom

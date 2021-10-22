@@ -40,14 +40,14 @@
 program flow_solve
 use etc
 call preliminary_tasks
- do while (integrate)
-  call user_analysis
-   call explicit_rhs
-    call apply_forcing
-     call explicit_step
-      call fill_boundary_arrays
-       call pressure_projection
-        call apply_bcs
+ do while (integrate);
+!  call user_analysis;
+   call explicit_rhs;STOP "B"
+    call apply_forcing;STOP "C"
+     call explicit_step;STOP "D"
+      call fill_boundary_arrays;STOP "E"
+       call pressure_projection;STOP "F"
+        call apply_bcs;STOP "G"
          call diffuse        
           call write_results
            call toggle

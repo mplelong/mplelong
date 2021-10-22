@@ -8,6 +8,7 @@ subroutine InitialConditions
 	use dependent_variables
 	use dimensional_scales
 	use mpi_params
+        use user_params
 	implicit none 
  
  	include 'netcdf.inc'
